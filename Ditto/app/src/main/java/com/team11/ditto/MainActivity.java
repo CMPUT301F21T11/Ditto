@@ -1,4 +1,4 @@
-/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ Goals:
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,23 +30,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.team11.ditto.habit.Habit;
 import com.team11.ditto.habit_event.AddHabitEventFragment;
 import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.habit_event.HabitEventRecyclerAdapter;
 import com.team11.ditto.habit_event.ViewEventActivity;
-import com.team11.ditto.interfaces.Firebase;
 import com.team11.ditto.interfaces.HabitFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Role: Class for Habit Event Activity, be able to see you feed and add a habit event
@@ -60,7 +53,6 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity implements SwitchTabs,
         AddHabitEventFragment.OnFragmentInteractionListener, HabitFirebase,
         HabitEventRecyclerAdapter.EventClickListener {
-    private static final String TAG = "tab switch";
     private TabLayout tabLayout;
     public static String EXTRA_HABIT_EVENT = "EXTRA_HABIT_EVENT";
     private ArrayList<HabitEvent> habitEventsData;
@@ -69,9 +61,6 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     private HabitEventRecyclerAdapter habitEventRecyclerAdapter;
 
     private FirebaseFirestore db;
-    HashMap<String, Object> data = new HashMap<>();
-
-    private ActiveUser activeUser;
 
     /**
      * Create the Activity instance for the "Homepage" screen, control flow of actions
@@ -79,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        overridePendingTransition(0,0);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -102,21 +92,18 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         db = FirebaseFirestore.getInstance();
         db.collection(HABIT_EVENT_KEY)
                 .whereEqualTo("uid", FirebaseAuth.getInstance().getUid())  // Query only current user events for now
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                        habitEventsData.clear();
-                        for (QueryDocumentSnapshot doc: value) {
-                            // Parse the event data for each document
-                            String eHabitId = (String) doc.getData().get("habitID");
-                            String eHabitTitle = (String) doc.getData().get("habitTitle");
-                            String eComment = (String) doc.getData().get("comment");
-                            String ePhoto = (String) doc.getData().get("photo");
-                            String eLocation = (String) doc.getData().get("location");
-                            habitEventsData.add(new HabitEvent(eHabitId, eComment, ePhoto, eLocation, eHabitTitle));  // Add the event to the event list
-                        }
-                        habitEventRecyclerAdapter.notifyDataSetChanged();  // Refresh the recycler
+                .addSnapshotListener((value, error) -> {
+                    habitEventsData.clear();
+                    for (QueryDocumentSnapshot doc: value) {
+                        // Parse the event data for each document
+                        String eHabitId = (String) doc.getData().get("habitID");
+                        String eHabitTitle = (String) doc.getData().get("habitTitle");
+                        String eComment = (String) doc.getData().get("comment");
+                        String ePhoto = (String) doc.getData().get("photo");
+                        String eLocation = (String) doc.getData().get("location");
+                        habitEventsData.add(new HabitEvent(eHabitId, eComment, ePhoto, eLocation, eHabitTitle));  // Add the event to the event list
                     }
+                    habitEventRecyclerAdapter.notifyDataSetChanged();  // Refresh the recycler
                 });
 
         LinearLayoutManager manager = new LinearLayoutManager(this);
@@ -157,9 +144,15 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
      */
     @Override
     public void onEventClick(int position) {
-        habitEventsData.get(position);
         Intent intent = new Intent(this, ViewEventActivity.class);
         intent.putExtra(EXTRA_HABIT_EVENT, habitEventsData.get(position));
         startActivity(intent);
     }
+
+    @Override
+    public void onPause(){
+        overridePendingTransition(0,0);
+        super.onPause();
+    }
+
 }

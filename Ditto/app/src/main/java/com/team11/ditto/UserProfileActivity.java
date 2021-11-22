@@ -65,6 +65,7 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
     //public static Bundle habitBundle = new Bundle();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        overridePendingTransition(0,0);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_userprofile);
 
@@ -218,6 +219,12 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    public void onPause(){
+        overridePendingTransition(0,0);
+        super.onPause();
     }
 
 }

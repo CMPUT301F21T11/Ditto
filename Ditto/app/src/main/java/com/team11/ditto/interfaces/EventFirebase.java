@@ -5,7 +5,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import androidx.fragment.app.FragmentActivity;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.EventListener;
@@ -28,6 +27,14 @@ import javax.annotation.Nullable;
 public interface EventFirebase extends Firebase{
 
     String HABIT_EVENT_KEY = "HabitEvent";
+
+    String HABIT_ID = "habitID";
+    String HABIT_TITLE = "habitTitle";
+
+    String EVENT_ID = "habitEventId ";
+    String COMMENT = "comment";
+    String PHOTO = "photo";
+    String LOCATION = "location";
     ArrayList<HabitEvent> hEventsFirebase = new ArrayList<>();
     HashMap<String, Object> eventData = new HashMap<>();
 
@@ -35,12 +42,12 @@ public interface EventFirebase extends Firebase{
     default void logEventData(@Nullable QuerySnapshot queryDocumentSnapshots) {
         if (queryDocumentSnapshots != null) {
             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                 Log.d(TAG, String.valueOf(doc.getData().get("habitID")));
-                 String eHabitId = (String) doc.getData().get("habitID");
-                 String eHabitTitle = (String) doc.getData().get("habitTitle");
-                 String eComment = (String) doc.getData().get("comment");
-                 String ePhoto = (String) doc.getData().get("photo");
-                 String eLocation = (String) doc.getData().get("location");
+                 Log.d(TAG, String.valueOf(doc.getData().get(HABIT_ID)));
+                 String eHabitId = (String) doc.getData().get(HABIT_ID);
+                 String eHabitTitle = (String) doc.getData().get(HABIT_TITLE);
+                 String eComment = (String) doc.getData().get(COMMENT);
+                 String ePhoto = (String) doc.getData().get(PHOTO);
+                 String eLocation = (String) doc.getData().get(LOCATION);
                  hEventsFirebase.add(new HabitEvent(eHabitId, eComment, ePhoto, eLocation, eHabitTitle));
             }
         }
@@ -82,7 +89,7 @@ public interface EventFirebase extends Firebase{
     default void deleteHabitEvents(FirebaseFirestore db, ArrayList<String> habitEventIds) {
         for (int i = 0; i < habitEventIds.size(); i++) {
             //delete the associated habit event in the database
-            Log.d(TAG, "habiteventid " + habitEventIds.get(i));
+            Log.d(TAG, EVENT_ID + habitEventIds.get(i));
             db.collection(HABIT_EVENT_KEY).document(habitEventIds.get(i))
                     .delete();
         }
@@ -116,14 +123,14 @@ public interface EventFirebase extends Firebase{
         String habitTitle = newHabitEvent.getHabitTitle();
         //get unique timestamp for ordering our list
         Date currentTime = Calendar.getInstance().getTime();
-        eventData.put("uid", FirebaseAuth.getInstance().getUid());
-        eventData.put("habitID", habitID);
-        eventData.put("comment", comment);
-        eventData.put("photo", photo);
-        eventData.put("location", location);
-        eventData.put("habitTitle", habitTitle);
+        eventData.put(USER_ID, FirebaseAuth.getInstance().getUid());
+        eventData.put(HABIT_ID, habitID);
+        eventData.put(COMMENT, comment);
+        eventData.put(PHOTO, photo);
+        eventData.put(LOCATION, location);
+        eventData.put(HABIT_TITLE, habitTitle);
         //this field is used to add the current timestamp of the item, to be used to order the items
-        eventData.put("order", currentTime);
+        eventData.put(ORDER, currentTime);
 
         pushToDB(database, HABIT_EVENT_KEY, "", eventData);
     }

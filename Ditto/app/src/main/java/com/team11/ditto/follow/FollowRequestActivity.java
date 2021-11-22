@@ -131,4 +131,9 @@ public class FollowRequestActivity extends AppCompatActivity
     }
 
 
+    @Override
+    public void onPause(){
+        overridePendingTransition(0,0);
+        super.onPause();
+    }
 }

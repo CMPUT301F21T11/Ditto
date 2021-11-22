@@ -165,6 +165,11 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
         });
     }
 
+    @Override
+    public void onPause(){
+        overridePendingTransition(0,0);
+        super.onPause();
+    }
 
 
 }

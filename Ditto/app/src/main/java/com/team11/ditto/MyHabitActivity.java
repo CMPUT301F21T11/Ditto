@@ -90,6 +90,7 @@ public class MyHabitActivity extends AppCompatActivity implements
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        overridePendingTransition(0,0);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_habit);
         tabLayout = findViewById(R.id.tabs);
@@ -260,8 +261,12 @@ public class MyHabitActivity extends AppCompatActivity implements
             }
         }
 
-
-
-
     }
+
+    @Override
+    public void onPause(){
+        overridePendingTransition(0,0);
+        super.onPause();
+    }
+
 }

@@ -113,6 +113,10 @@ public class SentRequestActivity extends AppCompatActivity
         userAdapter.notifyDataSetChanged();
     }
 
-
+    @Override
+    public void onPause(){
+        overridePendingTransition(0,0);
+        super.onPause();
+    }
 
 }

@@ -14,13 +14,10 @@
  */
 package com.team11.ditto.profile_details;
 
-import static com.google.firebase.firestore.FieldValue.arrayUnion;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -33,29 +30,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.SetOptions;
-import com.google.firestore.v1.WriteResult;
 import com.team11.ditto.R;
 import com.team11.ditto.UserProfileActivity;
-import com.team11.ditto.interfaces.Firebase;
 import com.team11.ditto.interfaces.FollowFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -108,7 +93,7 @@ public class SearchUserActivity extends AppCompatActivity implements SwitchTabs,
         switchTabs(this, tabLayout, PROFILE_TAB);
 
         user_listView.setAdapter(searchAdapter);
-        retreiveSentRequest(db,currentUser,sentRequest);
+        retrieveSentRequest(db,currentUser,sentRequest);
         //getFollowedByActiveUser(db, currentUser, followedByActiveUser);
         //sendFollowRequest();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -236,6 +221,10 @@ public class SearchUserActivity extends AppCompatActivity implements SwitchTabs,
     }
 
 
-
+    @Override
+    public void onPause(){
+        overridePendingTransition(0,0);
+        super.onPause();
+    }
 
 }

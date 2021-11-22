@@ -139,4 +139,10 @@ public class FollowerActivity extends AppCompatActivity implements SwitchTabs, F
         });
     }
 
+    @Override
+    public void onPause(){
+        overridePendingTransition(0,0);
+        super.onPause();
+    }
+
 }
