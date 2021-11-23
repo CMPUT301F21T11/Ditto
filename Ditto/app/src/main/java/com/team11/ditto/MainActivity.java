@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
      */
     @Override
     public void onOkPressed(HabitEvent newHabitEvent) {
-        pushHabitEventData(db, newHabitEvent);
+        pushEventData(db, newHabitEvent);
     }
 
     /**

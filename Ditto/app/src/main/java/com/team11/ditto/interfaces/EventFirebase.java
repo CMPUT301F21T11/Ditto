@@ -8,14 +8,17 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.team11.ditto.habit.Habit;
 import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.habit_event.HabitEventRecyclerAdapter;
+import com.team11.ditto.login.ActiveUser;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -41,7 +44,11 @@ public interface EventFirebase extends Firebase{
                  String eComment = (String) doc.getData().get("comment");
                  String ePhoto = (String) doc.getData().get("photo");
                  String eLocation = (String) doc.getData().get("location");
-                 hEventsFirebase.add(new HabitEvent(eHabitId, eComment, ePhoto, eLocation, eHabitTitle));
+
+                 HabitEvent hEvent = new HabitEvent(eHabitId, eComment, ePhoto, eLocation, eHabitTitle);
+                 hEvent.setEventID(doc.getId());
+                 Log.d(TAG, "EVENT ID IS" + hEvent.getEventID());
+                 hEventsFirebase.add(hEvent);
             }
         }
     }
@@ -102,12 +109,14 @@ public interface EventFirebase extends Firebase{
         spinner.setAdapter(habitAdapter);
     }
 
-
+/*
     /**
      * push the HabitEvent document data to the HabitEvent collection
      * @param database firestore cloud
      * @param newHabitEvent HabitEvent to be added
      */
+    /*
+
     default void pushHabitEventData(FirebaseFirestore database, HabitEvent newHabitEvent){
         String habitID = newHabitEvent.getHabitId();
         String comment = newHabitEvent.getComment();
@@ -126,6 +135,14 @@ public interface EventFirebase extends Firebase{
         eventData.put("order", currentTime);
 
         pushToDB(database, HABIT_EVENT_KEY, "", eventData);
+    }
+
+     */
+
+    default void pushEventData(FirebaseFirestore database, HabitEvent newEvent){
+        eventData.clear();
+        eventData.put("uid", new ActiveUser().getUID());
+        pushEditEvent(database, newEvent);
     }
 
     /**
@@ -147,5 +164,31 @@ public interface EventFirebase extends Firebase{
         pushToDB(database, HABIT_EVENT_KEY, eventID, eventData);
     }
 
+    default void deleteDataMyEvent(FirebaseFirestore db, HabitEvent oldEntry) {
+        //ALSO REMOVE THE ASSOCIATED HABIT EVENTS
+        db.collection(HABIT_EVENT_KEY).document(oldEntry.getEventID()).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+
+                    deleteHabit(db, oldEntry);
+                }
+            }
+        });
+
+    }
+
+    /**
+     * delete the habit event oldEntry from firestore
+     * @param db firebase cloud
+     * @param oldEntry habit to delete
+     */
+    default void deleteHabit(FirebaseFirestore db, HabitEvent oldEntry){
+        //remove from database
+        db.collection(HABIT_EVENT_KEY).document(oldEntry.getEventID())
+                .delete()
+                .addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully deleted!"))
+                .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
+    }
 
 }
