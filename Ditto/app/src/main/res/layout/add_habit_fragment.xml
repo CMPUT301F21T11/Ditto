@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="@string/habit_title"
-        android:maxLength="40"
+        android:maxLength="20"
         android:inputType="textPersonName" />
 
     <EditText
@@ -43,6 +43,7 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="@string/reason"
+        android:maxLength="30"
         android:inputType="textPersonName" />
 
     <LinearLayout

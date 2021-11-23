@@ -17,16 +17,23 @@ package com.team11.ditto.habit_event;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.team11.ditto.R;
+import com.team11.ditto.habit.EditHabitFragment;
+import com.team11.ditto.habit.Habit;
 import com.team11.ditto.habit_event.HabitEvent;
+import com.team11.ditto.interfaces.HabitFirebase;
 
 /**
  * Activity to view a Habit Event
  * @author Kelly Shih, Aidan Horemans
  */
-public class ViewEventActivity extends AppCompatActivity {
+public class ViewEventActivity extends AppCompatActivity implements EditEventFragment.OnFragmentInteractionListener, HabitFirebase {
 
     //Declarations
     HabitEvent habitEvent;
@@ -34,6 +41,9 @@ public class ViewEventActivity extends AppCompatActivity {
     TextView habitComment;
     String title;
     String comment;
+    Bundle eventBundle;
+    private FirebaseFirestore database;
+
 
     /**
      * Instructions for creating the Activity
@@ -57,6 +67,55 @@ public class ViewEventActivity extends AppCompatActivity {
         //set comment
         comment = habitEvent.getComment();
         habitComment.setText(comment);
+
+    }
+
+    /**
+     * Inflate the menu for the options menu
+     * @param menu options menu
+     * @return true when menu displayed, false otherwise
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.view_menu, menu);
+        getSupportActionBar().setTitle("My Event");
+        return super.onCreateOptionsMenu(menu);
+    }
+
+
+    /**
+     * Listener for the edit button
+     * @param item selected item
+     * @return true if displayed, false otherwise
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        int id = item.getItemId();
+        if (id == R.id.edit_habit){
+            EditEventFragment dialogFragment = new EditEventFragment();
+
+            //Creating bundle with selectedHabit
+            eventBundle = new Bundle();
+            eventBundle.putSerializable("EVENT", habitEvent);
+
+            //Passing bundle to EditHabitFragment
+            dialogFragment.setArguments(eventBundle);
+
+            //Opening EditHabitFragment with the selectedHabit bundled
+            dialogFragment.show(getSupportFragmentManager(), "EDIT_EVENT");
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    public void onOkPressed(HabitEvent event) {
+        //Update old habit event data with new habit event data
+
+        pushEditEvent(database, event);
+
+        //Updating old text with new habit stuff
+        habitComment.setText(event.getComment());
 
     }
 }

@@ -15,18 +15,17 @@
         limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Spinner
-        android:id="@+id/event_spinner"
+    <TextView
+        android:id="@+id/title_textView"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginTop="10dp"
-        android:layout_gravity="center"
-        />
+        android:layout_height="37dp"
+        android:ems="10"
+        android:textSize="12pt"
+        android:maxLength="40" />
 
 
     <EditText
@@ -36,20 +35,28 @@
         android:ems="10"
         android:hint="@string/comment"
         android:maxLength="20"
-        android:inputType="textPersonName"
-        android:autofillHints="Comment" />
+        android:inputType="textPersonName" />
 
     <Button
-        android:id="@+id/add_photo"
+        android:id="@+id/edit_photo_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/add_photo" />
+        android:text="EDIT PHOTO"
+        />
+
 
     <Button
-        android:id="@+id/add_location"
+        android:id="@+id/edit_loc_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/add_location" />
+        android:text="EDIT LOCATION"/>
+
+    <Button
+        android:id="@+id/update_event_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="UPDATE EVENT" />
+
 
 
 </LinearLayout>

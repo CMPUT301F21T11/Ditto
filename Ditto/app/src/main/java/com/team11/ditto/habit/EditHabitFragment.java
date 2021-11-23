@@ -97,7 +97,7 @@ public class EditHabitFragment extends DialogFragment implements Days {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         return builder
                 .setView(view)
-                .setTitle("Edit")
+                .setTitle("Edit Habit")
                 .setPositiveButton("UPDATE", new DialogInterface.OnClickListener() {
                     /**
                      * On clicking the "add" button, edit the pre-existing Habit object with the new data inputted by the user

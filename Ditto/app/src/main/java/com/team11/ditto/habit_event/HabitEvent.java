@@ -27,6 +27,7 @@ import java.io.Serializable;
  */
 
 public class HabitEvent implements Serializable {
+    private String eventID;
     private String habitId;
     private final String habitTitle;
     private String comment;
@@ -47,6 +48,22 @@ public class HabitEvent implements Serializable {
         this.photo = photo;
         this.location = location;
         this.habitTitle = habitTitle;
+    }
+
+    /**
+     * Getter for the Event's ID
+     * @return  Event's ID
+     */
+    public String getEventID() {
+        return eventID;
+    }
+
+    /**
+     * Setter for the Event's ID
+     * @param eventID the ID
+     */
+    public void setEventID(String eventID) {
+        this.eventID = eventID;
     }
 
     /**

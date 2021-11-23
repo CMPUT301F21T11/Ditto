@@ -128,4 +128,24 @@ public interface EventFirebase extends Firebase{
         pushToDB(database, HABIT_EVENT_KEY, "", eventData);
     }
 
+    /**
+     * push the Habit document data to the Habit class
+     * @param database firebase cloud
+     * @param event Habit to be added
+     */
+    default void pushEditEvent(FirebaseFirestore database, HabitEvent event) {
+
+        //get unique timestamp for ordering our list
+        final String eventID = event.getEventID();
+        Date currentTime = Calendar.getInstance().getTime();
+        eventData.put("habitTitle", event.getHabitTitle());
+        eventData.put("comment", event.getComment());
+
+        //this field is used to add the current timestamp of the item, to be used to order the items
+        eventData.put("order", currentTime);
+
+        pushToDB(database, HABIT_EVENT_KEY, eventID, eventData);
+    }
+
+
 }

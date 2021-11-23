@@ -45,14 +45,20 @@
         <entry key="app/src/main/res/layout/activity_sign_up.xml" value="0.171875" />
         <entry key="app/src/main/res/layout/activity_userprofile.xml" value="0.22083333333333333" />
         <entry key="app/src/main/res/layout/activity_welcome.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/add_event_fragment.xml" value="0.19067028985507245" />
+        <entry key="app/src/main/res/layout/add_habit_fragment.xml" value="0.19067028985507245" />
         <entry key="app/src/main/res/layout/content_habit.xml" value="0.182518115942029" />
         <entry key="app/src/main/res/layout/follow_request_content.xml" value="0.23333333333333334" />
         <entry key="app/src/main/res/layout/fragment_due_today.xml" value="0.182518115942029" />
+        <entry key="app/src/main/res/layout/fragment_edit_event.xml" value="0.32971014492753625" />
+        <entry key="app/src/main/res/layout/fragment_edit_habit.xml" value="0.19067028985507245" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.182518115942029" />
         <entry key="app/src/main/res/layout/fragment_my_habit.xml" value="0.182518115942029" />
         <entry key="app/src/main/res/layout/fragment_my_habit_activity.xml" value="0.182518115942029" />
         <entry key="app/src/main/res/layout/fragment_profile.xml" value="0.182518115942029" />
         <entry key="app/src/main/res/menu/navigation_bar.xml" value="0.246875" />
+        <entry key="app/src/main/res/menu/view_event_menu.xml" value="0.34427083333333336" />
+        <entry key="app/src/main/res/menu/view_menu.xml" value="0.34427083333333336" />
       </map>
     </option>
   </component>

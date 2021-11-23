@@ -14,6 +14,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.team11.ditto.habit.Habit;
 import com.team11.ditto.habit.HabitRecyclerAdapter;
+import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.login.ActiveUser;
 
 import java.util.ArrayList;
@@ -157,11 +158,8 @@ public interface HabitFirebase extends EventFirebase, Days{
     }
 
 
-    /**
-     * push the Habit document data to the Habit class
-     * @param database firebase cloud
-     * @param newHabit Habit to be added
-     */
+
+
     default void pushHabitData(FirebaseFirestore database, Habit newHabit){
         habitData.clear();
         habitData.put("uid", new ActiveUser().getUID());
