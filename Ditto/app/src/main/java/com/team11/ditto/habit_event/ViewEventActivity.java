@@ -60,6 +60,8 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
         //get the passed habit event
         habitEvent = (HabitEvent) getIntent().getSerializableExtra("EXTRA_HABIT_EVENT");
 
+        database = FirebaseFirestore.getInstance();
+
         //set title
         title = habitEvent.getHabitTitle();
         habitTitle.setText(title);

@@ -227,9 +227,6 @@ public interface FollowFirebase extends Firebase{
                             .document(id)
                             .update("sent_requests", FieldValue.arrayRemove(undesiredUserEmail));
                 }
-
-
-
             }
         } );
     }
@@ -254,9 +251,6 @@ public interface FollowFirebase extends Firebase{
                             .document(id)
                             .update("sent_requests", FieldValue.arrayUnion(desiredUserEmail));
                 }
-
-
-
             }
         } );
     }

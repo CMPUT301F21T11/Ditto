@@ -108,12 +108,13 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                         habitEventsData.clear();
                         for (QueryDocumentSnapshot doc: value) {
                             // Parse the event data for each document
+                            String eventID = (String) doc.getId();
                             String eHabitId = (String) doc.getData().get("habitID");
                             String eHabitTitle = (String) doc.getData().get("habitTitle");
                             String eComment = (String) doc.getData().get("comment");
                             String ePhoto = (String) doc.getData().get("photo");
                             String eLocation = (String) doc.getData().get("location");
-                            habitEventsData.add(new HabitEvent(eHabitId, eComment, ePhoto, eLocation, eHabitTitle));  // Add the event to the event list
+                            habitEventsData.add(new HabitEvent(eventID, eHabitId, eComment, ePhoto, eLocation, eHabitTitle));  // Add the event to the event list
                         }
                         habitEventRecyclerAdapter.notifyDataSetChanged();  // Refresh the recycler
                     }
@@ -125,8 +126,8 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 
         currentTab(tabLayout, HOME_TAB);
         switchTabs(this, tabLayout, HOME_TAB);
-
         db = FirebaseFirestore.getInstance();
+
         //Get a top level reference to the collection
 
         //Notifies if cloud data changes (from Firebase Interface)
