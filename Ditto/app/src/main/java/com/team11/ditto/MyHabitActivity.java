@@ -46,12 +46,13 @@ import com.team11.ditto.habit.HabitRecyclerAdapter;
 import com.team11.ditto.habit.ViewHabitActivity;
 import com.team11.ditto.interfaces.Days;
 import com.team11.ditto.interfaces.EventFirebase;
-import com.team11.ditto.interfaces.Firebase;
 import com.team11.ditto.interfaces.HabitFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 /**To display the listview of Habits for a user in the "My Habits" tab
@@ -179,7 +180,8 @@ public class MyHabitActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
-    ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+    ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN
+            | ItemTouchHelper.START | ItemTouchHelper.END, ItemTouchHelper.LEFT) {
         /**
          * To delete an item from the listview and database when a Habit is swiped to the left
          * @param recyclerView .
@@ -189,6 +191,15 @@ public class MyHabitActivity extends AppCompatActivity implements
          */
         @Override
         public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+
+            //get position of long clicked item
+            int fromPos = viewHolder.getAbsoluteAdapterPosition();
+            //get position of target position
+            int toPos = target.getAbsoluteAdapterPosition();
+
+            Collections.swap(habitDataList, fromPos, toPos);
+            recyclerView.getAdapter().notifyItemMoved(fromPos, toPos);
+
             return false;
         }
 
@@ -259,8 +270,6 @@ public class MyHabitActivity extends AppCompatActivity implements
                 dates.add(WEEKDAYS[i]);
             }
         }
-
-
 
 
     }
