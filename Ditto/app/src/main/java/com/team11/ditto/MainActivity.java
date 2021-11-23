@@ -22,6 +22,7 @@ Goals:
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -140,7 +141,6 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     }
 
 
-
     /**
      * Adds a habitevent to firestore "HabitEvent" and adds the habitevent ID to the list of habitEvents for the habit in "Habit"
      * Adds the habitevent to the listview
@@ -148,7 +148,13 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
      */
     @Override
     public void onOkPressed(HabitEvent newHabitEvent) {
-        pushHabitEventData(db, newHabitEvent);
+        //We have to select a habit, so if there are no habits, no events
+        if(newHabitEvent.getHabitTitle() != null){
+            pushAddEvent(db, newHabitEvent);
+        } else {
+            Toast toast = Toast.makeText(this, "Please create a Habit first", Toast.LENGTH_LONG);
+            toast.show();
+        }
     }
 
     /**
