@@ -42,6 +42,16 @@ public class HabitEvent implements Serializable {
      * @param location optional location (may be empty string)
      * @param habitTitle Title of the Habit whose HabitEvent this is
      */
+
+    public HabitEvent(String eventID, String habitId, String comment, String photo, String location, String habitTitle) {
+        this.eventID = eventID;
+        this.habitId = habitId;
+        this.comment = comment;
+        this.photo = photo;
+        this.location = location;
+        this.habitTitle = habitTitle;
+    }
+
     public HabitEvent(String habitId, String comment, String photo, String location, String habitTitle) {
         this.habitId = habitId;
         this.comment = comment;
