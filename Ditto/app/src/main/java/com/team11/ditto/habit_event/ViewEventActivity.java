@@ -47,7 +47,6 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
     String comment;
     Bundle eventBundle;
     private FirebaseFirestore database;
-    private Object MainActivity;
 
 
     /**
@@ -115,6 +114,7 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
         if (id == R.id.delete_event){
 
             deleteDataMyEvent(database, habitEvent);
+            finish();
 
         }
 

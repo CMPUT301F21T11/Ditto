@@ -109,13 +109,13 @@ public interface EventFirebase extends Firebase{
         spinner.setAdapter(habitAdapter);
     }
 
-/*
+
     /**
      * push the HabitEvent document data to the HabitEvent collection
      * @param database firestore cloud
      * @param newHabitEvent HabitEvent to be added
      */
-    /*
+
 
     default void pushHabitEventData(FirebaseFirestore database, HabitEvent newHabitEvent){
         String habitID = newHabitEvent.getHabitId();
@@ -137,7 +137,7 @@ public interface EventFirebase extends Firebase{
         pushToDB(database, HABIT_EVENT_KEY, "", eventData);
     }
 
-     */
+
 
     default void pushEventData(FirebaseFirestore database, HabitEvent newEvent){
         eventData.clear();
