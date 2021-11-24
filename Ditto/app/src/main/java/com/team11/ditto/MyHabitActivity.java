@@ -33,6 +33,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -138,6 +139,11 @@ public class MyHabitActivity extends AppCompatActivity implements
                     }
                     habitRecyclerAdapter.notifyDataSetChanged();
                 });
+
+
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(habitListView.getContext(), manager.getOrientation());
+        habitListView.addItemDecoration(dividerItemDecoration);
+
 
         currentTab(tabLayout, MY_HABITS_TAB);
         switchTabs(this, tabLayout, MY_HABITS_TAB);

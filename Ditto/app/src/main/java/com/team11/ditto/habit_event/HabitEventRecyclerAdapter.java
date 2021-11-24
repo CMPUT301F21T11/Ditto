@@ -15,14 +15,26 @@
 package com.team11.ditto.habit_event;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.team11.ditto.R;
 
 import java.util.ArrayList;
@@ -36,6 +48,7 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
     private ArrayList<HabitEvent> eventArrayList;
     private Context context;
     private EventClickListener eventClickListener;
+    private FirebaseFirestore db;
 
     /**
      * Constructor
@@ -47,6 +60,7 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
         this.eventArrayList = eventArrayList;
         this.context = context;
         this.eventClickListener = eventClickListener;
+        db = FirebaseFirestore.getInstance();
     }
 
     /**
@@ -78,6 +92,31 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
     @Override
     public void onBindViewHolder(@NonNull ViewHolderEvent holder, int position){
         HabitEvent habitEvent = eventArrayList.get(position);
+        /*DocumentReference docRef =  db.collection("User").document(habitEvent.getUid());
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot documentSnapshot = task.getResult();
+                    if (documentSnapshot.exists()) {
+                        //retrieve the order value
+                        holder.habitEventTitle.setText(documentSnapshot.getString("name"));
+                        Log.d("retrieve", "NAME  "+name);
+
+                    }
+                    else {
+                        Log.d("retrieve", "document does not exist!!");
+                    }
+
+                }
+                else {
+                    Log.d("retrieve", task.getException().toString());
+                }
+            }
+        });*/
+
+        holder.habitUsername.setText(habitEvent.getUid());
+         //Should return username
         holder.habitEventTitle.setText(habitEvent.getHabitTitle());
         holder.habitEventComment.setText(habitEvent.getComment());
     }
@@ -88,6 +127,7 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
     public class ViewHolderEvent extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView habitEventTitle;
         private TextView habitEventComment;
+        private TextView habitUsername;
         EventClickListener eventClickListener;
 
         /**
@@ -97,8 +137,9 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
          */
         public ViewHolderEvent(@NonNull View itemView, EventClickListener eventClickListener){
             super(itemView);
-            habitEventTitle = itemView.findViewById(R.id.firstLine);
-            habitEventComment = itemView.findViewById(R.id.secondLine);
+            habitUsername = itemView.findViewById(R.id.firstLine);
+            habitEventTitle = itemView.findViewById(R.id.habit_name);
+            habitEventComment = itemView.findViewById(R.id.habit_com);
             this.eventClickListener = eventClickListener;
 
             itemView.setOnClickListener(this);
@@ -111,8 +152,9 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
         @Override
         public void onClick(View view){
             eventClickListener.onEventClick(getBindingAdapterPosition());
-            habitEventTitle = itemView.findViewById(R.id.firstLine);
-            habitEventComment = itemView.findViewById(R.id.secondLine);
+            habitUsername = itemView.findViewById(R.id.firstLine);
+            habitEventTitle = itemView.findViewById(R.id.habit_name);
+            habitEventComment = itemView.findViewById(R.id.habit_com);
 
         }
     }

@@ -26,24 +26,25 @@
         android:id="@+id/list_habit_event"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:padding="10dp"
         app:layout_constraintBottom_toTopOf="@+id/tabs"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:context=".MainActivity"
         app:layoutManager="LinearLayoutManager"
-        tools:listitem="@layout/fragment_my_habit" />
+        tools:listitem="@layout/fragment_my_habit"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/add_habit_event"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="@string/add_habit_event"
         android:src="@drawable/ic_round_add_24"
         app:layout_constraintBottom_toTopOf="@id/tabs"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:contentDescription="@string/add_habit_event">
+        app:layout_constraintEnd_toEndOf="parent">
 
     </com.google.android.material.floatingactionbutton.FloatingActionButton>
 

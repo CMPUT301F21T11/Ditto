@@ -18,16 +18,30 @@
 
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="10dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Habit">
+
+    </TextView>
 
     <Spinner
         android:id="@+id/event_spinner"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_marginTop="10dp"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="5dp"
         android:layout_gravity="center"
-        />
+        style="@style/Base.Widget.AppCompat.Spinner.Underlined"/>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Event Comment">
+
+    </TextView>
 
     <EditText
         android:id="@+id/comment_editText"
@@ -37,7 +51,8 @@
         android:hint="@string/comment"
         android:maxLength="20"
         android:inputType="textPersonName"
-        android:autofillHints="Comment" />
+        android:autofillHints="Comment"
+        android:layout_marginVertical="5dp"/>
 
     <Button
         android:id="@+id/add_photo"

@@ -25,6 +25,7 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -114,7 +115,8 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                             String eComment = (String) doc.getData().get("comment");
                             String ePhoto = (String) doc.getData().get("photo");
                             String eLocation = (String) doc.getData().get("location");
-                            habitEventsData.add(new HabitEvent(eventID, eHabitId, eComment, ePhoto, eLocation, eHabitTitle));  // Add the event to the event list
+                            String uid = (String) doc.getData().get("uid");
+                            habitEventsData.add(new HabitEvent(eventID, eHabitId, eComment, ePhoto, eLocation, eHabitTitle, uid));  // Add the event to the event list
                         }
                         habitEventRecyclerAdapter.notifyDataSetChanged();  // Refresh the recycler
                     }
@@ -123,6 +125,10 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         LinearLayoutManager manager = new LinearLayoutManager(this);
         habitEventList.setLayoutManager(manager);
         habitEventList.setAdapter(habitEventRecyclerAdapter);
+
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(habitEventList.getContext(), manager.getOrientation());
+
+        habitEventList.addItemDecoration(dividerItemDecoration);
 
         currentTab(tabLayout, HOME_TAB);
         switchTabs(this, tabLayout, HOME_TAB);
@@ -148,9 +154,8 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
      */
     @Override
     public void onOkPressed(HabitEvent newHabitEvent) {
-
+        //Adds the item to the database and then immediately retrieves it from the list
         pushHabitEventData(db, newHabitEvent);
-        habitEventsData.add(newHabitEvent);
         habitEventRecyclerAdapter.notifyDataSetChanged();
     }
 
