@@ -27,6 +27,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -75,6 +76,7 @@ public class MyHabitActivity extends AppCompatActivity implements
     public static String SELECTED_HABIT = "HABIT";
     private TabLayout tabLayout;
 
+
     //Declare variables for the list of habits
     private RecyclerView habitListView;
 
@@ -116,7 +118,6 @@ public class MyHabitActivity extends AppCompatActivity implements
 
         collectionReference
             .addSnapshotListener((value, error) -> {
-                //habitDataList.clear();
                 if (value != null) {
                     for (QueryDocumentSnapshot document: value) {
                         String id = document.getId();
@@ -210,8 +211,7 @@ public class MyHabitActivity extends AppCompatActivity implements
             //reorder inside firebase by switching the order field
             Habit from = habitDataList.get(fromPos);
             Habit to = habitDataList.get(toPos);
-            swapHabitData(db, from, 0);
-            swapHabitData(db, to, 1);
+
 
             return false;
         }

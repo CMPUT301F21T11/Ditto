@@ -102,7 +102,6 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         db = FirebaseFirestore.getInstance();
         db.collection(HABIT_EVENT_KEY)
                 .whereEqualTo("uid", FirebaseAuth.getInstance().getUid())  // Query only current user events for now
-                .orderBy("order")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {

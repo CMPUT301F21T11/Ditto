@@ -7,6 +7,8 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -16,10 +18,13 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.team11.ditto.MyHabitActivity;
 import com.team11.ditto.habit.Habit;
 import com.team11.ditto.habit.HabitRecyclerAdapter;
 import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.login.ActiveUser;
+
+import org.w3c.dom.Document;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -34,7 +39,6 @@ public interface HabitFirebase extends EventFirebase, Days{
 
     ArrayList<Habit> habitsFirebase = new ArrayList<>();
     HashMap<String, Object> habitData = new HashMap<>();
-    final static Date[] order = new Date[2];
 
 
     String HABIT_KEY = "Habit";
@@ -153,6 +157,7 @@ public interface HabitFirebase extends EventFirebase, Days{
         Date currentTime = Calendar.getInstance().getTime();
         habitData.put("title", habit.getTitle());
         habitData.put("reason", habit.getReason());
+
         for (int i = 0; i<7; i++){
             habitData.put(WEEKDAYS[i], habit.getDates().contains(WEEKDAYS[i]));
         }
@@ -160,7 +165,32 @@ public interface HabitFirebase extends EventFirebase, Days{
         //this field is used to add the current timestamp of the item, to be used to order the items
         habitData.put("order", currentTime);
 
-        pushToDB(database, HABIT_KEY, habitID, habitData);
+        //pushToDB(database, HABIT_KEY, habitID, habitData);
+
+        //get the number of documents in collection
+        ActiveUser currentUser = new ActiveUser();
+
+        database.collection(HABIT_KEY)
+                .whereEqualTo("uid", currentUser.getUID())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            int count = 0;
+                            for (DocumentSnapshot document : task.getResult()) {
+                                count++;
+                            }
+                            habit.setPosition(count);
+                            habitData.put("position", count);
+                            pushToDB(database,HABIT_KEY,habitID, habitData);
+                            Log.d(TAG, "SET POSITION " + habit.getPosition());
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+
     }
 
 
@@ -215,8 +245,9 @@ public interface HabitFirebase extends EventFirebase, Days{
 
     }
 
-    default void swapHabitData(FirebaseFirestore database, Habit habit, int i) {
-        DocumentReference docRef =  database.collection(HABIT_KEY).document(habit.getHabitID());
+   /* default void swapHabitData(FirebaseFirestore database, Habit habit, int i) {
+        habit.getHabitID();
+        DocumentReference docRef =  database.collection(HABIT_KEY).document(habit.getHabitID().replace("/","-"));
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -246,11 +277,37 @@ public interface HabitFirebase extends EventFirebase, Days{
 
     }
 
-    default void getOrderVal(FirebaseFirestore database, Habit habit, Date[] order, int i) {
+    default void swapOrder(FirebaseFirestore database, Habit from, Habit to) {
+        //set the new values inside the order[] to the other two values.
+        DocumentReference habitRef = database.collection(HABIT_KEY).document(from.getHabitID());
+        Log.d(TAG, "ORDER NEXT"+order[0] +order[1]);
 
 
+        // Set the "from" order to the "to" order
+        habitRef
+                .update("order", order[1])
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully updated!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error updating document", e);
+                    }
+                });
+
+        DocumentReference habitToRef = database.collection(HABIT_KEY).document(to.getHabitID());
+
+        //set the "to" to the "from" order
+        habitToRef
+                .update("order", order[0]);
 
     }
+
+    */
 
 
 }
