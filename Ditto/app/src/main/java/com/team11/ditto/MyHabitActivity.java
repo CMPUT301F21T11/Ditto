@@ -115,7 +115,7 @@ public class MyHabitActivity extends AppCompatActivity implements
         currentUser = new ActiveUser();
         db.collection(HABIT_KEY)
                 .whereEqualTo("uid", currentUser.getUID())
-                .orderBy("order")
+                .orderBy("position")
                 .addSnapshotListener((value, error) -> {
                     habitDataList.clear();
                     if (value != null) {
@@ -204,13 +204,52 @@ public class MyHabitActivity extends AppCompatActivity implements
             int fromPos = viewHolder.getAbsoluteAdapterPosition();
             //get position of target position
             int toPos = target.getAbsoluteAdapterPosition();
+            ArrayList<Habit> updateHabits = new ArrayList<Habit>();
+            ArrayList<Habit> decrementHabits = new ArrayList<Habit>();
 
             Collections.swap(habitDataList, fromPos, toPos);
             recyclerView.getAdapter().notifyItemMoved(fromPos, toPos);
 
             //reorder inside firebase by switching the order field
-            Habit from = habitDataList.get(fromPos);
+            Habit movedObject = habitDataList.get(toPos);
             Habit to = habitDataList.get(toPos);
+
+            int total = habitRecyclerAdapter.getItemCount();
+
+
+            int start = toPos+1;
+            if (total==start) {
+                //empty arraylist
+            }
+            else {
+                //iterate through the habits and add them to the arraylist
+                for (int i=start; i<total; i++) {
+                    updateHabits.add(habitDataList.get(i));
+                }
+            }
+
+            int t = toPos;
+            //get an arraylist of habits after the moved object
+            int s = fromPos;
+            if (t==s) {
+                //empty arraylist
+            }
+            else {
+                //iterate through the habits and add them to the arraylist
+                for (int i=s; i<t; i++) {
+                    decrementHabits.add(habitDataList.get(i));
+                }
+            }
+
+
+
+
+            Log.d(TAG, "FROM POS " + fromPos+" TITLE "+to.getTitle());
+            Log.d(TAG, "TO POS " + toPos);
+            Log.d(TAG, "ARRAY TO UPDATE " + updateHabits);
+
+            reOrderPosition(db, movedObject, fromPos, toPos, updateHabits, decrementHabits);
+
 
 
             return false;

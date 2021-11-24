@@ -26,6 +26,7 @@ import com.team11.ditto.login.ActiveUser;
 
 import org.w3c.dom.Document;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -163,7 +164,7 @@ public interface HabitFirebase extends EventFirebase, Days{
         }
         habitData.put("is_public", habit.isPublic());
         //this field is used to add the current timestamp of the item, to be used to order the items
-        habitData.put("order", currentTime);
+        //habitData.put("order", currentTime);
 
         //pushToDB(database, HABIT_KEY, habitID, habitData);
 
@@ -242,6 +243,79 @@ public interface HabitFirebase extends EventFirebase, Days{
                         Log.d(TAG, "Error getting documents: ", task.getException());
                     }
                 });
+
+    }
+
+    default void reOrderPosition(FirebaseFirestore database, Habit from, int fromPos, int toPos, ArrayList<Habit> habitsUpdate, ArrayList<Habit> habitsDecrement) {
+        //get the number of documents in collection
+        from.setPosition(toPos);
+        DocumentReference movedRef = database.collection(HABIT_KEY).document(from.getHabitID());
+
+        //set position of from habit to toPos
+        movedRef
+                .update("position", toPos)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        Log.d(TAG, "DocumentSnapshot successfully updated!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error updating document", e);
+                    }
+                });
+
+        //decrement all habit positions after the "fromPos"
+        int c = fromPos;
+        for (int i=0; i<habitsDecrement.size();i++) {
+            DocumentReference docRef = database.collection(HABIT_KEY).document(habitsDecrement.get(i).getHabitID());
+
+            //set position of from habit to toPos
+            docRef
+                    .update("position", c)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Log.d(TAG, "DocumentSnapshot successfully updated!");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error updating document", e);
+                        }
+                    });
+            c--;
+
+        }
+
+
+        //increment all habit positions after the "toPos"
+        int counter = toPos+1;
+        for (int i=0; i<habitsUpdate.size();i++) {
+            DocumentReference docRef = database.collection(HABIT_KEY).document(habitsUpdate.get(i).getHabitID());
+
+            //set position of from habit to toPos
+            docRef
+                    .update("position", counter)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Log.d(TAG, "DocumentSnapshot successfully updated!");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error updating document", e);
+                        }
+                    });
+            counter++;
+
+        }
+
 
     }
 
