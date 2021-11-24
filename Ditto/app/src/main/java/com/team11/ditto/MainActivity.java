@@ -22,16 +22,21 @@ Goals:
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -157,6 +162,28 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         //Adds the item to the database and then immediately retrieves it from the list
         pushHabitEventData(db, newHabitEvent);
         habitEventRecyclerAdapter.notifyDataSetChanged();
+
+        //habitEvent addition means the Habit has been completed today
+        //set habitDoneToday to true in firebase, as well as the actual object
+
+        DocumentReference docRef = db.collection(HABIT_EVENT_KEY).document(newHabitEvent.getHabitId());
+
+        //set position of from habit to toPos
+        docRef
+                .update("habitDoneToday", true)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+
+                        Log.d(TAG, "DocumentSnapshot successfully updated!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error updating document", e);
+                    }
+                });
     }
 
     /**
