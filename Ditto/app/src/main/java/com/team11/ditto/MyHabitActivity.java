@@ -39,6 +39,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.team11.ditto.habit.AddHabitFragment;
 import com.team11.ditto.habit.Habit;
@@ -110,10 +111,12 @@ public class MyHabitActivity extends AppCompatActivity implements
 
         // Load habits
         currentUser = new ActiveUser();
-        db.collection(HABIT_KEY)
-            .whereEqualTo("uid", currentUser.getUID())
+        final Query collectionReference = db.collection(HABIT_KEY).whereEqualTo("uid", currentUser.getUID())
+                .orderBy("order");
+
+        collectionReference
             .addSnapshotListener((value, error) -> {
-                habitDataList.clear();
+                //habitDataList.clear();
                 if (value != null) {
                     for (QueryDocumentSnapshot document: value) {
                         String id = document.getId();
@@ -168,6 +171,10 @@ public class MyHabitActivity extends AppCompatActivity implements
         //when the user clicks the add button, we want to add to the db and display the new entry
         if (newHabit.getTitle().length() > 0) {
             pushHabitData(db, newHabit);
+            habitDataList.add(newHabit);
+
+            habitRecyclerAdapter.notifyDataSetChanged();
+
         }
     }
 
@@ -199,6 +206,12 @@ public class MyHabitActivity extends AppCompatActivity implements
 
             Collections.swap(habitDataList, fromPos, toPos);
             recyclerView.getAdapter().notifyItemMoved(fromPos, toPos);
+
+            //reorder inside firebase by switching the order field
+            Habit from = habitDataList.get(fromPos);
+            Habit to = habitDataList.get(toPos);
+            swapHabitData(db, from, 0);
+            swapHabitData(db, to, 1);
 
             return false;
         }

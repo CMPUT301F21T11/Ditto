@@ -3,8 +3,12 @@ package com.team11.ditto.interfaces;
 import android.util.Log;
 import android.widget.Spinner;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -22,6 +26,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -29,6 +34,7 @@ public interface HabitFirebase extends EventFirebase, Days{
 
     ArrayList<Habit> habitsFirebase = new ArrayList<>();
     HashMap<String, Object> habitData = new HashMap<>();
+    final static Date[] order = new Date[2];
 
 
     String HABIT_KEY = "Habit";
@@ -208,5 +214,43 @@ public interface HabitFirebase extends EventFirebase, Days{
                 });
 
     }
+
+    default void swapHabitData(FirebaseFirestore database, Habit habit, int i) {
+        DocumentReference docRef =  database.collection(HABIT_KEY).document(habit.getHabitID());
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot documentSnapshot = task.getResult();
+                    if (documentSnapshot.exists()) {
+                        //retrieve the order value
+                        order[i] = documentSnapshot.getDate("order");
+                        Log.d(TAG, "ORDER "+order[0] +order[1]);
+
+                    }
+                    else {
+                        Log.d(TAG, "document does not exist!!");
+                    }
+
+                }
+                else {
+                    Log.d(TAG, task.getException().toString());
+                }
+
+
+            }
+        });
+
+
+
+
+    }
+
+    default void getOrderVal(FirebaseFirestore database, Habit habit, Date[] order, int i) {
+
+
+
+    }
+
 
 }
