@@ -245,69 +245,6 @@ public interface HabitFirebase extends EventFirebase, Days{
 
     }
 
-   /* default void swapHabitData(FirebaseFirestore database, Habit habit, int i) {
-        habit.getHabitID();
-        DocumentReference docRef =  database.collection(HABIT_KEY).document(habit.getHabitID().replace("/","-"));
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot documentSnapshot = task.getResult();
-                    if (documentSnapshot.exists()) {
-                        //retrieve the order value
-                        order[i] = documentSnapshot.getDate("order");
-                        Log.d(TAG, "ORDER "+order[0] +order[1]);
-
-                    }
-                    else {
-                        Log.d(TAG, "document does not exist!!");
-                    }
-
-                }
-                else {
-                    Log.d(TAG, task.getException().toString());
-                }
-
-
-            }
-        });
-
-
-
-
-    }
-
-    default void swapOrder(FirebaseFirestore database, Habit from, Habit to) {
-        //set the new values inside the order[] to the other two values.
-        DocumentReference habitRef = database.collection(HABIT_KEY).document(from.getHabitID());
-        Log.d(TAG, "ORDER NEXT"+order[0] +order[1]);
-
-
-        // Set the "from" order to the "to" order
-        habitRef
-                .update("order", order[1])
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "DocumentSnapshot successfully updated!");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error updating document", e);
-                    }
-                });
-
-        DocumentReference habitToRef = database.collection(HABIT_KEY).document(to.getHabitID());
-
-        //set the "to" to the "from" order
-        habitToRef
-                .update("order", order[0]);
-
-    }
-
-    */
 
 
 }

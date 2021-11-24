@@ -113,31 +113,31 @@ public class MyHabitActivity extends AppCompatActivity implements
 
         // Load habits
         currentUser = new ActiveUser();
-        final Query collectionReference = db.collection(HABIT_KEY).whereEqualTo("uid", currentUser.getUID())
-                .orderBy("order");
-
-        collectionReference
-            .addSnapshotListener((value, error) -> {
-                if (value != null) {
-                    for (QueryDocumentSnapshot document: value) {
-                        String id = document.getId();
-                        String title = (String) document.getData().get("title");
-                        String reason = (String) document.getData().get("reason");
-                        ArrayList<String> days = new ArrayList<>();
-                        handleDays(days, document.getData());
-                        boolean isPublic;
-                        if (document.getData().get("is_public") == null){
-                            isPublic = true;
+        db.collection(HABIT_KEY)
+                .whereEqualTo("uid", currentUser.getUID())
+                .orderBy("order")
+                .addSnapshotListener((value, error) -> {
+                    habitDataList.clear();
+                    if (value != null) {
+                        for (QueryDocumentSnapshot document: value) {
+                            String id = document.getId();
+                            String title = (String) document.getData().get("title");
+                            String reason = (String) document.getData().get("reason");
+                            ArrayList<String> days = new ArrayList<>();
+                            handleDays(days, document.getData());
+                            boolean isPublic;
+                            if (document.getData().get("is_public") == null){
+                                isPublic = true;
+                            }
+                            else{
+                                isPublic = (boolean) document.getData().get("is_public");
+                            }
+                            Habit habit = new Habit(id, title, reason, days, isPublic);
+                            habitDataList.add(habit);
                         }
-                        else{
-                            isPublic = (boolean) document.getData().get("is_public");
-                        }
-                        Habit habit = new Habit(id, title, reason, days, isPublic);
-                        habitDataList.add(habit);
                     }
-                }
-                habitRecyclerAdapter.notifyDataSetChanged();
-            });
+                    habitRecyclerAdapter.notifyDataSetChanged();
+                });
 
         currentTab(tabLayout, MY_HABITS_TAB);
         switchTabs(this, tabLayout, MY_HABITS_TAB);
