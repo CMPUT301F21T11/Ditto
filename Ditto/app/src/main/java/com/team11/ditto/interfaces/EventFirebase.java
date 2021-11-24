@@ -109,40 +109,14 @@ public interface EventFirebase extends Firebase{
         spinner.setAdapter(habitAdapter);
     }
 
-
     /**
      * push the HabitEvent document data to the HabitEvent collection
      * @param database firestore cloud
-     * @param newHabitEvent HabitEvent to be added
+     * @param event HabitEvent to be added
      */
-
-
-    default void pushHabitEventData(FirebaseFirestore database, HabitEvent newHabitEvent){
-        String habitID = newHabitEvent.getHabitId();
-        String comment = newHabitEvent.getComment();
-        String photo = newHabitEvent.getPhoto();
-        String location = newHabitEvent.getLocation();
-        String habitTitle = newHabitEvent.getHabitTitle();
-        //get unique timestamp for ordering our list
-        Date currentTime = Calendar.getInstance().getTime();
-        eventData.put("uid", FirebaseAuth.getInstance().getUid());
-        eventData.put("habitID", habitID);
-        eventData.put("comment", comment);
-        eventData.put("photo", photo);
-        eventData.put("location", location);
-        eventData.put("habitTitle", habitTitle);
-        //this field is used to add the current timestamp of the item, to be used to order the items
-        eventData.put("order", currentTime);
-
+    default void pushAddEvent(FirebaseFirestore database, HabitEvent event){
+        getEventData(event); //Puts the data from event into eventData
         pushToDB(database, HABIT_EVENT_KEY, "", eventData);
-    }
-
-
-
-    default void pushEventData(FirebaseFirestore database, HabitEvent newEvent){
-        eventData.clear();
-        eventData.put("uid", new ActiveUser().getUID());
-        pushEditEvent(database, newEvent);
     }
 
     /**
@@ -151,6 +125,15 @@ public interface EventFirebase extends Firebase{
      * @param event Habit to be added
      */
     default void pushEditEvent(FirebaseFirestore database, HabitEvent event) {
+        getEventData(event); //Puts the data from event into eventData
+        pushToDB(database, HABIT_EVENT_KEY, event.getEventID(), eventData);
+    }
+
+    /**
+     * Helper function to put the proper data from HabitEvent into eventData
+     * @param event
+     */
+    default void getEventData(HabitEvent event){
         String habitID = event.getHabitId();
         String comment = event.getComment();
         String photo = event.getPhoto();
@@ -166,9 +149,8 @@ public interface EventFirebase extends Firebase{
         eventData.put("habitTitle", habitTitle);
         //this field is used to add the current timestamp of the item, to be used to order the items
         eventData.put("order", currentTime);
-
-        pushToDB(database, HABIT_EVENT_KEY, event.getEventID(), eventData);
     }
+
 
     default void deleteDataMyEvent(FirebaseFirestore db, HabitEvent oldEntry) {
         //ALSO REMOVE THE ASSOCIATED HABIT EVENTS

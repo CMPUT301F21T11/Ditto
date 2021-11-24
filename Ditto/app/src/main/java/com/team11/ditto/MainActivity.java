@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                        //habitEventsData.clear();
+                        habitEventsData.clear();
                         for (QueryDocumentSnapshot doc: value) {
                             // Parse the event data for each document
                             String eventID = (String) doc.getId();
