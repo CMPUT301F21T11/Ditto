@@ -114,7 +114,7 @@ public interface EventFirebase extends Firebase{
      * @param database firestore cloud
      * @param event HabitEvent to be added
      */
-    default void pushAddEvent(FirebaseFirestore database, HabitEvent event){
+    default void pushHabitEventData(FirebaseFirestore database, HabitEvent event){
         getEventData(event); //Puts the data from event into eventData
         pushToDB(database, HABIT_EVENT_KEY, "", eventData);
     }
