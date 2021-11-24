@@ -109,7 +109,7 @@ public class SearchUserActivity extends AppCompatActivity implements SwitchTabs,
 
         user_listView.setAdapter(searchAdapter);
         retreiveSentRequest(db,currentUser,sentRequest);
-        //getFollowedByActiveUser(db, currentUser, followedByActiveUser);
+        getFollowedByActiveUser(db, currentUser, followedByActiveUser);
         //sendFollowRequest();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 

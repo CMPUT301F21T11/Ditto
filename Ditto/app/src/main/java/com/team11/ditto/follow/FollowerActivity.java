@@ -42,6 +42,8 @@ import com.team11.ditto.login.ActiveUser;
 import com.team11.ditto.profile_details.User;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -115,6 +117,12 @@ public class FollowerActivity extends AppCompatActivity implements SwitchTabs, F
                             if(task.isSuccessful()){
                                 for(QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
                                     userDataList.add( new User(snapshot.get("name").toString(), followers.get(finalI))  );
+                                    Collections.sort(userDataList, new Comparator<User>() {
+                                        @Override
+                                        public int compare(User user, User t1) {
+                                            return user.getUsername().compareTo(t1.getUsername());
+                                        }
+                                    });
                                     Log.d("Followed", followers.get(finalI));
                                 }
                                 userAdapter.notifyDataSetChanged();

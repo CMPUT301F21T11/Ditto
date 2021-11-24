@@ -41,6 +41,8 @@ import com.team11.ditto.login.ActiveUser;
 import com.team11.ditto.profile_details.User;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -150,6 +152,12 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
                                 for(QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
                                     userDataList.add( new User(snapshot.get("name").toString(), followedByActiveUser.get(finalI))  );
                                     Log.d("Followed", followedByActiveUser.get(finalI));
+                                    Collections.sort(userDataList, new Comparator<User>() {
+                                        @Override
+                                        public int compare(User user, User t1) {
+                                            return user.getUsername().compareTo(t1.getUsername()) ;
+                                        }
+                                    });
                                 }
                                 userAdapter.notifyDataSetChanged();
                             }
