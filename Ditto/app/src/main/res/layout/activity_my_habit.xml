@@ -31,7 +31,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:listitem="@layout/fragment_my_habit">
+        tools:listitem="@layout/list_my_habit_event"
+        >
 
     </androidx.recyclerview.widget.RecyclerView>
 

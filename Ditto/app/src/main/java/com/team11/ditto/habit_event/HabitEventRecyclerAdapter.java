@@ -118,6 +118,11 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
         holder.habitUsername.setText(habitEvent.getUid());
          //Should return username
         holder.habitEventTitle.setText(habitEvent.getHabitTitle());
+        if(habitEvent.getComment().equals("")){
+            holder.habitSeparator.setText("");
+        } else {
+            holder.habitSeparator.setText(" - ");
+        }
         holder.habitEventComment.setText(habitEvent.getComment());
     }
 
@@ -128,6 +133,7 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
         private TextView habitEventTitle;
         private TextView habitEventComment;
         private TextView habitUsername;
+        private TextView habitSeparator;
         EventClickListener eventClickListener;
 
         /**
@@ -140,6 +146,7 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
             habitUsername = itemView.findViewById(R.id.firstLine);
             habitEventTitle = itemView.findViewById(R.id.habit_name);
             habitEventComment = itemView.findViewById(R.id.habit_com);
+            habitSeparator = itemView.findViewById(R.id.separator);
             this.eventClickListener = eventClickListener;
 
             itemView.setOnClickListener(this);
