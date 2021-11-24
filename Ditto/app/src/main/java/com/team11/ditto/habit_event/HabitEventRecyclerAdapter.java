@@ -118,11 +118,14 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
         holder.habitUsername.setText(habitEvent.getUid());
          //Should return username
         holder.habitEventTitle.setText(habitEvent.getHabitTitle());
+
+        //Helps keep the display feed clean
         if(habitEvent.getComment().equals("")){
             holder.habitSeparator.setText("");
         } else {
             holder.habitSeparator.setText(" - ");
         }
+
         holder.habitEventComment.setText(habitEvent.getComment());
     }
 

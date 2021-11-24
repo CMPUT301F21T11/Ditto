@@ -126,10 +126,6 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         habitEventList.setLayoutManager(manager);
         habitEventList.setAdapter(habitEventRecyclerAdapter);
 
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(habitEventList.getContext(), manager.getOrientation());
-
-        habitEventList.addItemDecoration(dividerItemDecoration);
-
         currentTab(tabLayout, HOME_TAB);
         switchTabs(this, tabLayout, HOME_TAB);
         db = FirebaseFirestore.getInstance();
