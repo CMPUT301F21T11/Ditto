@@ -1,4 +1,4 @@
-/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -18,20 +18,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.team11.ditto.R;
 import com.team11.ditto.UserProfileActivity;
 import com.team11.ditto.interfaces.Firebase;
@@ -42,7 +37,6 @@ import com.team11.ditto.profile_details.User;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -118,19 +112,16 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
      * View a User in the list's profile if they are clicked
      */
     public void onProfileClick() {
-        followingListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                User followedByMe = (User) followingListView.getAdapter().getItem(i);
-                String followedByMeEmail = followedByMe.getPassword();
-                String followedByMeName = followedByMe.getUsername();
-                Intent intent = new Intent(FollowingActivity.this, FriendHabitActivity.class);
-                Bundle b = new Bundle();
-                b.putStringArray("following", new String[]{followedByMeName, followedByMeEmail});
-                intent.putExtras(b);
-                Log.d("Opening profile of : ",followedByMeEmail);
-                startActivity(intent);
-            }
+        followingListView.setOnItemClickListener((adapterView, view, i, l) -> {
+            User followedByMe = (User) followingListView.getAdapter().getItem(i);
+            String followedByMeEmail = followedByMe.getPassword();
+            String followedByMeName = followedByMe.getUsername();
+            Intent intent = new Intent(FollowingActivity.this, FriendHabitActivity.class);
+            Bundle b = new Bundle();
+            b.putStringArray("following", new String[]{followedByMeName, followedByMeEmail});
+            intent.putExtras(b);
+            Log.d("Opening profile of : ",followedByMeEmail);
+            startActivity(intent);
         });
 
     }
@@ -143,24 +134,16 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
         for (int i =0; i< followedByActiveUser.size(); i++){
             int finalI = i;
             db.collection("User")
-                    .whereEqualTo("email",followedByActiveUser.get(i).toString() )
+                    .whereEqualTo("email", followedByActiveUser.get(i))
                     .get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if(task.isSuccessful()){
-                                for(QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
-                                    userDataList.add( new User(snapshot.get("name").toString(), followedByActiveUser.get(finalI))  );
-                                    Log.d("Followed", followedByActiveUser.get(finalI));
-                                    Collections.sort(userDataList, new Comparator<User>() {
-                                        @Override
-                                        public int compare(User user, User t1) {
-                                            return user.getUsername().compareTo(t1.getUsername()) ;
-                                        }
-                                    });
-                                }
-                                userAdapter.notifyDataSetChanged();
+                    .addOnCompleteListener(task -> {
+                        if(task.isSuccessful()){
+                            for(QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
+                                userDataList.add( new User(snapshot.get("name").toString(), followedByActiveUser.get(finalI))  );
+                                Log.d("Followed", followedByActiveUser.get(finalI));
+                                Collections.sort(userDataList, (user, t1) -> user.getUsername().compareTo(t1.getUsername()));
                             }
+                            userAdapter.notifyDataSetChanged();
                         }
                     });
         }
@@ -195,12 +178,12 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
 
     /**
      * This method will remove a user active user follows from following list
-     * @param view
+     * @param view view selected
      */
     public void onRemovePress(View view){
         String cUserEmail = currentUser.getEmail();
         int position = followingListView.getPositionForView((View) view.getParent());
-        View v = followingListView.getChildAt(position);
+        //View v = followingListView.getChildAt(position);
 
         User removeFollower = (User) followingListView.getAdapter().getItem(position);
         String removeFollowerEmail = removeFollower.getPassword();

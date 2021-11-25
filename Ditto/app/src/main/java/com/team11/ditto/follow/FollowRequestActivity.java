@@ -1,4 +1,4 @@
-/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class FollowRequestActivity extends AppCompatActivity
     //Declarations
     private TabLayout tabLayout;
     private ListView frlist;
-    private static FollowRequestList userAdapter;
+    private FollowRequestList userAdapter;
     ArrayList<User> userDataList;
     FirebaseFirestore db;
     private ActiveUser currentUser;
@@ -92,13 +92,13 @@ public class FollowRequestActivity extends AppCompatActivity
 
     /**
      * This method will accept a following request when accept icon is pressed
-     * @param view
+     * @param view view selected
      */
     public void onAcceptPress(View view){
 
         String cUserEmail = currentUser.getEmail();
         int position = frlist.getPositionForView((View) view.getParent());
-        View v = frlist.getChildAt(position);
+        //View v = frlist.getChildAt(position);
 
         User acceptRequest = (User) frlist.getAdapter().getItem(position);
         String acceptRequestEmail = acceptRequest.getPassword();
@@ -123,7 +123,7 @@ public class FollowRequestActivity extends AppCompatActivity
     public void onRejectPress(View view){
         String cUserEmail = currentUser.getEmail();
         int position = frlist.getPositionForView((View) view.getParent());
-        View v = frlist.getChildAt(position);
+        //View v = frlist.getChildAt(position);
 
         User acceptRequest = (User) frlist.getAdapter().getItem(position);
         String acceptRequestEmail = acceptRequest.getPassword();
