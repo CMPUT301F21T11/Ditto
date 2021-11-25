@@ -53,6 +53,7 @@ import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.habit_event.HabitEventRecyclerAdapter;
 import com.team11.ditto.habit_event.ViewEventActivity;
 import com.team11.ditto.interfaces.Firebase;
+import com.team11.ditto.interfaces.FollowFirebase;
 import com.team11.ditto.interfaces.HabitFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
@@ -69,7 +70,7 @@ import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements SwitchTabs,
         AddHabitEventFragment.OnFragmentInteractionListener, HabitFirebase,
-        HabitEventRecyclerAdapter.EventClickListener {
+        HabitEventRecyclerAdapter.EventClickListener, FollowFirebase {
     private static final String TAG = "tab switch";
     private TabLayout tabLayout;
     public static String EXTRA_HABIT_EVENT = "EXTRA_HABIT_EVENT";
@@ -186,6 +187,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         //Adds the item to the database and then immediately retrieves it from the list
         pushHabitEventData(db, newHabitEvent);
         habitEventRecyclerAdapter.notifyDataSetChanged();
+
         fadeInView();
 
     }
@@ -206,9 +208,12 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     }
 
     public void queryList(){
+        //First get all the user following
+        //Then query their info and the user's
         db = FirebaseFirestore.getInstance();
+
         db.collection(HABIT_EVENT_KEY)
-                .whereEqualTo("uid", FirebaseAuth.getInstance().getUid())  // Query only current user events for now
+                .whereEqualTo("uid", FirebaseAuth.getInstance().getUid()) //userevents
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -222,10 +227,10 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                             String ePhoto = (String) doc.getData().get("photo");
                             String eLocation = (String) doc.getData().get("location");
                             String uid = (String) doc.getData().get("uid");
-                            DocumentReference docRef = db.collection("User").document(uid);
+                            DocumentReference userNameReference = db.collection("User").document(uid);
 
                             //Query for name then create the habit event
-                            docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            userNameReference.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                                 @Override
                                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                                     if (task.isSuccessful()) {
@@ -253,6 +258,10 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                         }
                     }
                 });
+
+
+
+
     }
 
     /**
