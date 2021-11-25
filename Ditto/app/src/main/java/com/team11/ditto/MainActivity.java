@@ -160,15 +160,9 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     @Override
     public void onOkPressed(HabitEvent newHabitEvent) {
         //Adds the item to the database and then immediately retrieves it from the list
-        pushHabitEventData(db, newHabitEvent);
-        habitEventRecyclerAdapter.notifyDataSetChanged();
-
-        //habitEvent addition means the Habit has been completed today
-        //set habitDoneToday to true in firebase, as well as the actual object
-
-        DocumentReference docRef = db.collection(HABIT_EVENT_KEY).document(newHabitEvent.getHabitId());
-
         //set position of from habit to toPos
+        DocumentReference docRef = db.collection(HABIT_KEY).document(newHabitEvent.getHabitId());
+        Log.d(TAG, "HABIT ID " + newHabitEvent.getHabitId());
         docRef
                 .update("habitDoneToday", true)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -184,6 +178,16 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                         Log.w(TAG, "Error updating document", e);
                     }
                 });
+
+        pushHabitEventData(db, newHabitEvent);
+        habitEventRecyclerAdapter.notifyDataSetChanged();
+
+        //habitEvent addition means the Habit has been completed today
+        //set habitDoneToday to true in firebase, as well as the actual object
+
+
+
+
     }
 
     /**
