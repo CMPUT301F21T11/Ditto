@@ -248,6 +248,15 @@ public interface HabitFirebase extends EventFirebase, Days{
 
     }
 
+    /**
+     * Handle the manual reordering of Habits in firestore
+     * @param database firebase cloud
+     * @param from the habit object that is moved
+     * @param fromPos the original position of the habit object
+     * @param toPos the new position of the habit object
+     * @param habitsUpdate habits after the new position the habit is placed in
+     * @param habitsDecrement habits after the original position of the habit, up to the new position of the habit
+     */
     default void reOrderPosition(FirebaseFirestore database, Habit from, int fromPos, int toPos, ArrayList<Habit> habitsUpdate, ArrayList<Habit> habitsDecrement) {
         //get the number of documents in collection
         from.setPosition(toPos);
@@ -321,7 +330,14 @@ public interface HabitFirebase extends EventFirebase, Days{
 
     }
 
-
+    /** Handle updating habitDoneToday field for a habit when an event is added
+     * if today is the same day as one of the dates they picked,
+     * AND in this selected day if there are no other habit events with the same habit
+     * THEN set habitDoneToday to true
+     * @param db firebase cloud
+     * @param today integer representation the current day
+     * @param newHabitEvent the new habit event added
+     */
     default void isHabitDoneToday(FirebaseFirestore db, int today, HabitEvent newHabitEvent) {
         //get days ...
         final Integer[] daysOfWeek = new Integer[7];
@@ -355,6 +371,12 @@ public interface HabitFirebase extends EventFirebase, Days{
         });
     }
 
+    /**
+     * Handle setting the habitDoneToday boolean field in firestore after an event has been posted.
+     * @param document firebase cloud
+     * @param daysOfWeek a list of the days of the week that the Habit is to be done
+     * @param today the current day as an int (1-7)
+     */
     default void setHabitDoneToday(DocumentReference document, Integer[] daysOfWeek, int today) {
         for (int i=0; i<daysOfWeek.length;i++) {
             if (today == daysOfWeek[i]) {
@@ -378,6 +400,11 @@ public interface HabitFirebase extends EventFirebase, Days{
 
     }
 
+    /**
+     * Retrieve the day of the week
+     * @param i index of day in firestore
+     * @return String form of the day of week
+     */
     default String daysForHabit(int i) {
         String day = null;
         switch (i) {

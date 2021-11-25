@@ -23,7 +23,11 @@ import java.util.ArrayList;
  * Purpose: Habit class represents a habit object and holds data for
  * title
  * reason
- * date
+ * dates
+ * habitID
+ * isPublic
+ * position
+ * habitDoneToday
  * Design Rationale: set getters and setters for the data that Habit holds
  * @author Kelly Shih, Aidan Horemans
  */
@@ -40,13 +44,7 @@ public class Habit implements Serializable {
     private int position;
     private boolean habitDoneToday;
 
-    public boolean isHabitDoneToday() {
-        return habitDoneToday;
-    }
 
-    public void setHabitDoneToday(boolean habitDoneToday) {
-        this.habitDoneToday = habitDoneToday;
-    }
 
     /**
      * Constructor for Habit object
@@ -191,5 +189,21 @@ public class Habit implements Serializable {
         else if (this.streak > 0){
             this.streak = 0;
         }
+    }
+
+    /**
+     * Getter for whether Habit is done today or not
+     * @return
+     */
+    public boolean isHabitDoneToday() {
+        return habitDoneToday;
+    }
+
+    /**
+     * Setter for whether Habit is done today or not
+     * @param habitDoneToday
+     */
+    public void setHabitDoneToday(boolean habitDoneToday) {
+        this.habitDoneToday = habitDoneToday;
     }
 }
