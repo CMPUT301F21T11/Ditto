@@ -2,6 +2,10 @@ package com.team11.ditto.interfaces;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
@@ -10,6 +14,8 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.team11.ditto.follow.CustomListSentRequest;
 import com.team11.ditto.follow.FollowRequestList;
+import com.team11.ditto.follow.FriendHabitList;
+import com.team11.ditto.habit.Habit;
 import com.team11.ditto.login.ActiveUser;
 import com.team11.ditto.profile_details.User;
 
@@ -322,8 +328,126 @@ public interface FollowFirebase extends Firebase{
         } );
     }
 
+    /**
+     * This method will remove a follower a active user's follower list
+     * @param db firebase cloud
+     * @param removeFollowerEmail email of user that active user wants to removw
+     * @param activeUserEmail   email of active user
+     */
+    default void removeFollowerFromList(FirebaseFirestore db, String removeFollowerEmail, String activeUserEmail){
+        db.collection("Following").whereEqualTo("followed", activeUserEmail)
+                .whereEqualTo("followedBy", removeFollowerEmail)
+                .get()
+                .addOnCompleteListener( task -> {
+                    if(task.isSuccessful()){
+                        for (QueryDocumentSnapshot snapshot: Objects.requireNonNull(task.getResult())){
+                            String id = snapshot.getId();
+                            Log.d("ID TO DELETE ", id);
+                            db.collection("Following")
+                                    .document(id)
+                                    .delete()
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void unused) {
+                                            Log.d("Remove Follower ", "DocumentSnapshot successfully deleted!");
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.w("Remove Follower ", "Error deleting document",e);
+                                        }
+                                    });
+                        }
+                    }
+                });
+
+    }
 
 
+    /**
+     * This method will remove a user active user follows from following list
+     * @param db firebase cloud
+     * @param removeFollowingEmail email of user that active user wants to removw
+     * @param activeUserEmail   email of active user
+     */
+    default void removeFollowingFromList(FirebaseFirestore db, String removeFollowingEmail, String activeUserEmail){
+        db.collection("Following").whereEqualTo("followed", removeFollowingEmail)
+                .whereEqualTo("followedBy", activeUserEmail)
+                .get()
+                .addOnCompleteListener( task -> {
+                    if(task.isSuccessful()){
+                        for (QueryDocumentSnapshot snapshot: Objects.requireNonNull(task.getResult())){
+                            String id = snapshot.getId();
+                            Log.d("ID TO DELETE ", id);
+                            db.collection("Following")
+                                    .document(id)
+                                    .delete()
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void unused) {
+                                            Log.d("Remove Follower ", "DocumentSnapshot successfully deleted!");
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.w("Remove Follower ", "Error deleting document",e);
+                                        }
+                                    });
+                        }
+                    }
+                });
+
+    }
+
+    /**
+     * This method will show all public habits of the users whom active user is following
+     * @param db
+     * @param followedByMeEmail
+     * @param habitData
+     * @param friendHabitAdapter
+     */
+    default void showFriendHabits(FirebaseFirestore db, String followedByMeEmail, ArrayList<Habit> habitData, FriendHabitList friendHabitAdapter ){
+        db.collection("User")
+                .whereEqualTo("email",followedByMeEmail)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if(task.isSuccessful()){
+                        for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
+                            String uid = snapshot.getId();
+                            Log.d("Getting p habits of ", uid);
+                            db.collection("Habit")
+                                    .whereEqualTo("uid",uid)
+                                    .whereEqualTo("is_public", true)
+                                    .get()
+                                    .addOnCompleteListener(task2 ->{
+                                        if(task2.isSuccessful()){
+                                            for (QueryDocumentSnapshot snapshot1 : Objects.requireNonNull(task2.getResult())){
+                                                String id = snapshot1.getId();
+                                                Log.d("Opening document ", id);
+                                                DocumentReference documentReference = db.collection("Habit").document(id);
+                                                documentReference.get().addOnCompleteListener( task3 ->{
+                                                    if(task3.isSuccessful()){
+                                                        DocumentSnapshot documentSnapshot = task3.getResult();
+                                                        String title = documentSnapshot.get("title").toString();
+                                                        String reason = documentSnapshot.get("reason").toString();
+                                                        Log.d("Title ", title);
+                                                        Log.d("Reason ", reason);
+                                                        habitData.add(new Habit(title,reason));
+                                                        friendHabitAdapter.notifyDataSetChanged();
+                                                    }
+                                                });
+
+
+                                            }
+                                        }
+                                    });
+
+                        }
+                    }
+                });
+    }
 
 
 }

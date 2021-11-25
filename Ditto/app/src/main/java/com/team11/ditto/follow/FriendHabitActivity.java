@@ -16,6 +16,7 @@ package com.team11.ditto.follow;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -23,28 +24,38 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.team11.ditto.R;
 import com.team11.ditto.habit.Habit;
+import com.team11.ditto.interfaces.FollowFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
+import com.team11.ditto.login.ActiveUser;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
-// TODO Important --- Need to fetch user's list of habits to show on screen
-//  This is just a demo to see how this page would look like
 // Need an active user for this page to work
 
 /**
  * Activity to display a list of habits of a User the ActiveUser follows
- * TODO implement actual followed User's habits
+
  * @author Vivek Malhotra, Courtenay Laing-Kobe
  */
-public class FriendHabitActivity extends AppCompatActivity implements SwitchTabs {
+public class FriendHabitActivity extends AppCompatActivity implements SwitchTabs, FollowFirebase {
 
     //Declarations
     private TabLayout tabLayout;
     private ListView friendHabitList;
     private ArrayAdapter<Habit> friendHabitAdapter;
     private ArrayList<Habit> habitData;
+    private Bundle b;
+    private String[] followingDetails;
+    private String followedByMeName;
+    private String followedByMeEmail;
+    private FirebaseFirestore db;
 
     /**
      * Instructions on creating the Activity
@@ -55,10 +66,17 @@ public class FriendHabitActivity extends AppCompatActivity implements SwitchTabs
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         //Set layouts
         super.onCreate(savedInstanceState);
+        b = this.getIntent().getExtras();
+        followingDetails = b.getStringArray("following");
+        followedByMeName = followingDetails[0];
+        followedByMeEmail = followingDetails[1];
+
         setContentView(R.layout.activity_friend_profile);
         friendHabitList = findViewById(R.id.friend_habits);
         tabLayout = findViewById(R.id.tabs);
+        setTitle(followedByMeName);
 
+        db = FirebaseFirestore.getInstance();
         //Initialize
         habitData = new ArrayList<>();
         friendHabitAdapter = new FriendHabitList(FriendHabitActivity.this, habitData);
@@ -66,6 +84,7 @@ public class FriendHabitActivity extends AppCompatActivity implements SwitchTabs
 
         //Enable tab switching
         currentTab(tabLayout, PROFILE_TAB);
+        showFriendHabits(db,followedByMeEmail,habitData, (FriendHabitList) friendHabitAdapter);
         switchTabs(this, tabLayout, PROFILE_TAB);
     }
 
@@ -77,7 +96,8 @@ public class FriendHabitActivity extends AppCompatActivity implements SwitchTabs
             Intent intent = new Intent(FriendHabitActivity.this, FollowingActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
-        }
+    }
+
 
 
     @Override

@@ -17,6 +17,7 @@ package com.team11.ditto.follow;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -25,6 +26,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -33,18 +36,23 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.team11.ditto.R;
 import com.team11.ditto.UserProfileActivity;
 import com.team11.ditto.interfaces.Firebase;
+import com.team11.ditto.interfaces.FollowFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 import com.team11.ditto.profile_details.User;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
  * Activity to display a list of Users who follow the ActiveUser
  * @author Vivek Malhotra
  */
-public class FollowerActivity extends AppCompatActivity implements SwitchTabs, Firebase {
+public class FollowerActivity extends AppCompatActivity implements SwitchTabs, FollowFirebase {
 
     //Declarations
     private TabLayout tabLayout;
@@ -109,6 +117,12 @@ public class FollowerActivity extends AppCompatActivity implements SwitchTabs, F
                             if(task.isSuccessful()){
                                 for(QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
                                     userDataList.add( new User(snapshot.get("name").toString(), followers.get(finalI))  );
+                                    Collections.sort(userDataList, new Comparator<User>() {
+                                        @Override
+                                        public int compare(User user, User t1) {
+                                            return user.getUsername().compareTo(t1.getUsername());
+                                        }
+                                    });
                                     Log.d("Followed", followers.get(finalI));
                                 }
                                 userAdapter.notifyDataSetChanged();
@@ -143,6 +157,24 @@ public class FollowerActivity extends AppCompatActivity implements SwitchTabs, F
     public void onPause(){
         overridePendingTransition(0,0);
         super.onPause();
+    }
+
+    /**
+     * This method will remove a follower from follower list
+     * @param view
+     */
+    public void onRemovePress(View view){
+        String cUserEmail = currentUser.getEmail();
+        int position = followingListView.getPositionForView((View) view.getParent());
+        View v = followingListView.getChildAt(position);
+
+        User removeFollower = (User) followingListView.getAdapter().getItem(position);
+        String removeFollowerEmail = removeFollower.getPassword();
+        removeFollowerFromList(db,removeFollowerEmail,cUserEmail);
+        followers.clear();
+
+        userDataList.remove(position);
+        userAdapter.notifyDataSetChanged();
     }
 
 }

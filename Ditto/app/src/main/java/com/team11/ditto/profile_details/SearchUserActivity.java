@@ -1,4 +1,4 @@
-/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -23,15 +23,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.team11.ditto.R;
 import com.team11.ditto.UserProfileActivity;
 import com.team11.ditto.interfaces.FollowFirebase;
@@ -93,8 +89,10 @@ public class SearchUserActivity extends AppCompatActivity implements SwitchTabs,
         switchTabs(this, tabLayout, PROFILE_TAB);
 
         user_listView.setAdapter(searchAdapter);
+
         retrieveSentRequest(db,currentUser,sentRequest);
-        //getFollowedByActiveUser(db, currentUser, followedByActiveUser);
+        getFollowedByActiveUser(db, currentUser, followedByActiveUser);
+
         //sendFollowRequest();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
@@ -114,45 +112,42 @@ public class SearchUserActivity extends AppCompatActivity implements SwitchTabs,
                 db.collection("User")
                         .whereGreaterThanOrEqualTo("name",s.toUpperCase())
                         .get()
-                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                if(task.isSuccessful()){
+                        .addOnCompleteListener(task -> {
+                            if(task.isSuccessful()){
 
-                                    for (int i = 0; i < Objects.requireNonNull(task.getResult()).size(); i++){
-                                        if(Objects.requireNonNull(task.getResult().getDocuments().get(i).getString("name")).toLowerCase().startsWith(s_lower)){
-                                            String username = task.getResult().getDocuments().get(i).getString("name");
-                                            String email = task.getResult().getDocuments().get(i).getString("email");
+                                for (int i = 0; i < Objects.requireNonNull(task.getResult()).size(); i++){
+                                    if(Objects.requireNonNull(task.getResult().getDocuments().get(i).getString("name")).toLowerCase().startsWith(s_lower)){
+                                        String username = task.getResult().getDocuments().get(i).getString("name");
+                                        String email = task.getResult().getDocuments().get(i).getString("email");
 
-                                            Log.d("TAG",email);
+                                        Log.d("TAG",email);
 
 
-                                            // Only add if there is something in search view
-                                            // do not add the active user to search list
-                                            // do not show if follow request already sent
-                                            if( (! s.equals("")) &(! Objects.requireNonNull(email).equals(cUserEmail) ) &(!sentRequest.contains(email)) &(! followedByActiveUser.contains(email))){
-                                                userDataList.add(new User(username, email));
-                                                searchAdapter.notifyDataSetChanged();
-                                            }
-                                            // loop through and find duplicates
-                                            // if duplicate found, delete it
-                                            // In this case, I am using email as password (email is unique)
-                                            // user is not setup as originally planned in db
-                                            for (int i2 = 0; i2 < userDataList.size(); i2++){
-                                                for (int j = i2+1; j < userDataList.size(); j++){
-                                                    if(userDataList.get(i2).getPassword().equals(userDataList.get(j).getPassword())){
-                                                        userDataList.remove(j);
-                                                        j--;
-                                                    }
-                                                }
-                                            }
-
+                                        // Only add if there is something in search view
+                                        // do not add the active user to search list
+                                        // do not show if follow request already sent
+                                        if( (! s.equals("")) &(! Objects.requireNonNull(email).equals(cUserEmail) ) &(!sentRequest.contains(email)) &(! followedByActiveUser.contains(email))){
+                                            userDataList.add(new User(username, email));
                                             searchAdapter.notifyDataSetChanged();
                                         }
+                                        // loop through and find duplicates
+                                        // if duplicate found, delete it
+                                        // In this case, I am using email as password (email is unique)
+                                        // user is not setup as originally planned in db
+                                        for (int i2 = 0; i2 < userDataList.size(); i2++){
+                                            for (int j = i2+1; j < userDataList.size(); j++){
+                                                if(userDataList.get(i2).getPassword().equals(userDataList.get(j).getPassword())){
+                                                    userDataList.remove(j);
+                                                    j--;
+                                                }
+                                            }
+                                        }
 
+                                        searchAdapter.notifyDataSetChanged();
                                     }
 
                                 }
+
                             }
                         });
 

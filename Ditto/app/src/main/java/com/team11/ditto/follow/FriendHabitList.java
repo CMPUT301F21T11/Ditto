@@ -74,7 +74,7 @@ public class FriendHabitList extends ArrayAdapter<Habit> {
         ImageView progress = view.findViewById(R.id.friend_progress);
 
         habitName.setText(habit.getTitle());
-        habitDescription.setText("This is a sample description of a habit");
+        habitDescription.setText(habit.getReason());
 
         return view;
     }

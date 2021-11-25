@@ -18,25 +18,26 @@
 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="320dp"
-        android:layout_height="100dp">
+        android:layout_width="330dp"
+        android:layout_height="67dp">
 
         <TextView
             android:id="@+id/friend_habit_name"
-            android:layout_width="314dp"
-            android:layout_height="48dp"
+            android:layout_width="322dp"
+            android:layout_height="32dp"
 
-            android:paddingLeft="20dp"
-            android:paddingTop="25dp"
+            android:paddingLeft="5dp"
+            android:paddingTop="5dp"
             android:paddingRight="20dp"
             android:text="@string/sample_user"
             android:textColor="@color/black"
-            android:textSize="18sp"
+            android:textSize="15sp"
             app:layout_constraintBottom_toBottomOf="parent"
 
             app:layout_constraintStart_toStartOf="parent"
@@ -47,31 +48,34 @@
 
         <TextView
             android:id="@+id/friend_habit_description"
-            android:layout_width="297dp"
-            android:layout_height="48dp"
+            android:layout_width="315dp"
+            android:layout_height="30dp"
+            android:paddingLeft="10dp"
+            android:paddingTop="7dp"
             android:text="@string/sample_habit_description"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.228"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0" />
+            app:layout_constraintVertical_bias="0.906" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ImageView
         android:id="@+id/friend_progress"
-        android:layout_width="64dp"
-        android:layout_height="77dp"
+        android:layout_width="62dp"
+        android:layout_height="match_parent"
 
         android:clickable="true"
         android:contentDescription="@string/indicator"
+        android:focusable="true"
         android:padding="20dp"
         android:src="@drawable/happiness"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="#1FAA0F"
-        android:focusable="true">
+        app:tint="#1FAA0F">
 
     </ImageView>
 

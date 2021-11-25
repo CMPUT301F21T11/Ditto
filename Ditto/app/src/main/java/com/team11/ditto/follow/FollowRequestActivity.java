@@ -90,6 +90,10 @@ public class FollowRequestActivity extends AppCompatActivity
         startActivity(intent);
     }
 
+    /**
+     * This method will accept a following request when accept icon is pressed
+     * @param view
+     */
     public void onAcceptPress(View view){
 
         String cUserEmail = currentUser.getEmail();
@@ -112,6 +116,10 @@ public class FollowRequestActivity extends AppCompatActivity
         userAdapter.notifyDataSetChanged();
     }
 
+    /**
+     * This method will reject a following request when reject icon is pressed
+     * @param view
+     */
     public void onRejectPress(View view){
         String cUserEmail = currentUser.getEmail();
         int position = frlist.getPositionForView((View) view.getParent());

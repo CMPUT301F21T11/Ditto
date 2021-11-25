@@ -70,6 +70,17 @@ public class Habit implements Serializable {
     }
 
     /**
+     * Constructor for habit object
+     * Its purpose is to show all habit objects of users that are followed by active user
+     * @param title title of the habit
+     * @param reason reason for habit
+     */
+    public Habit(String title, String reason){
+        this.title = title;
+        this.reason = reason;
+    }
+
+    /**
      * Getter for Habit title
      * @return Habit title
      */

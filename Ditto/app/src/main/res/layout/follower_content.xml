@@ -19,6 +19,7 @@
 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal">
@@ -68,14 +69,15 @@
         android:layout_height="match_parent"
 
         android:layout_marginEnd="4dp"
-
+        android:onClick="onRemovePress"
         android:contentDescription="@string/remove_user"
         android:padding="20dp"
         android:src="@drawable/ic_round_remove_circle_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:tint="#B30000"
-        android:focusable="false">
+        android:focusable="false"
+        tools:ignore="UsingOnClickInXml">
 
     </ImageView>
 

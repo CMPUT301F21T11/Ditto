@@ -33,7 +33,7 @@
         <activity
             android:name=".follow.FollowingActivity"
             android:exported="true"
-            android:label="Following (demo)"
+            android:label="Following "
             android:parentActivityName=".UserProfileActivity"
             />
         <activity
@@ -58,7 +58,7 @@
             android:name=".follow.FollowerActivity"
             android:exported="true"
             android:parentActivityName=".UserProfileActivity"
-            android:label = "Followers (demo)"/>
+            android:label = "Followers"/>
 
         <activity
             android:name=".login.SignUpActivity"
