@@ -176,7 +176,6 @@ public class MyHabitActivity extends AppCompatActivity implements
             habitDataList.add(newHabit);
 
             habitRecyclerAdapter.notifyDataSetChanged();
-
         }
     }
 

@@ -92,6 +92,10 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
     @Override
     public void onBindViewHolder(@NonNull ViewHolderEvent holder, int position){
         HabitEvent habitEvent = eventArrayList.get(position);
+
+
+        //Add separator if comment is not empty
+
         DocumentReference docRef =  db.collection("User").document(habitEvent.getUid());
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -124,8 +128,6 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
                 }
             }
         });
-
-
     }
 
     /**
