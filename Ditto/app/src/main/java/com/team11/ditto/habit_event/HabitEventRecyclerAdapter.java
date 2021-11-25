@@ -48,6 +48,7 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
     private ArrayList<HabitEvent> eventArrayList;
     private Context context;
     private EventClickListener eventClickListener;
+    private FirebaseFirestore db;
 
     /**
      * Constructor
@@ -59,6 +60,7 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
         this.eventArrayList = eventArrayList;
         this.context = context;
         this.eventClickListener = eventClickListener;
+        db = FirebaseFirestore.getInstance();
     }
 
     /**
@@ -91,17 +93,41 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
     public void onBindViewHolder(@NonNull ViewHolderEvent holder, int position){
         HabitEvent habitEvent = eventArrayList.get(position);
 
-        holder.habitUsername.setText(habitEvent.getUid()); //Should return username
-        holder.habitEventTitle.setText(habitEvent.getHabitTitle());
 
         //Add separator if comment is not empty
-        if(habitEvent.getComment().equals("")){
-            holder.habitSeparator.setText("");
-        } else {
-            holder.habitSeparator.setText(" - ");
-        }
 
-        holder.habitEventComment.setText(habitEvent.getComment());
+        DocumentReference docRef =  db.collection("User").document(habitEvent.getUid());
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot documentSnapshot = task.getResult();
+                    if (documentSnapshot.exists()) {
+                        //retrieve the order value
+                        holder.habitUsername.setText(documentSnapshot.getString("name"));
+                        //Should return username
+                        holder.habitEventTitle.setText(habitEvent.getHabitTitle());
+
+                        //Helps keep the display feed clean
+                        if(habitEvent.getComment().equals("")){
+                            holder.habitSeparator.setText("");
+                        } else {
+                            holder.habitSeparator.setText(" - ");
+                        }
+
+                        holder.habitEventComment.setText(habitEvent.getComment());
+
+                    }
+                    else {
+                        Log.d("retrieve", "document does not exist!!");
+                    }
+
+                }
+                else {
+                    Log.d("retrieve", task.getException().toString());
+                }
+            }
+        });
     }
 
     /**
