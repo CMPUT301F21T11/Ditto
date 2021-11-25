@@ -25,10 +25,12 @@ package com.team11.ditto;
   @author Kelly Shih, Aidan Horemans
  */
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.junit.Assert.fail;
 
 import android.app.Activity;
+import android.os.SystemClock;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -45,6 +47,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.team11.ditto.habit.AddHabitFragment;
 import com.team11.ditto.habit.Habit;
 import com.team11.ditto.habit.HabitRecyclerAdapter;
+import com.team11.ditto.habit.ViewHabitActivity;
 import com.team11.ditto.habit_event.HabitEventRecyclerAdapter;
 
 import org.junit.Before;
@@ -57,6 +60,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class HabitsTest {
 
     private Solo solo;
+    int size;
 
     @Rule
     public ActivityTestRule<MyHabitActivity> rule = new ActivityTestRule<>(MyHabitActivity.class, true, true);
@@ -108,7 +112,7 @@ public class HabitsTest {
     }
 
 
-    //
+    //Swipes on the given habit to delete it
     private void deleteHabit(String text) {
         int x1, x2, y;
         int[] location = new int[2];
@@ -116,7 +120,7 @@ public class HabitsTest {
         View row = solo.getText(text);
         row.getLocationInWindow(location);
 
-        x1 = location[0] + 10;
+        x1 = location[0] + 100;
         y = location[1];
 
         x2 = location[0];
@@ -138,6 +142,9 @@ public class HabitsTest {
 
         MyHabitActivity activity = (MyHabitActivity) solo.getCurrentActivity();
 
+        RecyclerView recyclerView = activity.findViewById(R.id.list);
+        HabitRecyclerAdapter habitRecyclerAdapter = (HabitRecyclerAdapter) recyclerView.getAdapter();
+
         solo.clickOnView(activity.findViewById(R.id.add_habit));
 
         solo.enterText((EditText) solo.getView(R.id.title_editText), title);
@@ -147,11 +154,25 @@ public class HabitsTest {
 
         solo.clickOnView(tuesday);
 
+        size = habitRecyclerAdapter.getItemCount();
+
         solo.clickOnText("ADD");
+
+        solo.waitForText(title);
+
+        size = size + 1;
+
+        assertEquals(habitRecyclerAdapter.getItemCount(), size);
 
         deleteHabit(title);
 
+        //wait for system to catch up
+        //otherwise getItemCount doesn't update fast enough
+        SystemClock.sleep(2000);
 
+        size = size - 1;
+
+        assertEquals(habitRecyclerAdapter.getItemCount(), size);
 
         //open the add habit fragment
 
@@ -162,20 +183,32 @@ public class HabitsTest {
      */
     @Test
     public void testAddTitle() {
-        /*String title = "Eating";
+        String title = "Eating";
 
-        //open the add habit fragment
-        onView(withId(R.id.add_habit)).perform(click());
+        solo.assertCurrentActivity("Wrong Activity", MyHabitActivity.class);
 
-        //type in title and reason
-        onView(withId(R.id.title_editText)).perform(typeText(title));
+        MyHabitActivity activity = (MyHabitActivity) solo.getCurrentActivity();
 
-        //click add
-        onView(withText("ADD")).perform(click());
+        solo.clickOnView(activity.findViewById(R.id.add_habit));
 
-        //Check eating exists
-        onView(withId(R.id.list)).check(matches(hasDescendant(withText("Eating"))));*/
+        solo.enterText((EditText) solo.getView(R.id.title_editText), title);
 
+        CheckBox wednesday = (CheckBox) solo.getView(R.id.wednesday_select);
+        CheckBox saturday = (CheckBox) solo.getView(R.id.saturday_select);
+        CheckBox sunday = (CheckBox) solo.getView(R.id.sunday_select);
+
+        solo.clickOnView(wednesday);
+        solo.clickOnView(saturday);
+        solo.clickOnView(sunday);
+
+        solo.clickOnText("ADD");
+
+        RecyclerView recyclerView = activity.findViewById(R.id.list);
+        HabitRecyclerAdapter habitRecyclerAdapter = (HabitRecyclerAdapter) recyclerView.getAdapter();
+
+        Habit habit = (Habit) habitRecyclerAdapter.getItemAt(habitRecyclerAdapter.getItemCount() - 1);
+
+        assertEquals("Eating", habit.getTitle());
     }
 
     /**
@@ -186,49 +219,76 @@ public class HabitsTest {
         String reason = "To get abs";
 
         //open the add habit fragment
-        /*onView(withId(R.id.add_habit)).perform(click());
+        solo.assertCurrentActivity("Wrong Activity", MyHabitActivity.class);
 
-        //type in title and reason
-        onView(withId(R.id.reason_editText)).perform(typeText(reason));
-        onView(withId(R.id.tuesday_select)).perform(click());
-        onView(withId(R.id.saturday_select)).perform(click());
+        MyHabitActivity activity = (MyHabitActivity) solo.getCurrentActivity();
 
-        //click add
-        onView(withText("ADD")).perform(click());
+        solo.clickOnView(activity.findViewById(R.id.add_habit));
 
-        //Check the item didnt get added
-        onView(withId(R.id.list)).check(matches(not(hasDescendant(withText("To get abs")))));*/
+        solo.enterText((EditText) solo.getView(R.id.reason_editText), reason);
+
+        solo.clickOnText("ADD");
+
+        SystemClock.sleep(3000); //waiting
+
+        RecyclerView recyclerView = activity.findViewById(R.id.list);
+        HabitRecyclerAdapter habitRecyclerAdapter = (HabitRecyclerAdapter) recyclerView.getAdapter();
+
+        //Make sure nothing got added
+        for(int i = 0; i <= habitRecyclerAdapter.getItemCount() - 1; i++){
+            assertNotEquals(habitRecyclerAdapter.getItemAt(i).getReason(), reason);
+        }
 
     }
 
     /**
      * test the view habit action -> click on a habit and go to a new activity
      */
-//    @Test
-//    public void testViewHabit() {
-//        //first add a habit then view it
-//        String title = "Massage";
-//        String reason = "Stress relief";
-//
-//        //open the add habit fragment
-//        onView(withId(R.id.add_habit)).perform(click());
-//
-//        //type in title and reason
-//        onView(withId(R.id.title_editText)).perform(typeText(title));
-//        onView(withId(R.id.reason_editText)).perform(typeText(reason));
-//        onView(withId(R.id.tuesday_select)).perform(click());
-//        onView(withId(R.id.saturday_select)).perform(click());
-//
-//        //click add
-//        onView(withText("ADD")).perform(click());
-//
-//        //click and view activity for habit
-//        onView(withId(R.id.list)).perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
-//
-//        //Checking that the activity switched
-//        onView(withId(R.id.tracking)).check(matches(isDisplayed()));
-//        onView(withId(R.id.habit_reason)).check(matches(withText("Stress relief")));
-//    }
+    @Test
+    public void testViewHabit() {
+        //first add a habit then view it
+        String title = "Massage";
+        String reason = "Stress relief";
+
+        //open the add habit fragment
+        solo.assertCurrentActivity("Wrong Activity", MyHabitActivity.class);
+
+        MyHabitActivity activity = (MyHabitActivity) solo.getCurrentActivity();
+
+        RecyclerView recyclerView = activity.findViewById(R.id.list);
+        HabitRecyclerAdapter habitRecyclerAdapter = (HabitRecyclerAdapter) recyclerView.getAdapter();
+
+        solo.clickOnView(activity.findViewById(R.id.add_habit));
+
+        solo.enterText((EditText) solo.getView(R.id.title_editText), title);
+        solo.enterText((EditText) solo.getView(R.id.reason_editText), reason);
+
+        CheckBox tuesday = (CheckBox) solo.getView(R.id.tuesday_select);
+
+        solo.clickOnView(tuesday);
+
+        size = habitRecyclerAdapter.getItemCount();
+
+        solo.clickOnText("ADD");
+
+        solo.waitForText(title);
+
+        //click and view activity for habit
+        solo.clickOnText(title);
+
+        //Checking that the activity switched
+        solo.waitForActivity(ViewHabitActivity.class);
+        solo.assertCurrentActivity("Wrong Activity", ViewHabitActivity.class);
+
+        solo.waitForText(reason);
+
+        ViewHabitActivity viewActivity = (ViewHabitActivity) solo.getCurrentActivity();
+
+        assertEquals(viewActivity.getTitle(), title);
+        assertTrue(solo.searchText(reason));
+        assertTrue(solo.searchText("Tuesday"));
+
+    }
 
     /**
      * test if editing the details of a habit crashes
@@ -282,7 +342,6 @@ public class HabitsTest {
 
     /*
     Future tests:
-     * public void testEditHabitTitle() //tests the edit function which will be implemented
     * public void testViewPersists() //tests that the view updates the updated data
     * check for repeated Habit titles!!!
     * public void habitEventDeleted() //when you delete a habit activity, it should also delete the associated habit events
