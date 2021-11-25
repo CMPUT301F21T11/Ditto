@@ -14,8 +14,6 @@
  */
 package com.team11.ditto.habit;
 
-import android.widget.Toast;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -164,14 +162,18 @@ public class Habit implements Serializable {
     }
 
     public void completeHabit(boolean complete){
-        if (complete){
+        if (complete && this.streak > 0){
             this.streak ++;
         }
-        else if (this.streak <= 0){
+        else if (complete && this.streak <= 0){
+            this.streak = 1;
+        }
+        else if (!complete && this.streak <= 0){
             this.streak--;
         }
-        else if (this.streak > 0){
+        else if (!complete && this.streak > 0){
             this.streak = 0;
         }
+
     }
 }

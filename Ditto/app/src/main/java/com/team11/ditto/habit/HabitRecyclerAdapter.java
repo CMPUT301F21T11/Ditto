@@ -34,9 +34,9 @@ import java.util.ArrayList;
  */
 public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdapter.RecyclerViewHolder> {
     //Declarations
-    private ArrayList<Habit> courseDataArrayList;
+    private final ArrayList<Habit> courseDataArrayList;
     private final Context context;
-    private HabitClickListener habitClickListener;
+    private final HabitClickListener habitClickListener;
 
     /**
      * Constructor
@@ -87,7 +87,7 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
     /**
      * Viewholder class to handle RecyclerView
      */
-    public class RecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class RecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         // creating a variable for our text view.
         private TextView habitTitle;
         private TextView habitReason;

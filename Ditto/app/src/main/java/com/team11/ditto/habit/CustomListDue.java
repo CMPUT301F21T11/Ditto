@@ -1,4 +1,4 @@
-/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.team11.ditto.R;
-import com.team11.ditto.profile_details.User;
 
 import java.util.ArrayList;
 
@@ -36,8 +35,8 @@ import java.util.ArrayList;
  */
 public class CustomListDue extends ArrayAdapter<Habit> {
 
-    private ArrayList<Habit> habits;
-    private Context context;
+    private final ArrayList<Habit> habits;
+    private final Context context;
 
     public CustomListDue(Context context, ArrayList<Habit> habits) {
         super(context,0, habits);
