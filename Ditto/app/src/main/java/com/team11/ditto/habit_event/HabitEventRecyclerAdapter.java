@@ -1,4 +1,4 @@
-/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -33,9 +33,8 @@ import java.util.ArrayList;
  */
 public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRecyclerAdapter.ViewHolderEvent>{
     //Declarations
-    private ArrayList<HabitEvent> eventArrayList;
-    private Context context;
-    private EventClickListener eventClickListener;
+    private final ArrayList<HabitEvent> eventArrayList;
+    private final EventClickListener eventClickListener;
 
     /**
      * Constructor
@@ -45,7 +44,6 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
      */
     public HabitEventRecyclerAdapter(Context context, ArrayList<HabitEvent> eventArrayList, EventClickListener eventClickListener){
         this.eventArrayList = eventArrayList;
-        this.context = context;
         this.eventClickListener = eventClickListener;
     }
 
@@ -55,6 +53,7 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
      * @param viewType Android default
      * @return view holder
      */
+    @NonNull
     @Override
     public ViewHolderEvent onCreateViewHolder(ViewGroup parent, int viewType){
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_my_habit_event, parent, false);
@@ -85,15 +84,15 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
     /**
      * Viewholder class to handle RecyclerView
      */
-    public class ViewHolderEvent extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public static class ViewHolderEvent extends RecyclerView.ViewHolder implements View.OnClickListener{
         private TextView habitEventTitle;
         private TextView habitEventComment;
         EventClickListener eventClickListener;
 
         /**
          * Pair the holder with the item view
-         * @param itemView
-         * @param eventClickListener
+         * @param itemView view for item
+         * @param eventClickListener listener for interaction with item view
          */
         public ViewHolderEvent(@NonNull View itemView, EventClickListener eventClickListener){
             super(itemView);
