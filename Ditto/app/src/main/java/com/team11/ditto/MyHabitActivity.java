@@ -110,22 +110,22 @@ public class MyHabitActivity extends AppCompatActivity implements
         // Load habits
         currentUser = new ActiveUser();
         db.collection(HABIT_KEY)
-            .whereEqualTo("uid", currentUser.getUID())
+            .whereEqualTo(USER_ID, currentUser.getUID())
             .addSnapshotListener((value, error) -> {
                 habitDataList.clear();
                 if (value != null) {
                     for (QueryDocumentSnapshot document: value) {
                         String id = document.getId();
-                        String title = (String) document.getData().get("title");
-                        String reason = (String) document.getData().get("reason");
+                        String title = (String) document.getData().get(TITLE);
+                        String reason = (String) document.getData().get(REASON);
                         ArrayList<String> days = new ArrayList<>();
                         handleDays(days, document.getData());
                         boolean isPublic;
-                        if (document.getData().get("is_public") == null){
+                        if (document.getData().get(IS_PUBLIC) == null){
                             isPublic = true;
                         }
                         else{
-                            isPublic = (boolean) document.getData().get("is_public");
+                            isPublic = (boolean) document.getData().get(IS_PUBLIC);
                         }
                         Habit habit = new Habit(id, title, reason, days, isPublic);
                         habitDataList.add(habit);
@@ -137,7 +137,7 @@ public class MyHabitActivity extends AppCompatActivity implements
         currentTab(tabLayout, MY_HABITS_TAB);
         switchTabs(this, tabLayout, MY_HABITS_TAB);
 
-        //add habit button action
+        //add habit button
         final FloatingActionButton addHabitButton = findViewById(R.id.add_habit);
         addHabitButton.setOnClickListener(new View.OnClickListener() {
             /**
