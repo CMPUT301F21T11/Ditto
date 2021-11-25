@@ -20,9 +20,14 @@ Goals:
     solve by making a more object oriented design
 */
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -76,6 +81,9 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     public static String EXTRA_HABIT_EVENT = "EXTRA_HABIT_EVENT";
     private ArrayList<HabitEvent> habitEventsData;
 
+    private ProgressBar progressBar;
+    private int shortAnimationDuration;
+
     private RecyclerView habitEventList;
     private HabitEventRecyclerAdapter habitEventRecyclerAdapter;
 
@@ -100,6 +108,8 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
             this.startActivity(intent);
         }
 
+        progressBar = findViewById(R.id.progress_bar);
+
         tabLayout = findViewById(R.id.tabs);
 
         setTitle("My Feed");
@@ -109,7 +119,95 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 
         habitEventRecyclerAdapter = new HabitEventRecyclerAdapter(this, habitEventsData, this);
 
+        habitEventList.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+
+        shortAnimationDuration = getResources().getInteger(android.R.integer.config_longAnimTime);
+
         // Load the Habit Event data (This will be converted to use the Firebase interface in the future)
+        queryList();
+
+        LinearLayoutManager manager = new LinearLayoutManager(this);
+        habitEventList.setLayoutManager(manager);
+        habitEventList.setAdapter(habitEventRecyclerAdapter);
+
+        currentTab(tabLayout, HOME_TAB);
+        switchTabs(this, tabLayout, HOME_TAB);
+        db = FirebaseFirestore.getInstance();
+
+        //Get a top level reference to the collection
+
+        //Notifies if cloud data changes (from Firebase Interface)
+        autoHabitEventListener(db, habitEventRecyclerAdapter);
+
+
+        final FloatingActionButton addHabitEventButton = findViewById(R.id.add_habit_event);
+
+        addHabitEventButton.setOnClickListener(view -> new AddHabitEventFragment()
+                .show(getSupportFragmentManager(), "ADD_HABIT_EVENT"));
+
+
+        fadeInView();
+
+    }
+
+    private void fadeInView(){
+        habitEventList.setAlpha(1f);
+        habitEventList.setVisibility(View.VISIBLE);
+
+        habitEventList.animate()
+                .alpha(1f)
+                .setDuration(shortAnimationDuration)
+                .setListener(null);
+
+        progressBar.animate()
+                .alpha(0f)
+                .setDuration(shortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animator){
+                        progressBar.setVisibility(View.GONE);
+                    }
+                });
+    }
+
+
+    /**
+     * Adds a habitevent to firestore "HabitEvent" and adds the habitevent ID to the list of habitEvents for the habit in "Habit"
+     * Adds the habitevent to the listview
+     * @param newHabitEvent
+     */
+    @Override
+    public void onOkPressed(HabitEvent newHabitEvent) {
+        //Adds the item to the database and then immediately retrieves it from the list
+
+        //if today is the same day as one of the dates they picked,
+        //AND in this selected day if there are no other habit events with the same habit
+        //THEN set habitDoneToday to true
+        habitEventList.setVisibility(View.INVISIBLE);
+        isHabitDoneToday(db, todayIs(), newHabitEvent);
+        pushHabitEventData(db, newHabitEvent);
+        habitEventRecyclerAdapter.notifyDataSetChanged();
+        fadeInView();
+
+    }
+
+    /**
+     * Handles the view Habit event activity
+     * starts a new activity to view the clicked habit event
+     * @param position of the clicked habit event
+     */
+    @Override
+    public void onEventClick(int position) {
+        //If we are clicking on our own event
+        if(habitEventsData.get(position).getUid().equals(FirebaseAuth.getInstance().getUid())){
+            Intent intent = new Intent(this, ViewEventActivity.class);
+            intent.putExtra(EXTRA_HABIT_EVENT, habitEventsData.get(position));
+            startActivity(intent);
+        }
+    }
+
+    public void queryList(){
         db = FirebaseFirestore.getInstance();
         db.collection(HABIT_EVENT_KEY)
                 .whereEqualTo("uid", FirebaseAuth.getInstance().getUid())  // Query only current user events for now
@@ -126,65 +224,37 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                             String ePhoto = (String) doc.getData().get("photo");
                             String eLocation = (String) doc.getData().get("location");
                             String uid = (String) doc.getData().get("uid");
-                            habitEventsData.add(new HabitEvent(eventID, eHabitId, eComment, ePhoto, eLocation, eHabitTitle, uid));  // Add the event to the event list
+                            DocumentReference docRef = db.collection("User").document(uid);
+
+                            //Query for name then create the habit event
+                            docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                    if (task.isSuccessful()) {
+                                        DocumentSnapshot documentSnapshot = task.getResult();
+                                        if (documentSnapshot.exists()) {
+                                            //retrieve the order value
+                                            String name = (String) documentSnapshot.get("name");
+                                            habitEventsData.add(new HabitEvent(eventID, eHabitId, eComment, ePhoto, eLocation, eHabitTitle, uid, name));
+                                            habitEventRecyclerAdapter.notifyDataSetChanged();
+                                        }
+                                        else {
+                                            Log.d("retrieve", "document does not exist!!");
+                                        }
+
+                                    }
+                                    else {
+                                        Log.d("retrieve", task.getException().toString());
+                                    }
+                                }
+
+                            });
+
+
+                            //habitEventsData.add(new HabitEvent(eventID, eHabitId, eComment, ePhoto, eLocation, eHabitTitle, uid));  // Add the event to the event list
                         }
-                        habitEventRecyclerAdapter.notifyDataSetChanged();  // Refresh the recycler
                     }
                 });
-
-        LinearLayoutManager manager = new LinearLayoutManager(this);
-        habitEventList.setLayoutManager(manager);
-        habitEventList.setAdapter(habitEventRecyclerAdapter);
-
-        currentTab(tabLayout, HOME_TAB);
-        switchTabs(this, tabLayout, HOME_TAB);
-        db = FirebaseFirestore.getInstance();
-
-        //Get a top level reference to the collection
-
-        //Notifies if cloud data changes (from Firebase Interface)
-        autoHabitEventListener(db, habitEventRecyclerAdapter);
-
-        final FloatingActionButton addHabitEventButton = findViewById(R.id.add_habit_event);
-
-        addHabitEventButton.setOnClickListener(view -> new AddHabitEventFragment()
-                .show(getSupportFragmentManager(), "ADD_HABIT_EVENT"));
-    }
-
-
-
-    /**
-     * Adds a habitevent to firestore "HabitEvent" and adds the habitevent ID to the list of habitEvents for the habit in "Habit"
-     * Adds the habitevent to the listview
-     * @param newHabitEvent
-     */
-    @Override
-    public void onOkPressed(HabitEvent newHabitEvent) {
-        //Adds the item to the database and then immediately retrieves it from the list
-
-        //if today is the same day as one of the dates they picked,
-        //AND in this selected day if there are no other habit events with the same habit
-        //THEN set habitDoneToday to true
-
-        isHabitDoneToday(db, todayIs(), newHabitEvent);
-        pushHabitEventData(db, newHabitEvent);
-        habitEventRecyclerAdapter.notifyDataSetChanged();
-
-
-
-    }
-
-    /**
-     * Handles the view Habit event activity
-     * starts a new activity to view the clicked habit event
-     * @param position of the clicked habit event
-     */
-    @Override
-    public void onEventClick(int position) {
-        habitEventsData.get(position);
-        Intent intent = new Intent(this, ViewEventActivity.class);
-        intent.putExtra(EXTRA_HABIT_EVENT, habitEventsData.get(position));
-        startActivity(intent);
     }
 
     private int todayIs() {

@@ -96,7 +96,18 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
 
         //Add separator if comment is not empty
 
-        DocumentReference docRef =  db.collection("User").document(habitEvent.getUid());
+        holder.habitEventTitle.setText(habitEvent.getHabitTitle());
+        holder.habitUsername.setText((habitEvent.getName()));
+
+        if(habitEvent.getComment().equals("")){
+            holder.habitSeparator.setText("");
+        } else {
+            holder.habitSeparator.setText(" - ");
+        }
+
+        holder.habitEventComment.setText(habitEvent.getComment());
+
+        /*DocumentReference docRef =  db.collection("User").document(habitEvent.getUid());
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -127,7 +138,7 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
                     Log.d("retrieve", task.getException().toString());
                 }
             }
-        });
+        });*/
     }
 
     /**
