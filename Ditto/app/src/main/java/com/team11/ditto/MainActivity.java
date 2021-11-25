@@ -15,9 +15,6 @@
 package com.team11.ditto;
 /*
 Role: Class for Habit Event Activity, be able to see you feed and add a habit event
-Goals:
-    there is repetition between MyHabitActivity and the Homepage when creating fragments and listviews
-    solve by making a more object oriented design
 */
 
 import android.animation.Animator;
@@ -67,9 +64,6 @@ import java.util.HashMap;
 
 /**
  * Role: Class for Habit Event Activity, be able to see you feed and add a habit event
- * TODO:
- *     there is repetition between MyHabitActivity and the Homepage when creating fragments and listviews
- *     solve by making a more object oriented design
  * @author: Kelly Shih, Aidan Horemans, Vivek Malhotra, Matthew Asgari
  */
 
@@ -109,7 +103,6 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         }
 
         progressBar = findViewById(R.id.progress_bar);
-
         tabLayout = findViewById(R.id.tabs);
 
         setTitle("My Feed");
@@ -122,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         habitEventList.setVisibility(View.INVISIBLE);
         progressBar.setVisibility(View.VISIBLE);
 
-        shortAnimationDuration = getResources().getInteger(android.R.integer.config_longAnimTime);
+        shortAnimationDuration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
 
         // Load the Habit Event data (This will be converted to use the Firebase interface in the future)
         queryList();
@@ -133,9 +126,9 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 
         currentTab(tabLayout, HOME_TAB);
         switchTabs(this, tabLayout, HOME_TAB);
-        db = FirebaseFirestore.getInstance();
 
         //Get a top level reference to the collection
+        db = FirebaseFirestore.getInstance();
 
         //Notifies if cloud data changes (from Firebase Interface)
         autoHabitEventListener(db, habitEventRecyclerAdapter);
@@ -175,6 +168,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     /**
      * Adds a habitevent to firestore "HabitEvent" and adds the habitevent ID to the list of habitEvents for the habit in "Habit"
      * Adds the habitevent to the listview
+     * updates the habitDoneToday value for the Habit
      * @param newHabitEvent
      */
     @Override
@@ -185,7 +179,11 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         //AND in this selected day if there are no other habit events with the same habit
         //THEN set habitDoneToday to true
         habitEventList.setVisibility(View.INVISIBLE);
+
+        //handle setting the habitDoneToday field for the Habit
         isHabitDoneToday(db, todayIs(), newHabitEvent);
+
+        //Adds the item to the database and then immediately retrieves it from the list
         pushHabitEventData(db, newHabitEvent);
         habitEventRecyclerAdapter.notifyDataSetChanged();
         fadeInView();
@@ -257,6 +255,10 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                 });
     }
 
+    /**
+     * return the current day
+     * @return int representing the current day of week (1-7)
+     */
     private int todayIs() {
         Calendar calendar = Calendar.getInstance();
         int day = calendar.get(Calendar.DAY_OF_WEEK);

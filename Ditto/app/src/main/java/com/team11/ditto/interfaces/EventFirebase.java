@@ -152,8 +152,12 @@ public interface EventFirebase extends Firebase{
     }
 
 
+    /**
+     * Handle the deletion process for a habit event
+     * @param db firebase cloud
+     * @param oldEntry habit to delete
+     */
     default void deleteDataMyEvent(FirebaseFirestore db, HabitEvent oldEntry) {
-        //ALSO REMOVE THE ASSOCIATED HABIT EVENTS
         db.collection(HABIT_EVENT_KEY).document(oldEntry.getEventID()).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
