@@ -140,11 +140,6 @@ public class MyHabitActivity extends AppCompatActivity implements
                     habitRecyclerAdapter.notifyDataSetChanged();
                 });
 
-
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(habitListView.getContext(), manager.getOrientation());
-        habitListView.addItemDecoration(dividerItemDecoration);
-
-
         currentTab(tabLayout, MY_HABITS_TAB);
         switchTabs(this, tabLayout, MY_HABITS_TAB);
 
