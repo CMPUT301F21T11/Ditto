@@ -46,7 +46,6 @@ import com.team11.ditto.habit.HabitRecyclerAdapter;
 import com.team11.ditto.habit.ViewHabitActivity;
 import com.team11.ditto.interfaces.Days;
 import com.team11.ditto.interfaces.EventFirebase;
-import com.team11.ditto.interfaces.Firebase;
 import com.team11.ditto.interfaces.HabitFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;

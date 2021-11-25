@@ -16,7 +16,6 @@
 -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -28,7 +27,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:backgroundTint="@color/white"
-        android:text="SEARCH FOR USERS"
+        android:text="@string/search_for_users"
         android:textColor="#314CDF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -61,12 +60,13 @@
         android:layout_width="88dp"
         android:layout_height="21dp"
         android:layout_marginTop="68dp"
-        android:text="Followers"
+        android:text="@string/followers"
         android:textColor="#000000"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.234"
         app:layout_constraintStart_toEndOf="@+id/imageView2"
-        app:layout_constraintTop_toTopOf="@+id/imageView2" />
+        app:layout_constraintTop_toTopOf="@+id/imageView2"
+        android:focusable="true" />
 
     <TextView
         android:id="@+id/following"
@@ -74,18 +74,19 @@
         android:layout_width="88dp"
         android:layout_height="21dp"
         android:layout_marginTop="68dp"
-        android:text="Following"
+        android:text="@string/following"
         android:textColor="#000000"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.349"
         app:layout_constraintStart_toEndOf="@+id/followers"
-        app:layout_constraintTop_toTopOf="@+id/imageView2" />
+        app:layout_constraintTop_toTopOf="@+id/imageView2"
+        android:focusable="true" />
 
     <TextView
         android:id="@+id/no_followers"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="--"
+        android:text="@string/none"
         android:textColor="#000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -98,7 +99,7 @@
         android:id="@+id/no_following_1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="--"
+        android:text="@string/none"
         android:textColor="#000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -114,7 +115,7 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:backgroundTint="@color/white"
-        android:text="FOLLOW REQUEST SENT"
+        android:text="@string/follow_request_sent_button"
         android:textColor="#314CDF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -126,7 +127,7 @@
         android:id="@+id/textView_user"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Username"
+        android:text="@string/userName"
         android:textColor="#000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -143,7 +144,7 @@
         android:layout_marginTop="2dp"
         android:layout_marginEnd="20dp"
         android:backgroundTint="@color/white"
-        android:text="FOLLOW REQUEST RECEIVED"
+        android:text="@string/follow_request_received_button"
         android:textColor="#314CDF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -160,7 +161,7 @@
         android:layout_marginTop="2dp"
         android:layout_marginEnd="20dp"
         android:backgroundTint="@color/white"
-        android:text="LOG OUT"
+        android:text="@string/log_out_button"
         android:textColor="#FF1744"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -173,7 +174,6 @@
         android:id="@+id/username_editText"
         android:layout_width="wrap_content"
         android:layout_height="26dp"
-        android:text="ABCDEFGHIJKL"
         android:textColor="#000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -202,7 +202,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:icon="@drawable/ic_action_home"
-        android:text="Home"
+        android:text="@string/home"
         app:tabSelectedTextColor="@color/black"
         app:tabTextAppearance="@style/MyCustomTabText"
         app:tabTextColor="#314CDF" />
@@ -211,7 +211,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:icon="@drawable/ic_action_myhabits"
-        android:text="Habits"
+        android:text="@string/habits"
         app:tabSelectedTextColor="@color/black"
         app:tabTextAppearance="@style/MyCustomTabText"
         app:tabTextColor="#314CDF" />
@@ -220,7 +220,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:icon="@drawable/ic_action_duetoday"
-        android:text="DUE"
+        android:text="@string/due"
         app:tabSelectedTextColor="@color/black"
         app:tabTextColor="#314CDF" />
 
@@ -228,7 +228,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:icon="@drawable/ic_action_profile"
-        android:text="Profile"
+        android:text="@string/profile"
         app:tabSelectedTextColor="@color/black"
         app:tabTextColor="#314CDF" />
 </com.google.android.material.tabs.TabLayout>

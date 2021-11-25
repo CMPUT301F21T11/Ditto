@@ -46,4 +46,15 @@
     <string name="email">Email</string>
     <string name="pub">Public</string>
     <string name="priv">Private</string>
+    <string name="search_for_users">SEARCH FOR USERS</string>
+    <string name="followers">Followers</string>
+    <string name="following">Following</string>
+    <string name="none">--</string>
+    <string name="follow_request_sent_button">FOLLOW REQUEST SENT</string>
+    <string name="follow_request_received_button">FOLLOW REQUEST RECEIVED</string>
+    <string name="log_out_button">LOG OUT</string>
+    <string name="get_started">Get Started!</string>
+    <string name="log_in">Log in</string>
+    <string name="welcome_to">Welcome to</string>
+    <string name="slogan">Keep track of your habits</string>
 </resources>

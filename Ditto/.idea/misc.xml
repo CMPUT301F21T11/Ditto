@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/lkcou/Documents/A_University/CMPUT301/TeamProject/Ditto/Ditto/app/src/main/res/layout/activity_following.xml" value="0.182518115942029" />
+        <entry key="..\:/Users/lkcou/Documents/A_University/CMPUT301/TeamProject/Ditto/Ditto/app/src/main/res/layout/activity_friend_profile.xml" value="0.1" />
         <entry key="..\:/Users/lkcou/Documents/A_University/CMPUT301/TeamProject/Ditto/Ditto/app/src/main/res/layout/activity_login.xml" value="0.182518115942029" />
         <entry key="..\:/Users/lkcou/Documents/A_University/CMPUT301/TeamProject/Ditto/Ditto/app/src/main/res/layout/activity_main.xml" value="0.182518115942029" />
         <entry key="..\:/Users/lkcou/Documents/A_University/CMPUT301/TeamProject/Ditto/Ditto/app/src/main/res/layout/activity_my_habit.xml" value="0.1" />
@@ -21,6 +22,7 @@
         <entry key="..\:/Users/lkcou/Documents/A_University/CMPUT301/TeamProject/Ditto/Ditto/app/src/main/res/layout/fragment_home.xml" value="0.182518115942029" />
         <entry key="..\:/Users/lkcou/Documents/A_University/CMPUT301/TeamProject/Ditto/Ditto/app/src/main/res/layout/fragment_my_habit.xml" value="0.22" />
         <entry key="..\:/Users/lkcou/Documents/A_University/CMPUT301/TeamProject/Ditto/Ditto/app/src/main/res/layout/fragment_profile.xml" value="0.182518115942029" />
+        <entry key="..\:/Users/lkcou/Documents/A_University/CMPUT301/TeamProject/Ditto/Ditto/app/src/main/res/layout/sent_request_content.xml" value="0.1" />
         <entry key="..\:/Users/lkcou/Documents/A_University/CMPUT301/TeamProject/Ditto/Ditto/app/src/main/res/menu/navigation_bar.xml" value="0.20052083333333334" />
         <entry key="..\:/Users/s/Desktop/Ditto/Ditto/app/src/main/res/layout/activity_sign_in.xml" value="1.0" />
         <entry key="..\:/Users/s/Desktop/Ditto/Ditto/app/src/main/res/layout/activity_welcome.xml" value="0.264" />
