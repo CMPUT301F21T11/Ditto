@@ -166,69 +166,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         //AND in this selected day if there are no other habit events with the same habit
         //THEN set habitDoneToday to true
 
-        int today = todayIs(); //today's day of the week
-
-        //get days ...
-        final Integer[] daysOfWeek = new Integer[7];
-
-        DocumentReference document = db.collection(HABIT_KEY).document(newHabitEvent.getHabitId());
-        document.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot documentSnapshot = task.getResult();
-                    if (documentSnapshot.exists()) {
-                        //retrieve the order value
-                        int numDays = 7;
-                        for (int i=0;i<numDays;i++) {
-                            Boolean isDay; //is the day "true" in for this Habit
-                            String day = daysForHabit(i);
-                            isDay = documentSnapshot.getBoolean(day);
-                            if (isDay==true) { daysOfWeek[i] = i+1; }
-                            else { daysOfWeek[i] = 0; }
-                        }
-
-                        //if today is in the set of days chosen, update habitDoneToday to true
-                        for (int i=0; i<daysOfWeek.length;i++) {
-                            if (today == daysOfWeek[i]) {
-                                //then we set ishabitDone to true
-                                document.update("habitDoneToday", true)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void unused) {
-
-                                                Log.d(TAG, "DocumentSnapshot successfully updated!");
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.w(TAG, "Error updating document", e);
-                                            }
-                                        });
-
-
-
-                            }
-                        }
-
-
-                    }
-                    else {
-                        Log.d(TAG, "document does not exist!!");
-                    }
-
-                }
-                else {
-                    Log.d(TAG, task.getException().toString());
-                }
-
-
-            }
-        });
-
-
-
+        isHabitDoneToday(db, todayIs(), newHabitEvent);
         pushHabitEventData(db, newHabitEvent);
         habitEventRecyclerAdapter.notifyDataSetChanged();
 
@@ -279,31 +217,5 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         return day;
     }
 
-    private String daysForHabit(int i) {
-        String day = null;
-        switch (i) {
-            case 0:
-                day = "Sunday";
-                break;
-            case 1:
-                day = "Monday";
-                break;
-            case 2:
-                day = "Tuesday";
-                break;
-            case 3:
-                day = "Wednesday";
-                break;
-            case 4:
-                day = "Thursday";
-                break;
-            case 5:
-                day = "Friday";
-                break;
-            case 6:
-                day ="Saturday";
-                break;
-        }
-        return day;
-    }
+
 }
