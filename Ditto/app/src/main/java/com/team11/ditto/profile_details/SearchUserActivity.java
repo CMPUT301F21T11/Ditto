@@ -53,11 +53,11 @@ public class SearchUserActivity extends AppCompatActivity implements SwitchTabs,
 
     private ArrayList<User> userDataList;
     private SearchView searchView;
-    private ArrayList<String> followedByActiveUser = new ArrayList<>();
+    private final ArrayList<String> followedByActiveUser = new ArrayList<>();
     private ActiveUser currentUser;
     FirebaseFirestore db;
 
-    private Set<String> sentRequest = new HashSet<>();
+    private final Set<String> sentRequest = new HashSet<>();
 
     /**
      * Instructions on creating the Activity
