@@ -92,7 +92,7 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
     @Override
     public void onBindViewHolder(@NonNull ViewHolderEvent holder, int position){
         HabitEvent habitEvent = eventArrayList.get(position);
-        /*DocumentReference docRef =  db.collection("User").document(habitEvent.getUid());
+        DocumentReference docRef =  db.collection("User").document(habitEvent.getUid());
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -100,8 +100,18 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
                     DocumentSnapshot documentSnapshot = task.getResult();
                     if (documentSnapshot.exists()) {
                         //retrieve the order value
-                        holder.habitEventTitle.setText(documentSnapshot.getString("name"));
-                        Log.d("retrieve", "NAME  "+name);
+                        holder.habitUsername.setText(documentSnapshot.getString("name"));
+                        //Should return username
+                        holder.habitEventTitle.setText(habitEvent.getHabitTitle());
+
+                        //Helps keep the display feed clean
+                        if(habitEvent.getComment().equals("")){
+                            holder.habitSeparator.setText("");
+                        } else {
+                            holder.habitSeparator.setText(" - ");
+                        }
+
+                        holder.habitEventComment.setText(habitEvent.getComment());
 
                     }
                     else {
@@ -113,20 +123,9 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
                     Log.d("retrieve", task.getException().toString());
                 }
             }
-        });*/
+        });
 
-        holder.habitUsername.setText(habitEvent.getUid());
-         //Should return username
-        holder.habitEventTitle.setText(habitEvent.getHabitTitle());
 
-        //Helps keep the display feed clean
-        if(habitEvent.getComment().equals("")){
-            holder.habitSeparator.setText("");
-        } else {
-            holder.habitSeparator.setText(" - ");
-        }
-
-        holder.habitEventComment.setText(habitEvent.getComment());
     }
 
     /**
