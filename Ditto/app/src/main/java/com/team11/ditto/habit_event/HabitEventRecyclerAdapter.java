@@ -48,7 +48,6 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
     private ArrayList<HabitEvent> eventArrayList;
     private Context context;
     private EventClickListener eventClickListener;
-    private FirebaseFirestore db;
 
     /**
      * Constructor
@@ -60,7 +59,6 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
         this.eventArrayList = eventArrayList;
         this.context = context;
         this.eventClickListener = eventClickListener;
-        db = FirebaseFirestore.getInstance();
     }
 
     /**
@@ -92,34 +90,11 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
     @Override
     public void onBindViewHolder(@NonNull ViewHolderEvent holder, int position){
         HabitEvent habitEvent = eventArrayList.get(position);
-        /*DocumentReference docRef =  db.collection("User").document(habitEvent.getUid());
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot documentSnapshot = task.getResult();
-                    if (documentSnapshot.exists()) {
-                        //retrieve the order value
-                        holder.habitEventTitle.setText(documentSnapshot.getString("name"));
-                        Log.d("retrieve", "NAME  "+name);
 
-                    }
-                    else {
-                        Log.d("retrieve", "document does not exist!!");
-                    }
-
-                }
-                else {
-                    Log.d("retrieve", task.getException().toString());
-                }
-            }
-        });*/
-
-        holder.habitUsername.setText(habitEvent.getUid());
-         //Should return username
+        holder.habitUsername.setText(habitEvent.getUid()); //Should return username
         holder.habitEventTitle.setText(habitEvent.getHabitTitle());
 
-        //Helps keep the display feed clean
+        //Add separator if comment is not empty
         if(habitEvent.getComment().equals("")){
             holder.habitSeparator.setText("");
         } else {

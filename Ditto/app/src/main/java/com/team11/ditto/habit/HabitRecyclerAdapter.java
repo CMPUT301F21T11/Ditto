@@ -84,6 +84,10 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
         return courseDataArrayList.size();
     }
 
+    public Habit getItemAt(int position){
+        return courseDataArrayList.get(position);
+    }
+
     /**
      * Viewholder class to handle RecyclerView
      */

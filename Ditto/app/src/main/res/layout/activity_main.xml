@@ -33,7 +33,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:context=".MainActivity"
         app:layoutManager="LinearLayoutManager"
-        tools:listitem="@layout/fragment_my_habit"/>
+        tools:listitem="@layout/list_my_habit_event"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/add_habit_event"
@@ -49,10 +49,9 @@
     </com.google.android.material.floatingactionbutton.FloatingActionButton>
 
 
-
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabs"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:padding="5dp"
