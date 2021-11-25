@@ -38,6 +38,15 @@ public class Habit implements Serializable {
     private boolean isPublic;
     private int streak;
     private int position;
+    private boolean habitDoneToday;
+
+    public boolean isHabitDoneToday() {
+        return habitDoneToday;
+    }
+
+    public void setHabitDoneToday(boolean habitDoneToday) {
+        this.habitDoneToday = habitDoneToday;
+    }
 
     /**
      * Constructor for Habit object

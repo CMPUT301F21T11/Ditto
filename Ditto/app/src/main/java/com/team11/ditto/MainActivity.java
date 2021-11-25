@@ -22,16 +22,24 @@ Goals:
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -47,7 +55,9 @@ import com.team11.ditto.interfaces.HabitFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 
 /**
@@ -151,8 +161,79 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     @Override
     public void onOkPressed(HabitEvent newHabitEvent) {
         //Adds the item to the database and then immediately retrieves it from the list
+
+        //if today is the same day as one of the dates they picked,
+        //AND in this selected day if there are no other habit events with the same habit
+        //THEN set habitDoneToday to true
+
+        int today = todayIs(); //today's day of the week
+
+        //get days ...
+        final Integer[] daysOfWeek = new Integer[7];
+
+        DocumentReference document = db.collection(HABIT_KEY).document(newHabitEvent.getHabitId());
+        document.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot documentSnapshot = task.getResult();
+                    if (documentSnapshot.exists()) {
+                        //retrieve the order value
+                        int numDays = 7;
+                        for (int i=0;i<numDays;i++) {
+                            Boolean isDay; //is the day "true" in for this Habit
+                            String day = daysForHabit(i);
+                            isDay = documentSnapshot.getBoolean(day);
+                            if (isDay==true) { daysOfWeek[i] = i+1; }
+                            else { daysOfWeek[i] = 0; }
+                        }
+
+                        //if today is in the set of days chosen, update habitDoneToday to true
+                        for (int i=0; i<daysOfWeek.length;i++) {
+                            if (today == daysOfWeek[i]) {
+                                //then we set ishabitDone to true
+                                document.update("habitDoneToday", true)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void unused) {
+
+                                                Log.d(TAG, "DocumentSnapshot successfully updated!");
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.w(TAG, "Error updating document", e);
+                                            }
+                                        });
+
+
+
+                            }
+                        }
+
+
+                    }
+                    else {
+                        Log.d(TAG, "document does not exist!!");
+                    }
+
+                }
+                else {
+                    Log.d(TAG, task.getException().toString());
+                }
+
+
+            }
+        });
+
+
+
         pushHabitEventData(db, newHabitEvent);
         habitEventRecyclerAdapter.notifyDataSetChanged();
+
+
+
     }
 
     /**
@@ -166,5 +247,63 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         Intent intent = new Intent(this, ViewEventActivity.class);
         intent.putExtra(EXTRA_HABIT_EVENT, habitEventsData.get(position));
         startActivity(intent);
+    }
+
+    private int todayIs() {
+        Calendar calendar = Calendar.getInstance();
+        int day = calendar.get(Calendar.DAY_OF_WEEK);
+
+        switch (day) {
+            case Calendar.SUNDAY:
+                day = 1;
+                break;
+            case Calendar.MONDAY:
+                day = 2;
+                break;
+            case Calendar.TUESDAY:
+                day = 3;
+                break;
+            case Calendar.WEDNESDAY:
+                day = 4;
+                break;
+            case Calendar.THURSDAY:
+                day = 5;
+                break;
+            case Calendar.FRIDAY:
+                day = 6;
+                break;
+            case Calendar.SATURDAY:
+                day = 7;
+                break;
+        }
+        return day;
+    }
+
+    private String daysForHabit(int i) {
+        String day = null;
+        switch (i) {
+            case 0:
+                day = "Sunday";
+                break;
+            case 1:
+                day = "Monday";
+                break;
+            case 2:
+                day = "Tuesday";
+                break;
+            case 3:
+                day = "Wednesday";
+                break;
+            case 4:
+                day = "Thursday";
+                break;
+            case 5:
+                day = "Friday";
+                break;
+            case 6:
+                day ="Saturday";
+                break;
+        }
+        return day;
     }
 }
