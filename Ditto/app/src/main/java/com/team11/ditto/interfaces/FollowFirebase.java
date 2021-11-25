@@ -2,10 +2,6 @@ package com.team11.ditto.interfaces;
 
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
@@ -20,7 +16,6 @@ import com.team11.ditto.login.ActiveUser;
 import com.team11.ditto.profile_details.User;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -35,14 +30,12 @@ public interface FollowFirebase extends Firebase{
     String USERNAME = "username";
     String EMAIL = "email";
     String PASSWORD = "password";
-    String AGE = "age";
 
     String FOLLOWED_BY = "followedBy";
     String FOLLOWED = "followed";
     String SENT = "sent_requests";
     String RECEIVED = "follow_requests";
     ArrayList<User> usersFirebase = new ArrayList<>();
-    HashMap<String, Object> userData = new HashMap<>();
 
 
     default void logUserData(@Nullable QuerySnapshot queryDocumentSnapshots) {
@@ -51,8 +44,7 @@ public interface FollowFirebase extends Firebase{
                 Log.d(TAG, String.valueOf(doc.getData().get(USERNAME)));
                 String uUsername = (String) doc.getData().get(USERNAME);
                 String uPassword = (String) doc.getData().get(PASSWORD);
-                int uAge = Integer.parseInt((String) doc.getData().get(AGE));
-                usersFirebase.add(new User(uUsername, uPassword, uAge));
+                usersFirebase.add(new User(uUsername, uPassword));
             }
         }
     }
@@ -84,7 +76,7 @@ public interface FollowFirebase extends Firebase{
 
 
     /**
-     * This method retreives all User objects who sent follow request to active user in real time
+     * This method retrieves all User objects who sent follow request to active user in real time
      * @param db Firebase cloud
      * @param currentUser active user
      * @param receivedRequestEmails list of emails received follow requests from
@@ -331,7 +323,7 @@ public interface FollowFirebase extends Firebase{
     /**
      * This method will remove a follower a active user's follower list
      * @param db firebase cloud
-     * @param removeFollowerEmail email of user that active user wants to removw
+     * @param removeFollowerEmail email of user that active user wants to remove
      * @param activeUserEmail   email of active user
      */
     default void removeFollowerFromList(FirebaseFirestore db, String removeFollowerEmail, String activeUserEmail){
@@ -346,18 +338,8 @@ public interface FollowFirebase extends Firebase{
                             db.collection("Following")
                                     .document(id)
                                     .delete()
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void unused) {
-                                            Log.d("Remove Follower ", "DocumentSnapshot successfully deleted!");
-                                        }
-                                    })
-                                    .addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Log.w("Remove Follower ", "Error deleting document",e);
-                                        }
-                                    });
+                                    .addOnSuccessListener(unused -> Log.d("Remove Follower ", "DocumentSnapshot successfully deleted!"))
+                                    .addOnFailureListener(e -> Log.w("Remove Follower ", "Error deleting document",e));
                         }
                     }
                 });
@@ -368,7 +350,7 @@ public interface FollowFirebase extends Firebase{
     /**
      * This method will remove a user active user follows from following list
      * @param db firebase cloud
-     * @param removeFollowingEmail email of user that active user wants to removw
+     * @param removeFollowingEmail email of user that active user wants to remove
      * @param activeUserEmail   email of active user
      */
     default void removeFollowingFromList(FirebaseFirestore db, String removeFollowingEmail, String activeUserEmail){
@@ -383,18 +365,8 @@ public interface FollowFirebase extends Firebase{
                             db.collection("Following")
                                     .document(id)
                                     .delete()
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void unused) {
-                                            Log.d("Remove Follower ", "DocumentSnapshot successfully deleted!");
-                                        }
-                                    })
-                                    .addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Log.w("Remove Follower ", "Error deleting document",e);
-                                        }
-                                    });
+                                    .addOnSuccessListener(unused -> Log.d("Remove Follower ", "DocumentSnapshot successfully deleted!"))
+                                    .addOnFailureListener(e -> Log.w("Remove Follower ", "Error deleting document",e));
                         }
                     }
                 });
@@ -403,10 +375,10 @@ public interface FollowFirebase extends Firebase{
 
     /**
      * This method will show all public habits of the users whom active user is following
-     * @param db
-     * @param followedByMeEmail
-     * @param habitData
-     * @param friendHabitAdapter
+     * @param db database
+     * @param followedByMeEmail email of follow-ee
+     * @param habitData habit
+     * @param friendHabitAdapter adapter for listview
      */
     default void showFriendHabits(FirebaseFirestore db, String followedByMeEmail, ArrayList<Habit> habitData, FriendHabitList friendHabitAdapter ){
         db.collection("User")

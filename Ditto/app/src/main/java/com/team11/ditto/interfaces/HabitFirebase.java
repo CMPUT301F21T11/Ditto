@@ -63,7 +63,7 @@ public interface HabitFirebase extends EventFirebase, Days{
     /**
      * initializing query for RecyclerAdapter
      * @param database firebase cloud
-     * @param adapter adapter between datalist and database
+     * @param adapter adapter between dataset and database
      */
     default void autoHabitListener(FirebaseFirestore database, HabitRecyclerAdapter adapter){
         Query query = database.collection(HABIT_KEY).orderBy(ORDER, Query.Direction.DESCENDING);
