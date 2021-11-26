@@ -7,6 +7,7 @@ import android.widget.Spinner;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -42,6 +43,7 @@ public interface EventFirebase extends Firebase{
     default void logEventData(@Nullable QuerySnapshot queryDocumentSnapshots) {
         if (queryDocumentSnapshots != null) {
             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+
                  Log.d(TAG, String.valueOf(doc.getData().get(HABIT_ID)));
                  String eHabitId = (String) doc.getData().get(HABIT_ID);
                  String eHabitTitle = (String) doc.getData().get(HABIT_TITLE);
@@ -49,6 +51,12 @@ public interface EventFirebase extends Firebase{
                  String ePhoto = (String) doc.getData().get(PHOTO);
                  String eLocation = (String) doc.getData().get(LOCATION);
                  hEventsFirebase.add(new HabitEvent(eHabitId, eComment, ePhoto, eLocation, eHabitTitle));
+
+                 HabitEvent hEvent = new HabitEvent(eHabitId, eComment, ePhoto, eLocation, eHabitTitle);
+                 hEvent.setEventID(doc.getId());
+                 Log.d(TAG, "EVENT ID IS" + hEvent.getEventID());
+                 hEventsFirebase.add(hEvent);
+
             }
         }
     }
@@ -109,18 +117,36 @@ public interface EventFirebase extends Firebase{
         spinner.setAdapter(habitAdapter);
     }
 
-
     /**
      * push the HabitEvent document data to the HabitEvent collection
      * @param database firestore cloud
-     * @param newHabitEvent HabitEvent to be added
+     * @param event HabitEvent to be added
      */
-    default void pushHabitEventData(FirebaseFirestore database, HabitEvent newHabitEvent){
-        String habitID = newHabitEvent.getHabitId();
-        String comment = newHabitEvent.getComment();
-        String photo = newHabitEvent.getPhoto();
-        String location = newHabitEvent.getLocation();
-        String habitTitle = newHabitEvent.getHabitTitle();
+    default void pushHabitEventData(FirebaseFirestore database, HabitEvent event){
+        getEventData(event); //Puts the data from event into eventData
+        pushToDB(database, HABIT_EVENT_KEY, "", eventData);
+    }
+
+    /**
+     * push the Habit document data to the Habit class
+     * @param database firebase cloud
+     * @param event Habit to be added
+     */
+    default void pushEditEvent(FirebaseFirestore database, HabitEvent event) {
+        getEventData(event); //Puts the data from event into eventData
+        pushToDB(database, HABIT_EVENT_KEY, event.getEventID(), eventData);
+    }
+
+    /**
+     * Helper function to put the proper data from HabitEvent into eventData
+     * @param event event whose data to input
+     */
+    default void getEventData(HabitEvent event) {
+        String habitID = event.getHabitId();
+        String comment = event.getComment();
+        String photo = event.getPhoto();
+        String location = event.getLocation();
+        String habitTitle = event.getHabitTitle();
         //get unique timestamp for ordering our list
         Date currentTime = Calendar.getInstance().getTime();
         eventData.put(USER_ID, FirebaseAuth.getInstance().getUid());
@@ -131,8 +157,33 @@ public interface EventFirebase extends Firebase{
         eventData.put(HABIT_TITLE, habitTitle);
         //this field is used to add the current timestamp of the item, to be used to order the items
         eventData.put(ORDER, currentTime);
+    }
 
-        pushToDB(database, HABIT_EVENT_KEY, "", eventData);
+    default void deleteDataMyEvent(FirebaseFirestore db, HabitEvent oldEntry) {
+        //ALSO REMOVE THE ASSOCIATED HABIT EVENTS
+        db.collection(HABIT_EVENT_KEY).document(oldEntry.getEventID()).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+
+                    deleteHabit(db, oldEntry);
+                }
+            }
+        });
+
+    }
+
+    /**
+     * delete the habit event oldEntry from firestore
+     * @param db firebase cloud
+     * @param oldEntry habit to delete
+     */
+    default void deleteHabit(FirebaseFirestore db, HabitEvent oldEntry){
+        //remove from database
+        db.collection(HABIT_EVENT_KEY).document(oldEntry.getEventID())
+                .delete()
+                .addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully deleted!"))
+                .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
     }
 
 }

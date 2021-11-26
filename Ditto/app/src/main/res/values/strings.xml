@@ -19,11 +19,11 @@
     <string name="age">Age</string>
     <string name="register">Register</string>
     <string name="account_already">Already Have an Account</string>
-    <string name="habit_title">Habit Title</string>
+    <string name="habit_title">Habit Name</string>
     <string name="comment">Comment</string>
     <string name="tracking">How well am I tracking?</string>
     <string name="days">Days</string>
-    <string name="reason">Reason</string>
+    <string name="reason">Habit Reason</string>
     <string name="add_photo">ADD PHOTO</string>
     <string name="add_location">ADD LOCATION</string>
     <string name="m">M</string>

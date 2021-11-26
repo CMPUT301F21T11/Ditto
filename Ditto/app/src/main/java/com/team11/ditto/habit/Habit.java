@@ -35,6 +35,16 @@ public class Habit implements Serializable {
     private ArrayList<String> dates;
     private boolean isPublic;
     private int streak;
+    private int position;
+    private boolean habitDoneToday;
+
+    public boolean isHabitDoneToday() {
+        return habitDoneToday;
+    }
+
+    public void setHabitDoneToday(boolean habitDoneToday) {
+        this.habitDoneToday = habitDoneToday;
+    }
 
     /**
      * Constructor for Habit object
@@ -152,6 +162,14 @@ public class Habit implements Serializable {
      * @return isPublic boolean
      */
     public boolean isPublic(){ return this.isPublic; }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
 
     /**
      * Setter for whether Habit is public or not

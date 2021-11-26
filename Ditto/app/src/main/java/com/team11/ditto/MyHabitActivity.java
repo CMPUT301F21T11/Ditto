@@ -27,6 +27,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -51,6 +52,7 @@ import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 
 /**To display the listview of Habits for a user in the "My Habits" tab
@@ -71,6 +73,7 @@ public class MyHabitActivity extends AppCompatActivity implements
 
     public static String SELECTED_HABIT = "HABIT";
     private TabLayout tabLayout;
+
 
     //Declare variables for the list of habits
     private RecyclerView habitListView;
@@ -110,29 +113,29 @@ public class MyHabitActivity extends AppCompatActivity implements
         // Load habits
         currentUser = new ActiveUser();
         db.collection(HABIT_KEY)
-            .whereEqualTo(USER_ID, currentUser.getUID())
-            .addSnapshotListener((value, error) -> {
-                habitDataList.clear();
-                if (value != null) {
-                    for (QueryDocumentSnapshot document: value) {
-                        String id = document.getId();
-                        String title = (String) document.getData().get(TITLE);
-                        String reason = (String) document.getData().get(REASON);
-                        ArrayList<String> days = new ArrayList<>();
-                        handleDays(days, document.getData());
-                        boolean isPublic;
-                        if (document.getData().get(IS_PUBLIC) == null){
-                            isPublic = true;
+                .whereEqualTo("uid", currentUser.getUID())
+                .addSnapshotListener((value, error) -> {
+                    habitDataList.clear();
+                    if (value != null) {
+                        for (QueryDocumentSnapshot document: value) {
+                            String id = document.getId();
+                            String title = (String) document.getData().get("title");
+                            String reason = (String) document.getData().get("reason");
+                            ArrayList<String> days = new ArrayList<>();
+                            handleDays(days, document.getData());
+                            boolean isPublic;
+                            if (document.getData().get("is_public") == null){
+                                isPublic = true;
+                            }
+                            else{
+                                isPublic = (boolean) document.getData().get("is_public");
+                            }
+                            Habit habit = new Habit(id, title, reason, days, isPublic);
+                            habitDataList.add(habit);
                         }
-                        else{
-                            isPublic = (boolean) document.getData().get(IS_PUBLIC);
-                        }
-                        Habit habit = new Habit(id, title, reason, days, isPublic);
-                        habitDataList.add(habit);
                     }
-                }
-                habitRecyclerAdapter.notifyDataSetChanged();
-            });
+                    habitRecyclerAdapter.notifyDataSetChanged();
+                });
 
         currentTab(tabLayout, MY_HABITS_TAB);
         switchTabs(this, tabLayout, MY_HABITS_TAB);
@@ -167,6 +170,9 @@ public class MyHabitActivity extends AppCompatActivity implements
         //when the user clicks the add button, we want to add to the db and display the new entry
         if (newHabit.getTitle().length() > 0) {
             pushHabitData(db, newHabit);
+            habitDataList.add(newHabit);
+
+            habitRecyclerAdapter.notifyDataSetChanged();
         }
     }
 
@@ -179,7 +185,8 @@ public class MyHabitActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
-    ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+    ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN
+            | ItemTouchHelper.START | ItemTouchHelper.END, ItemTouchHelper.LEFT) {
         /**
          * To delete an item from the listview and database when a Habit is swiped to the left
          * @param recyclerView .
@@ -189,6 +196,59 @@ public class MyHabitActivity extends AppCompatActivity implements
          */
         @Override
         public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+
+            //get position of long clicked item
+            int fromPos = viewHolder.getAbsoluteAdapterPosition();
+            //get position of target position
+            int toPos = target.getAbsoluteAdapterPosition();
+            ArrayList<Habit> updateHabits = new ArrayList<>();
+            ArrayList<Habit> decrementHabits = new ArrayList<>();
+
+            Collections.swap(habitDataList, fromPos, toPos);
+            recyclerView.getAdapter().notifyItemMoved(fromPos, toPos);
+
+            //reorder inside firebase by switching the order field
+            Habit movedObject = habitDataList.get(toPos);
+            Habit to = habitDataList.get(toPos);
+
+            int total = habitRecyclerAdapter.getItemCount();
+
+
+            int start = toPos+1;
+            if (total==start) {
+                //empty arraylist
+            }
+            else {
+                //iterate through the habits and add them to the arraylist
+                for (int i=start; i<total; i++) {
+                    updateHabits.add(habitDataList.get(i));
+                }
+            }
+
+            int t = toPos;
+            //get an arraylist of habits after the moved object
+            int s = fromPos;
+            if (t==s) {
+                //empty arraylist
+            }
+            else {
+                //iterate through the habits and add them to the arraylist
+                for (int i=s; i<t; i++) {
+                    decrementHabits.add(habitDataList.get(i));
+                }
+            }
+
+
+
+
+            Log.d(TAG, "FROM POS " + fromPos+" TITLE "+to.getTitle());
+            Log.d(TAG, "TO POS " + toPos);
+            Log.d(TAG, "ARRAY TO UPDATE " + updateHabits);
+
+            reOrderPosition(db, movedObject, fromPos, toPos, updateHabits, decrementHabits);
+
+
+
             return false;
         }
 

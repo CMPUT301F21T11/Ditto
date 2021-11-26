@@ -41,6 +41,8 @@ import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+
 
 /**
  * Role: Class for Habit Event Activity, be able to see you feed and add a habit event
@@ -64,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 
     /**
      * Create the Activity instance for the "Homepage" screen, control flow of actions
-     * @param savedInstanceState
+     * @param savedInstanceState saved state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,12 +98,14 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                     habitEventsData.clear();
                     for (QueryDocumentSnapshot doc: value) {
                         // Parse the event data for each document
+                        String eventID = (String) doc.getId();
                         String eHabitId = (String) doc.getData().get("habitID");
                         String eHabitTitle = (String) doc.getData().get("habitTitle");
                         String eComment = (String) doc.getData().get("comment");
                         String ePhoto = (String) doc.getData().get("photo");
                         String eLocation = (String) doc.getData().get("location");
-                        habitEventsData.add(new HabitEvent(eHabitId, eComment, ePhoto, eLocation, eHabitTitle));  // Add the event to the event list
+                        String uid = (String) doc.getData().get("uid");
+                        habitEventsData.add(new HabitEvent(eventID, eHabitId, eComment, ePhoto, eLocation, eHabitTitle, uid));  // Add the event to the event list
                     }
                     habitEventRecyclerAdapter.notifyDataSetChanged();  // Refresh the recycler
                 });
@@ -112,8 +116,8 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 
         currentTab(tabLayout, HOME_TAB);
         switchTabs(this, tabLayout, HOME_TAB);
-
         db = FirebaseFirestore.getInstance();
+
         //Get a top level reference to the collection
 
         //Notifies if cloud data changes (from Firebase Interface)
@@ -130,11 +134,22 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     /**
      * Adds a habitevent to firestore "HabitEvent" and adds the habitevent ID to the list of habitEvents for the habit in "Habit"
      * Adds the habitevent to the listview
-     * @param newHabitEvent
+     * @param newHabitEvent habit event to add
      */
     @Override
     public void onOkPressed(HabitEvent newHabitEvent) {
+        //Adds the item to the database and then immediately retrieves it from the list
+
+        //if today is the same day as one of the dates they picked,
+        //AND in this selected day if there are no other habit events with the same habit
+        //THEN set habitDoneToday to true
+
+        isHabitDoneToday(db, todayIs(), newHabitEvent);
         pushHabitEventData(db, newHabitEvent);
+        habitEventRecyclerAdapter.notifyDataSetChanged();
+
+
+
     }
 
     /**
@@ -153,6 +168,36 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     public void onPause(){
         overridePendingTransition(0,0);
         super.onPause();
+    }
+
+    private int todayIs() {
+        Calendar calendar = Calendar.getInstance();
+        int day = calendar.get(Calendar.DAY_OF_WEEK);
+
+        switch (day) {
+            case Calendar.SUNDAY:
+                day = 1;
+                break;
+            case Calendar.MONDAY:
+                day = 2;
+                break;
+            case Calendar.TUESDAY:
+                day = 3;
+                break;
+            case Calendar.WEDNESDAY:
+                day = 4;
+                break;
+            case Calendar.THURSDAY:
+                day = 5;
+                break;
+            case Calendar.FRIDAY:
+                day = 6;
+                break;
+            case Calendar.SATURDAY:
+                day = 7;
+                break;
+        }
+        return day;
     }
 
 }

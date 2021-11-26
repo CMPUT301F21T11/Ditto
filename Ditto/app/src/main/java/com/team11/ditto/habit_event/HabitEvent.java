@@ -27,11 +27,13 @@ import java.io.Serializable;
  */
 
 public class HabitEvent implements Serializable {
+    private String eventID;
     private String habitId;
     private final String habitTitle;
     private String comment;
     private String photo;
     private String location;
+    private String uid;
 
     /**
      * Constructor
@@ -41,12 +43,43 @@ public class HabitEvent implements Serializable {
      * @param location optional location (may be empty string)
      * @param habitTitle Title of the Habit whose HabitEvent this is
      */
+
+    public HabitEvent(String eventID, String habitId, String comment, String photo, String location, String habitTitle, String uid) {
+        this.eventID = eventID;
+        this.habitId = habitId;
+        this.comment = comment;
+        this.photo = photo;
+        this.location = location;
+        this.habitTitle = habitTitle;
+        this.uid = uid;
+    }
+
     public HabitEvent(String habitId, String comment, String photo, String location, String habitTitle) {
         this.habitId = habitId;
         this.comment = comment;
         this.photo = photo;
         this.location = location;
         this.habitTitle = habitTitle;
+    }
+
+    public String getUid(){
+        return uid;
+    }
+
+    /**
+     * Getter for the Event's ID
+     * @return  Event's ID
+     */
+    public String getEventID() {
+        return eventID;
+    }
+
+    /**
+     * Setter for the Event's ID
+     * @param eventID the ID
+     */
+    public void setEventID(String eventID) {
+        this.eventID = eventID;
     }
 
     /**
