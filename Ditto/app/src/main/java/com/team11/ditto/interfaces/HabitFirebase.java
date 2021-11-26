@@ -186,6 +186,8 @@ public interface HabitFirebase extends EventFirebase, Days{
                             int count = 0;
                             for (DocumentSnapshot document : task.getResult()) {
                                 count++;
+                                habit.setHabitID(document.getId());
+
                             }
                             habit.setPosition(count);
                             habitData.put("position", count);
