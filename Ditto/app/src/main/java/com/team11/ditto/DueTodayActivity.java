@@ -80,7 +80,6 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
 
         habits = new ArrayList<>();
         dueTodayAdapter = new CustomListDue(DueTodayActivity.this, habits);
-        Log.d("BRUH1", habits.toString());
 
         list.setAdapter(dueTodayAdapter);
 
@@ -89,7 +88,6 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
         db.collection("Habit")
                 .whereEqualTo("uid", currentUser.getUID())
                 .addSnapshotListener((value, error) -> {
-                    Log.d("BRUH2", habits.toString());
 
                     habits.clear();
                     if (value != null) {
@@ -109,11 +107,9 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
 
                             }// Add to the habit list
                         }
-                        Log.d("BRUH3", habits.toString());
                         checkDecrement(this, habits);
 
                     }
-                    Log.d("BRUH4", habits.toString());
 
                     dueTodayAdapter.notifyDataSetChanged();  // Refresh the adapter
                 });

@@ -15,14 +15,23 @@
 package com.team11.ditto.habit;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.team11.ditto.R;
 
 import java.util.ArrayList;
@@ -37,6 +46,8 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
     private final ArrayList<Habit> courseDataArrayList;
     private final Context context;
     private final HabitClickListener habitClickListener;
+    FirebaseFirestore database;
+
 
     /**
      * Constructor
@@ -73,7 +84,67 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
         Habit habit = courseDataArrayList.get(position);
         holder.habitTitle.setText(habit.getTitle());
         holder.habitReason.setText(habit.getReason());
+
+        //set the streak icon
+        //get the streak value from database
+        database = FirebaseFirestore.getInstance();
+        DocumentReference docRef = database.collection("Habit").document(habit.getHabitID());
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot documentSnapshot = task.getResult();
+                    if (documentSnapshot.exists()) {
+                        //retrieve the habitDoneToday value
+                        Boolean habitDoneToday = documentSnapshot.getBoolean("habitDoneToday");
+                        int streaks = Integer.valueOf(documentSnapshot.getString("streaks"));
+
+                        //if streaks is less than -3 -> sad face
+                        //if streaks between -3 and 5 -> neutral
+                        //if streaks greater than 5 -> happy face
+                        setIcon(streaks, holder);
+
+
+
+
+
+                    } else {
+                        Log.d("YK", "document does not exist!!");
+                    }
+
+                } else {
+                    Log.d("YK", task.getException().toString());
+                }
+
+
+            }
+        });
+
     }
+
+    private void setIcon(int streaks, RecyclerViewHolder holder) {
+        int lB = -3;
+        int uB = 5;
+        if (streaks < lB) {
+            holder.icon.setImageResource(R.drawable.sad);
+            holder.icon.setColorFilter(Color.GREEN);
+
+        }
+        else if (streaks >= lB && streaks <= uB) {
+            holder.icon.setImageResource(R.drawable.neutral);
+            holder.icon.setColorFilter(Color.rgb(255,191,0));
+
+        }
+        else if (streaks > uB) {
+            holder.icon.setImageResource(R.drawable.happiness);
+            holder.icon.setColorFilter(Color.rgb(50,205,50));
+
+
+        }
+
+
+    }
+
 
     /**
      * Returns the size of the recyclerview
@@ -95,6 +166,7 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
         // creating a variable for our text view.
         private TextView habitTitle;
         private TextView habitReason;
+        private ImageView icon;
         HabitClickListener habitClickListener;
 
         /**
@@ -107,6 +179,7 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
             // initializing our text views.
             habitTitle = itemView.findViewById(R.id.firstLine);
             habitReason = itemView.findViewById(R.id.secondLine);
+            icon = itemView.findViewById(R.id.tracking_icon);
             this.habitClickListener = habitClickListener;
 
             itemView.setOnClickListener(this);
