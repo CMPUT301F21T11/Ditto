@@ -100,6 +100,7 @@ public class SignInActivity extends AppCompatActivity {
                                 startActivity(intent);
                             } else {
                                 Log.d(TAG, "loginUserWithEmail:failure");
+                                Toast.makeText(getApplicationContext(),"Wrong username/password.",Toast.LENGTH_LONG).show();
                             }
                         }
                     });
