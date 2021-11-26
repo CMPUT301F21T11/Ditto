@@ -19,23 +19,24 @@ Role: Class for Habit Event Activity, be able to see you feed and add a habit ev
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
@@ -47,20 +48,19 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.team11.ditto.habit.Habit;
+import com.team11.ditto.habit.Decrement;
 import com.team11.ditto.habit_event.AddHabitEventFragment;
 import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.habit_event.HabitEventRecyclerAdapter;
 import com.team11.ditto.habit_event.ViewEventActivity;
-import com.team11.ditto.interfaces.Firebase;
 import com.team11.ditto.interfaces.FollowFirebase;
 import com.team11.ditto.interfaces.HabitFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 
 /**
@@ -142,7 +142,33 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 
 
         fadeInView();
+        checkDecrement();
 
+    }
+
+
+    private void checkDecrement() {
+        AlarmManager mAlarmManger = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+
+        BroadcastReceiver daylyBR = new BroadcastReceiver() {
+            @Override public void onReceive( Context context, Intent _ )
+            {
+                //Do something
+                Log.d(TAG, "daylyTask uitgevoerd.");
+            }
+        };
+
+        getApplicationContext().registerReceiver( daylyBR, new IntentFilter("yourApp.blah") );
+
+
+        PendingIntent daylyPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(this, Decrement.class), 0);
+
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.set(GregorianCalendar.HOUR_OF_DAY, 0);
+        cal.set(GregorianCalendar.MINUTE, 1);
+
+        // set alarm to fire 5 sec (1000*5) from cal repeating every 86400000L ms (1 day)
+        mAlarmManger.setRepeating( AlarmManager. RTC_WAKEUP, cal.getTimeInMillis() + 5000L,  86400000L,  daylyPendingIntent );
     }
 
     private void fadeInView(){
@@ -297,6 +323,8 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         }
         return day;
     }
+
+
 
 
 }

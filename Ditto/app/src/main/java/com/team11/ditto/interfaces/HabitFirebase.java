@@ -163,7 +163,8 @@ public interface HabitFirebase extends EventFirebase, Days{
             habitData.put(WEEKDAYS[i], habit.getDates().contains(WEEKDAYS[i]));
         }
         habitData.put("is_public", habit.isPublic());
-        habitData.put("habitDoneToday", false);
+        habitData.put("habitDoneToday", false); //habitDoneToday initially false
+        habitData.put("streaks", "0"); //streaks initially 0
 
         //this field is used to add the current timestamp of the item, to be used to order the items
         //habitData.put("order", currentTime);
@@ -341,7 +342,7 @@ public interface HabitFirebase extends EventFirebase, Days{
     default void isHabitDoneToday(FirebaseFirestore db, int today, HabitEvent newHabitEvent) {
         //get days ...
         final Integer[] daysOfWeek = new Integer[7];
-        DocumentReference document = db.collection(HABIT_KEY).document(newHabitEvent.getHabitId());
+        DocumentReference document = db.collection(HABIT_KEY).document(newHabitEvent.getHabitId()); //get the associated habit
         document.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -359,6 +360,8 @@ public interface HabitFirebase extends EventFirebase, Days{
                         }
                         //if today is in the set of days chosen, update habitDoneToday to true
                         setHabitDoneToday(document, daysOfWeek, today);
+                        int streaks = Integer.valueOf(documentSnapshot.getString("streaks"));
+                        setStreaks(document, streaks);
                     }
                     else {
                         Log.d(TAG, "document does not exist!!");
@@ -398,6 +401,25 @@ public interface HabitFirebase extends EventFirebase, Days{
             }
         }
 
+    }
+
+    default void setStreaks(DocumentReference document, int streaks) {
+        //increment the streaks value
+        String newStreaks = String.valueOf(streaks +1);
+        document.update("streaks", newStreaks)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        Log.w(TAG, "Streaks have been successfully updated");
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error updating document", e);
+                    }
+                });
     }
 
     /**
