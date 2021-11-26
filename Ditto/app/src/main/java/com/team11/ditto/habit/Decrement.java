@@ -3,22 +3,12 @@ package com.team11.ditto.habit;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.team11.ditto.DueTodayActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.team11.ditto.interfaces.Days;
 import com.team11.ditto.login.ActiveUser;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 
 
@@ -30,16 +20,16 @@ public class Decrement extends BroadcastReceiver implements Days {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Bundle args = intent.getBundleExtra("HABITS_DUE");
+        //Bundle args = intent.getBundleExtra("HABITS_DUE");
         //ArrayList<Habit> habits = (ArrayList<Habit>) args.getSerializable("ARRAYLIST");
-        ArrayList<Habit> habits = (ArrayList<Habit>) intent.getSerializableExtra("HABITS_DUE");
+        ArrayList<String> habitIDs = intent.getStringArrayListExtra("HABITS_DUE");
+        Log.d("BRUH15", Integer.toString(habitIDs.size()));
 
         //get habits due today
         //if habitDoneToday is true -> increment streak
         //if habitDone is false -> decrement streak
         //database = FirebaseFirestore.getInstance();
         Log.d("HELLO", "DOES THIS WORK");
-        Log.d("HELLO", String.valueOf(habits));
 
 /*
         // Load habits

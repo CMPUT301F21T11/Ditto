@@ -14,6 +14,9 @@
  */
 package com.team11.ditto.habit;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -41,8 +44,6 @@ public class Habit implements Serializable {
     private int streak;
     private int position;
     private boolean habitDoneToday;
-
-
 
     /**
      * Constructor for Habit object

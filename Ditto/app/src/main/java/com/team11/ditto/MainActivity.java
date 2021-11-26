@@ -144,34 +144,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                 .show(getSupportFragmentManager(), "ADD_HABIT_EVENT"));
 
         fadeInView();
-        checkDecrement();
 
-    }
-
-
-    private void checkDecrement() {
-        AlarmManager mAlarmManger = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-
-        BroadcastReceiver daylyBR = new BroadcastReceiver() {
-            @Override public void onReceive( Context context, Intent _ )
-            {
-                //get habits due today
-                //if habitDoneToday is true -> increment streak
-                //if habitDone is false -> decrement streak
-            }
-        };
-
-        getApplicationContext().registerReceiver( daylyBR, new IntentFilter("yourApp.blah") );
-
-
-        PendingIntent daylyPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent(this, Decrement.class), 0);
-
-        GregorianCalendar cal = new GregorianCalendar();
-        cal.set(GregorianCalendar.HOUR_OF_DAY, 0);
-        cal.set(GregorianCalendar.MINUTE, 1);
-
-        // set alarm to fire 5 sec (1000*5) from cal repeating every 86400000L ms (1 day)
-        mAlarmManger.setRepeating( AlarmManager. RTC_WAKEUP, cal.getTimeInMillis() + 5000L,  86400000L,  daylyPendingIntent );
     }
 
     private void fadeInView(){

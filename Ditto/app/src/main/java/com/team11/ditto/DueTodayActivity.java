@@ -175,18 +175,19 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
 
     public static void checkDecrement(Context context, ArrayList<Habit> habits) {
         Intent _intent = new Intent(context, Decrement.class);
-        _intent.putExtra("HABITS_DUE", habits);
-        /*
-        Bundle args = new Bundle();
-        args.putSerializable("ARRAYLIST", (Serializable) habits);
-        _intent.putExtra("HABITS_DUE", args);
-         */
-        Log.d("BRUH5", habits.toString());
+
+        ArrayList<String> habitIDs = new ArrayList<>();
+
+        Log.d("BRUH15", habits.get(0).getTitle());
+
+        for(int i = 0; i < habits.size(); i++){
+            habitIDs.add(habits.get(i).getHabitID());
+        }
+
+        _intent.putStringArrayListExtra("HABITS_DUE", habitIDs);
 
 
-
-
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, PendingIntent.FLAG_IMMUTABLE);
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(pendingIntent);
         Calendar calendar = Calendar.getInstance();
