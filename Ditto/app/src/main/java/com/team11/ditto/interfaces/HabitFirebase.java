@@ -191,7 +191,7 @@ public interface HabitFirebase extends EventFirebase, Days{
                     }
                 });
 
-        pushToDB(database, HABIT_KEY, habitID, habitData);
+        //pushToDB(database, HABIT_KEY, habitID, habitData);
 
     }
 
@@ -283,8 +283,7 @@ public interface HabitFirebase extends EventFirebase, Days{
             DocumentReference docRef = database.collection(HABIT_KEY).document(habitsDecrement.get(i).getHabitID());
 
             //set position of from habit to toPos
-            docRef
-                    .update("position", c)
+            docRef.update("position", c)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {

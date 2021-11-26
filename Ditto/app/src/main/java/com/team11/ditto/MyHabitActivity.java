@@ -244,9 +244,6 @@ public class MyHabitActivity extends AppCompatActivity implements
                 }
             }
 
-
-
-
             Log.d(TAG, "FROM POS " + fromPos+" TITLE "+to.getTitle());
             Log.d(TAG, "TO POS " + toPos);
             Log.d(TAG, "ARRAY TO UPDATE " + updateHabits);
