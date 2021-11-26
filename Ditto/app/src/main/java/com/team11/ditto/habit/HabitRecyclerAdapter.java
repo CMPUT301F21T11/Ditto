@@ -32,6 +32,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.team11.ditto.R;
 
 import java.util.ArrayList;
@@ -104,10 +105,6 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
                         //if streaks greater than 5 -> happy face
                         setIcon(streaks, holder);
 
-
-
-
-
                     } else {
                         Log.d("YK", "document does not exist!!");
                     }
@@ -115,7 +112,6 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
                 } else {
                     Log.d("YK", task.getException().toString());
                 }
-
 
             }
         });

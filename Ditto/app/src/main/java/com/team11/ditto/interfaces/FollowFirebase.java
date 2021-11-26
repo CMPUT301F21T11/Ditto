@@ -28,6 +28,7 @@ public interface FollowFirebase extends Firebase{
     String FOLLOWING_KEY = "Following";
 
     String USERNAME = "username";
+    String NAME = "name";
     String EMAIL = "email";
     String PASSWORD = "password";
 
@@ -93,7 +94,7 @@ public interface FollowFirebase extends Firebase{
             List<String> re = new ArrayList<>();
 
             if (value != null && value.exists()) {
-                List<String> listReceived = (List<String>) value.get(RECEIVED);
+                List<String> listReceived = (List<String>) value.get("follow_requests");
                 for (int i = 0; i < listReceived.size(); i++) {
                     if (!re.contains(listReceived.get(i))) {
                         re.add(listReceived.get(i));
@@ -123,11 +124,9 @@ public interface FollowFirebase extends Firebase{
                         .addOnCompleteListener(task2 -> {
                             if (task2.isSuccessful()) {
                                 for (int k = 0; k < 1; k++) {
-                                    if ((Objects.requireNonNull(task2.getResult())
-                                            .getDocuments().get(k).getString(EMAIL))
-                                            .equals(receivedEmail)) {
+                                    if ((Objects.requireNonNull(task2.getResult()).getDocuments().get(k).getString(EMAIL)).equals(receivedEmail)) {
                                         String name = task2.getResult()
-                                                .getDocuments().get(k).getString(USERNAME);
+                                                .getDocuments().get(k).getString(NAME);
                                         userDataList.add(new User(name, receivedEmail));
 
                                     }
@@ -176,7 +175,7 @@ public interface FollowFirebase extends Firebase{
                                             .getDocuments().get(k).getString(EMAIL))
                                             .equals(sentEmail)){
                                         String name = task2.getResult()
-                                                .getDocuments().get(k).getString(USERNAME);
+                                                .getDocuments().get(k).getString(NAME);
                                         userDataList.add(new User(name, sentEmail));
                                         Log.d("Sent request", sentEmail);
                                         userAdapter.notifyDataSetChanged();
