@@ -153,8 +153,9 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         BroadcastReceiver daylyBR = new BroadcastReceiver() {
             @Override public void onReceive( Context context, Intent _ )
             {
-                //Do something
-                Log.d(TAG, "daylyTask uitgevoerd.");
+                //get habits due today
+                //if habitDoneToday is true -> increment streak
+                //if habitDone is false -> decrement streak
             }
         };
 

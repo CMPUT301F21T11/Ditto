@@ -14,9 +14,15 @@
  */
 package com.team11.ditto;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -27,15 +33,19 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.team11.ditto.habit.CustomListDue;
+import com.team11.ditto.habit.Decrement;
 import com.team11.ditto.habit.Habit;
 import com.team11.ditto.interfaces.Days;
 import com.team11.ditto.interfaces.Firebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 
+import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  * Activity to display a list of the ActiveUser's Habits that are scheduled to be done today
@@ -46,7 +56,7 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
     private TabLayout tabLayout;
     private ListView list;
     private ArrayAdapter<Habit> dueTodayAdapter ;
-    private ArrayList<Habit> habits;
+    private ArrayList<Habit> habits; //list of habits due today
     private ActiveUser currentUser;
 
     /**
@@ -69,6 +79,8 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
 
         habits = new ArrayList<>();
         dueTodayAdapter = new CustomListDue(DueTodayActivity.this, habits);
+        Log.d("BRUH1", habits.toString());
+
         list.setAdapter(dueTodayAdapter);
 
         // Load habits
@@ -76,6 +88,8 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
         db.collection("Habit")
                 .whereEqualTo("uid", currentUser.getUID())
                 .addSnapshotListener((value, error) -> {
+                    Log.d("BRUH2", habits.toString());
+
                     habits.clear();
                     if (value != null) {
                         for (QueryDocumentSnapshot document: value) {
@@ -91,12 +105,20 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
                                 habits.add(habit);
                             }// Add to the habit list
                         }
+                        Log.d("BRUH3", habits.toString());
+                        checkDecrement(this, habits);
+
                     }
+                    Log.d("BRUH4", habits.toString());
+
                     dueTodayAdapter.notifyDataSetChanged();  // Refresh the adapter
                 });
 
         currentTab(tabLayout, DUE_TODAY_TAB);
         switchTabs(this, tabLayout, DUE_TODAY_TAB);
+        String dayItIs = toTitleCase(LocalDate.now().getDayOfWeek().toString());
+
+
     }
 
     /**
@@ -142,6 +164,31 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
             return s;
         }
         return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
+    }
+
+
+    public static void checkDecrement(Context context, ArrayList<Habit> habits) {
+        Intent _intent = new Intent(context, Decrement.class);
+        _intent.putExtra("HABITS_DUE", habits);
+        /*
+        Bundle args = new Bundle();
+        args.putSerializable("ARRAYLIST", (Serializable) habits);
+        _intent.putExtra("HABITS_DUE", args);
+         */
+        Log.d("BRUH5", habits.toString());
+
+
+
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, 0);
+        AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(pendingIntent);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 22);
+        calendar.set(Calendar.MINUTE, 26);
+        calendar.set(Calendar.SECOND, 0);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
     }
 
 }
