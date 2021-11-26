@@ -164,9 +164,7 @@ public interface HabitFirebase extends EventFirebase, Days{
         }
         habitData.put(IS_PUBLIC, habit.isPublic());
         habitData.put("habitDoneToday", false);
-        habitData.put("is_public", habit.isPublic());
-        habitData.put("habitDoneToday", false); //habitDoneToday initially false
-        habitData.put("streaks", "0"); //streaks initially 0
+        habitData.put("streaks", Integer.toString(habit.getStreak()));
 
         //this field is used to add the current timestamp of the item, to be used to order the items
         //habitData.put("order", currentTime);

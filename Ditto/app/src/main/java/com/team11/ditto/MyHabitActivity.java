@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 /**To display the listview of Habits for a user in the "My Habits" tab
  *Allow a user to add a habit, swipe left to delete a habit
@@ -151,7 +152,8 @@ public class MyHabitActivity extends AppCompatActivity implements
                             String id = document.getId();
                             String title = (String) document.getData().get(TITLE);
                             String reason = (String) document.getData().get(REASON);
-                            int streaks = Integer.parseInt( (String) document.getData().get("streaks"));
+                            String streaks =  (String) Objects.requireNonNull(document.getData().get("streaks"));
+                            int s = Integer.parseInt(streaks);
                             ArrayList<String> days = new ArrayList<>();
                             handleDays(days, document.getData());
                             boolean isPublic;
@@ -160,7 +162,7 @@ public class MyHabitActivity extends AppCompatActivity implements
                             } else {
                                 isPublic = (boolean) document.getData().get("is_public");
                             }
-                            Habit habit = new Habit(id, title, reason, days, isPublic, streaks);
+                            Habit habit = new Habit(id, title, reason, days, isPublic, s);
                             habitDataList.add(habit);
                         }
 

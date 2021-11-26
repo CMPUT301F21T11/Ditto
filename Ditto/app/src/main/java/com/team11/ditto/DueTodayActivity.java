@@ -188,8 +188,7 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
 
         _intent.putStringArrayListExtra("HABITS_DUE", habitIDs);
 
-
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, PendingIntent.FLAG_IMMUTABLE);
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
