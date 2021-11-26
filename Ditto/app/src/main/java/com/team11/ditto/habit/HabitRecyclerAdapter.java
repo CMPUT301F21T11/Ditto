@@ -86,35 +86,7 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
         holder.habitTitle.setText(habit.getTitle());
         holder.habitReason.setText(habit.getReason());
 
-        //set the streak icon
-        //get the streak value from database
-        database = FirebaseFirestore.getInstance();
-        Log.d("HELLO", habit.getHabitID());
-        DocumentReference docRef = database.collection("Habit").document(habit.getHabitID());
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot documentSnapshot = task.getResult();
-                    if (documentSnapshot.exists()) {
-                        //retrieve the habitDoneToday value
-                        int streaks = Integer.valueOf(documentSnapshot.getString("streaks"));
-
-                        //if streaks is less than -3 -> sad face
-                        //if streaks between -3 and 5 -> neutral
-                        //if streaks greater than 5 -> happy face
-                        setIcon(streaks, holder);
-
-                    } else {
-                        Log.d("YK", "document does not exist!!");
-                    }
-
-                } else {
-                    Log.d("YK", task.getException().toString());
-                }
-
-            }
-        });
+        setIcon(habit.getStreak(), holder);
 
     }
 
@@ -128,16 +100,14 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
 
 
         }
-        else if (streaks >= lB && streaks <= uB) {
+        else if (streaks >= lB && streaks < uB) {
             holder.icon.setImageResource(R.drawable.neutral);
             holder.icon.setColorFilter(Color.rgb(255,191,0));
 
         }
-        else if (streaks > uB) {
+        else if (streaks >= uB) {
             holder.icon.setImageResource(R.drawable.happiness);
             holder.icon.setColorFilter(Color.rgb(50,205,50));
-
-
 
         }
 

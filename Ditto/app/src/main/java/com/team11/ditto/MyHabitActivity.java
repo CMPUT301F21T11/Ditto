@@ -151,6 +151,7 @@ public class MyHabitActivity extends AppCompatActivity implements
                             String id = document.getId();
                             String title = (String) document.getData().get(TITLE);
                             String reason = (String) document.getData().get(REASON);
+                            int streaks = Integer.parseInt( (String) document.getData().get("streaks"));
                             ArrayList<String> days = new ArrayList<>();
                             handleDays(days, document.getData());
                             boolean isPublic;
@@ -159,7 +160,7 @@ public class MyHabitActivity extends AppCompatActivity implements
                             } else {
                                 isPublic = (boolean) document.getData().get("is_public");
                             }
-                            Habit habit = new Habit(id, title, reason, days, isPublic);
+                            Habit habit = new Habit(id, title, reason, days, isPublic, streaks);
                             habitDataList.add(habit);
                         }
 

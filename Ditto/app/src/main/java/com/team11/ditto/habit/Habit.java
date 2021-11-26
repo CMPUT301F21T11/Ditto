@@ -56,7 +56,7 @@ public class Habit implements Serializable {
         this.reason = reason;
         this.setDate(dates);
         this.isPublic = isPublic;
-        this.streak = 0;
+        this.streak = 0; //Basic habit, not in db yet means it is BRAND NEW
         this.habitID = "";
     }
 
@@ -67,13 +67,13 @@ public class Habit implements Serializable {
      * @param reason Reason for habit
      * @param dates Days of the week for scheduling
      */
-    public Habit(String id, String title, String reason, ArrayList<String> dates, boolean isPublic) {
+    public Habit(String id, String title, String reason, ArrayList<String> dates, boolean isPublic, int streak) {
         this.habitID = id;
         this.title = title;
         this.reason = reason;
         this.setDate(dates);
         this.isPublic = isPublic;
-        this.streak = 0;
+        this.streak = streak;
     }
 
     /**
@@ -86,6 +86,15 @@ public class Habit implements Serializable {
         this.title = title;
         this.reason = reason;
     }
+
+    public int getStreak(){
+        return this.streak;
+    }
+
+    public void setStreak(int streak){
+      this.streak = streak;
+    }
+
 
     /**
      * Getter for Habit title
