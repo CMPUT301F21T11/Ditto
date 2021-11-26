@@ -69,7 +69,7 @@ public class ViewHabitActivity extends AppCompatActivity
         dates = selectedHabit.getDates();
 
         //Displaying dates in TextView
-        habitDays.setText(listDays());
+        habitDays.setText(listDays(selectedHabit));
         habitTitle = findViewById(R.id.habit_tracking);
     }
 
@@ -124,15 +124,18 @@ public class ViewHabitActivity extends AppCompatActivity
 
         //Updating old text with new habit stuff
         habitReason.setText(habit.getReason());
-        habitDays.setText(listDays());
+        dates.clear();
+        dates = habit.getDates();
+        habitDays.setText(listDays(habit));
     }
 
-    private String listDays(){
+    private String listDays(Habit habit){
         String listDays = "";
-        if(dates != null){
-            if(dates.size() > 0){
-                for(int i = 0; i < dates.size(); i++){
-                    listDays += dates.get(i) + " ";
+        ArrayList<String> currentDates = habit.getDates();
+        if(currentDates != null){
+            if(currentDates.size() > 0){
+                for(int i = 0; i < currentDates.size(); i++){
+                    listDays += currentDates.get(i) + " ";
                 }
             }
         }

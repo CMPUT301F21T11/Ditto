@@ -114,34 +114,7 @@ public class MyHabitActivity extends AppCompatActivity implements
         habitListView.setAdapter(habitRecyclerAdapter);
 
         // Load habits
-        currentUser = new ActiveUser();
-        db.collection(HABIT_KEY)
-                .whereEqualTo(USER_ID, currentUser.getUID())
-                .orderBy("position")
-                .addSnapshotListener((value, error) -> {
-                    habitDataList.clear();
-                    if (value != null) {
-                        for (QueryDocumentSnapshot document: value) {
-                            String id = document.getId();
-                            String title = (String) document.getData().get(TITLE);
-                            String reason = (String) document.getData().get(REASON);
-                            ArrayList<String> days = new ArrayList<>();
-                            handleDays(days, document.getData());
-                            boolean isPublic;
-                            if (document.getData().get("is_public") == null){
-                                isPublic = true;
-                            }
-                            else{
-                                isPublic = (boolean) document.getData().get("is_public");
-                            }
-                            Habit habit = new Habit(id, title, reason, days, isPublic);
-                            habitDataList.add(habit);
-                        }
-
-                    }
-                    habitRecyclerAdapter.notifyDataSetChanged();
-
-                });
+        queryHabits(db);
 
         currentTab(tabLayout, MY_HABITS_TAB);
         switchTabs(this, tabLayout, MY_HABITS_TAB);
@@ -166,11 +139,42 @@ public class MyHabitActivity extends AppCompatActivity implements
         helper.attachToRecyclerView(habitListView);
     }
 
-    /**
-     * Adding a habit to the database and listview as the response to the user clicking the "Add" button from the fragment
-     *
-     * @param newHabit the Habit to be added
-     */
+    public void queryHabits(FirebaseFirestore db) {
+        currentUser = new ActiveUser();
+        db.collection(HABIT_KEY)
+                .whereEqualTo(USER_ID, currentUser.getUID())
+                .orderBy("position")
+                .addSnapshotListener((value, error) -> {
+                    habitDataList.clear();
+                    if (value != null) {
+                        for (QueryDocumentSnapshot document : value) {
+                            String id = document.getId();
+                            String title = (String) document.getData().get(TITLE);
+                            String reason = (String) document.getData().get(REASON);
+                            ArrayList<String> days = new ArrayList<>();
+                            handleDays(days, document.getData());
+                            boolean isPublic;
+                            if (document.getData().get("is_public") == null) {
+                                isPublic = true;
+                            } else {
+                                isPublic = (boolean) document.getData().get("is_public");
+                            }
+                            Habit habit = new Habit(id, title, reason, days, isPublic);
+                            habitDataList.add(habit);
+                        }
+
+                    }
+                    habitRecyclerAdapter.notifyDataSetChanged();
+
+                });
+    }
+
+
+        /**
+         * Adding a habit to the database and listview as the response to the user clicking the "Add" button from the fragment
+         *
+         * @param newHabit the Habit to be added
+         */
     @Override
     public void onOkPressed(Habit newHabit) {
         //when the user clicks the add button, we want to add to the db and display the new entry

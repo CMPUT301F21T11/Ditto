@@ -19,6 +19,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
@@ -34,6 +35,7 @@ import com.team11.ditto.R;
 import com.team11.ditto.interfaces.Days;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Role: Initialize a Dialog for the user to edit an EXISTING Habit Event
@@ -88,6 +90,9 @@ public class EditHabitFragment extends DialogFragment implements Days {
             hTitle.setText(selectedHabit.getTitle());
             hReason.setText(selectedHabit.getReason());
             dates = selectedHabit.getDates();
+            for(String date : dates){
+                Log.d("days", date);
+            }
             privacySwitch.setChecked(selectedHabit.isPublic());
 
             //Setting the checkboxes depending on pre-selected days
