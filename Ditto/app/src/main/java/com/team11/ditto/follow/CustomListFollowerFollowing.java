@@ -1,4 +1,4 @@
-/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class CustomListFollowerFollowing extends ArrayAdapter<User> {
 
     //Declare values
     private ArrayList<User> users;
-    private Context context;
+    private final Context context;
 
     /**
      * Constructor for CustomUserList

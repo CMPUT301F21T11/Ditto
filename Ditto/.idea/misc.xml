@@ -3,7 +3,14 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/ahore/repos/Ditto/Ditto/app/src/main/res/drawable/checkbox_circles.xml" value="0.22135416666666666" />
+        <entry key="..\:/Users/ahore/repos/Ditto/Ditto/app/src/main/res/drawable/checkbox_selected.xml" value="0.22135416666666666" />
+        <entry key="..\:/Users/ahore/repos/Ditto/Ditto/app/src/main/res/drawable/checkbox_unselected.xml" value="0.22135416666666666" />
+        <entry key="..\:/Users/ahore/repos/Ditto/Ditto/app/src/main/res/drawable/input_background.xml" value="0.22135416666666666" />
+        <entry key="..\:/Users/ahore/repos/Ditto/Ditto/app/src/main/res/drawable/roundimage.xml" value="0.22135416666666666" />
         <entry key="..\:/Users/ahore/repos/Ditto/Ditto/app/src/main/res/layout/activity_main.xml" value="0.36102564102564105" />
+        <entry key="..\:/Users/ahore/repos/Ditto/Ditto/app/src/main/res/layout/add_habit_fragment.xml" value="0.5" />
+        <entry key="..\:/Users/ahore/repos/Ditto/Ditto/app/src/main/res/layout/fragment_edit_habit.xml" value="0.33" />
         <entry key="..\:/Users/lkcou/Documents/A_University/CMPUT301/TeamProject/Ditto/Ditto/app/src/main/res/layout/activity_following.xml" value="0.182518115942029" />
         <entry key="..\:/Users/lkcou/Documents/A_University/CMPUT301/TeamProject/Ditto/Ditto/app/src/main/res/layout/activity_login.xml" value="0.182518115942029" />
         <entry key="..\:/Users/lkcou/Documents/A_University/CMPUT301/TeamProject/Ditto/Ditto/app/src/main/res/layout/activity_main.xml" value="0.182518115942029" />

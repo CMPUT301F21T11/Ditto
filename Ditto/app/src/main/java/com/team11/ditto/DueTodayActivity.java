@@ -69,6 +69,7 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
     @RequiresApi(api = Build.VERSION_CODES.O)
     protected void onCreate(Bundle savedInstanceState) {
         //Set layouts
+        overridePendingTransition(0,0);
         super.onCreate(savedInstanceState);
         db = FirebaseFirestore.getInstance();
         setContentView(R.layout.activity_due_today);
@@ -166,6 +167,11 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
         return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
     }
 
+    @Override
+    public void onPause(){
+        overridePendingTransition(0,0);
+        super.onPause();
+    }
 
     public static void checkDecrement(Context context, ArrayList<Habit> habits) {
         Intent _intent = new Intent(context, Decrement.class);

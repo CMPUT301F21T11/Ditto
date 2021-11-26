@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import android.util.Log;
 
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.team11.ditto.habit.Habit;
 
 import org.junit.Test;
@@ -31,7 +32,9 @@ public class HabitsUnitTest {
     //Constructor 2
     @Test
     public void makeHabitWithID(){
-
+        ArrayList<String> dates = new ArrayList<>();
+        dates.add("Tuesday");
+        Habit habit = new Habit("testid", "Read a book", "Be Smart", dates, false);
     }
 
 }

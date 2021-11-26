@@ -1,4 +1,4 @@
-/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ import java.util.ArrayList;
 public class SearchList extends ArrayAdapter<User> {
 
     //Declarations
-    private ArrayList<User> users;
-    private Context context;
+    private final ArrayList<User> users;
+    private final Context context;
 
     /**
      * Constructor for custom list
@@ -69,12 +69,12 @@ public class SearchList extends ArrayAdapter<User> {
         User user = users.get(position);
 
         TextView username = view.findViewById(R.id.search_user_name);
-        ImageView userphoto = view.findViewById(R.id.search_user_photo);
+        ImageView userPhoto = view.findViewById(R.id.search_user_photo);
         ImageView sendRequest = view.findViewById(R.id.send_request);
 
         username.setText(user.getUsername());
         //TODO implement actual profile photos
-        userphoto.setImageResource(R.drawable.background);
+        userPhoto.setImageResource(R.drawable.background);
 
 
         return view;

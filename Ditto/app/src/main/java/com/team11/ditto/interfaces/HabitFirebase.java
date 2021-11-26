@@ -75,7 +75,7 @@ public interface HabitFirebase extends EventFirebase, Days{
     /**
      * initializing query for RecyclerAdapter
      * @param database firebase cloud
-     * @param adapter adapter between datalist and database
+     * @param adapter adapter between dataset and database
      */
     default void autoHabitListener(FirebaseFirestore database, HabitRecyclerAdapter adapter){
         Query query = database.collection(HABIT_KEY).orderBy(ORDER, Query.Direction.DESCENDING);
@@ -127,7 +127,7 @@ public interface HabitFirebase extends EventFirebase, Days{
 
                     // Query all associated habit events
                     db.collection(HABIT_EVENT_KEY)
-                            .whereEqualTo("habitID", oldEntry.getHabitID())
+                            .whereEqualTo(HABIT_ID, oldEntry.getHabitID())
                             .get()
                             .addOnCompleteListener(task1 -> {
                                 if (task1.isSuccessful()) {
@@ -156,12 +156,14 @@ public interface HabitFirebase extends EventFirebase, Days{
         //get unique timestamp for ordering our list
         final String habitID = habit.getHabitID();
         Date currentTime = Calendar.getInstance().getTime();
-        habitData.put("title", habit.getTitle());
-        habitData.put("reason", habit.getReason());
+        habitData.put(TITLE, habit.getTitle());
+        habitData.put(REASON, habit.getReason());
 
         for (int i = 0; i<7; i++){
             habitData.put(WEEKDAYS[i], habit.getDates().contains(WEEKDAYS[i]));
         }
+        habitData.put(IS_PUBLIC, habit.isPublic());
+        habitData.put("habitDoneToday", false);
         habitData.put("is_public", habit.isPublic());
         habitData.put("habitDoneToday", false); //habitDoneToday initially false
         habitData.put("streaks", "0"); //streaks initially 0
@@ -202,7 +204,7 @@ public interface HabitFirebase extends EventFirebase, Days{
 
     default void pushHabitData(FirebaseFirestore database, Habit newHabit){
         habitData.clear();
-        habitData.put("uid", new ActiveUser().getUID());
+        habitData.put(USER_ID, new ActiveUser().getUID());
         pushEditData(database, newHabit);
     }
 
@@ -214,7 +216,7 @@ public interface HabitFirebase extends EventFirebase, Days{
      */
     default void addHabitData(QueryDocumentSnapshot snapshot, List<String> habits, List<String> habitIDs) {
         Log.d(TAG, snapshot.getId() + "=>" + snapshot.getData());
-        String habitTitle = snapshot.get("title").toString();
+        String habitTitle = snapshot.get(TITLE).toString();
         String habitID = snapshot.getId();
         habits.add(habitTitle);
         habitIDs.add(habitID);
@@ -233,7 +235,7 @@ public interface HabitFirebase extends EventFirebase, Days{
 
         ActiveUser currentUser = new ActiveUser();
         database.collection(HABIT_KEY)
-                .whereEqualTo("uid", currentUser.getUID())
+                .whereEqualTo(USER_ID, currentUser.getUID())
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -285,8 +287,7 @@ public interface HabitFirebase extends EventFirebase, Days{
             DocumentReference docRef = database.collection(HABIT_KEY).document(habitsDecrement.get(i).getHabitID());
 
             //set position of from habit to toPos
-            docRef
-                    .update("position", c)
+            docRef.update("position", c)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {

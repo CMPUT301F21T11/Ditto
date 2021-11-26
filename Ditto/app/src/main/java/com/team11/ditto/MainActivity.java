@@ -53,11 +53,13 @@ import com.team11.ditto.habit_event.AddHabitEventFragment;
 import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.habit_event.HabitEventRecyclerAdapter;
 import com.team11.ditto.habit_event.ViewEventActivity;
+import com.team11.ditto.interfaces.Firebase;
 import com.team11.ditto.interfaces.FollowFirebase;
 import com.team11.ditto.interfaces.HabitFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -71,6 +73,7 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity implements SwitchTabs,
         AddHabitEventFragment.OnFragmentInteractionListener, HabitFirebase,
         HabitEventRecyclerAdapter.EventClickListener, FollowFirebase {
+
     private static final String TAG = "tab switch";
     private TabLayout tabLayout;
     public static String EXTRA_HABIT_EVENT = "EXTRA_HABIT_EVENT";
@@ -93,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        overridePendingTransition(0,0);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -134,12 +138,10 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         //Notifies if cloud data changes (from Firebase Interface)
         autoHabitEventListener(db, habitEventRecyclerAdapter);
 
-
         final FloatingActionButton addHabitEventButton = findViewById(R.id.add_habit_event);
 
         addHabitEventButton.setOnClickListener(view -> new AddHabitEventFragment()
                 .show(getSupportFragmentManager(), "ADD_HABIT_EVENT"));
-
 
         fadeInView();
         checkDecrement();
@@ -325,7 +327,9 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         return day;
     }
 
-
-
-
+    @Override
+    public void onPause(){
+        overridePendingTransition(0,0);
+        super.onPause();
+    }
 }
