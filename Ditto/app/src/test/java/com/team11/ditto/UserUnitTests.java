@@ -32,7 +32,6 @@ public class UserUnitTests {
         User courtenay = mockUser();
         assertEquals(courtenay.getUsername(), "universalwonder");
         assertEquals(courtenay.getPassword(), "notAPassword");
-        assertEquals(courtenay.getAge().toString(), "26");
         assertNull(courtenay.getID());
         assertNotNull(courtenay.getFollowMe());
         assertNotNull(courtenay.getIFollow());

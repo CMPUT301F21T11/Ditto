@@ -1,4 +1,4 @@
-/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -71,6 +71,7 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity implements SwitchTabs,
         AddHabitEventFragment.OnFragmentInteractionListener, HabitFirebase,
         HabitEventRecyclerAdapter.EventClickListener, FollowFirebase {
+
     private static final String TAG = "tab switch";
     private TabLayout tabLayout;
     public static String EXTRA_HABIT_EVENT = "EXTRA_HABIT_EVENT";
@@ -83,9 +84,6 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     private HabitEventRecyclerAdapter habitEventRecyclerAdapter;
 
     private FirebaseFirestore db;
-    HashMap<String, Object> data = new HashMap<>();
-
-    private ActiveUser activeUser;
 
     /**
      * Create the Activity instance for the "Homepage" screen, control flow of actions
@@ -93,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        overridePendingTransition(0,0);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -134,12 +133,10 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         //Notifies if cloud data changes (from Firebase Interface)
         autoHabitEventListener(db, habitEventRecyclerAdapter);
 
-
         final FloatingActionButton addHabitEventButton = findViewById(R.id.add_habit_event);
 
         addHabitEventButton.setOnClickListener(view -> new AddHabitEventFragment()
                 .show(getSupportFragmentManager(), "ADD_HABIT_EVENT"));
-
 
         fadeInView();
 
@@ -259,9 +256,6 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                     }
                 });
 
-
-
-
     }
 
     /**
@@ -298,5 +292,9 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         return day;
     }
 
-
+    @Override
+    public void onPause(){
+        overridePendingTransition(0,0);
+        super.onPause();
+    }
 }

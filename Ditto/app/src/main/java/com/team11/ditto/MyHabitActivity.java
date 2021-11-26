@@ -95,6 +95,7 @@ public class MyHabitActivity extends AppCompatActivity implements
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        overridePendingTransition(0,0);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_habit);
         tabLayout = findViewById(R.id.tabs);
@@ -115,15 +116,15 @@ public class MyHabitActivity extends AppCompatActivity implements
         // Load habits
         currentUser = new ActiveUser();
         db.collection(HABIT_KEY)
-                .whereEqualTo("uid", currentUser.getUID())
+                .whereEqualTo(USER_ID, currentUser.getUID())
                 .orderBy("position")
                 .addSnapshotListener((value, error) -> {
                     habitDataList.clear();
                     if (value != null) {
                         for (QueryDocumentSnapshot document: value) {
                             String id = document.getId();
-                            String title = (String) document.getData().get("title");
-                            String reason = (String) document.getData().get("reason");
+                            String title = (String) document.getData().get(TITLE);
+                            String reason = (String) document.getData().get(REASON);
                             ArrayList<String> days = new ArrayList<>();
                             handleDays(days, document.getData());
                             boolean isPublic;
@@ -136,14 +137,16 @@ public class MyHabitActivity extends AppCompatActivity implements
                             Habit habit = new Habit(id, title, reason, days, isPublic);
                             habitDataList.add(habit);
                         }
+
                     }
                     habitRecyclerAdapter.notifyDataSetChanged();
+
                 });
 
         currentTab(tabLayout, MY_HABITS_TAB);
         switchTabs(this, tabLayout, MY_HABITS_TAB);
 
-        //add habit button action
+        //add habit button
         final FloatingActionButton addHabitButton = findViewById(R.id.add_habit);
         addHabitButton.setOnClickListener(new View.OnClickListener() {
             /**
@@ -323,6 +326,12 @@ public class MyHabitActivity extends AppCompatActivity implements
             }
         }
 
-
     }
+
+    @Override
+    public void onPause(){
+        overridePendingTransition(0,0);
+        super.onPause();
+    }
+
 }
