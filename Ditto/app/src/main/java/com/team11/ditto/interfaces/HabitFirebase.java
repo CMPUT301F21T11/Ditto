@@ -363,8 +363,6 @@ public interface HabitFirebase extends EventFirebase, Days{
                         }
                         //if today is in the set of days chosen, update habitDoneToday to true
                         setHabitDoneToday(document, daysOfWeek, today);
-                        int streaks = Integer.valueOf(documentSnapshot.getString("streaks"));
-                        setStreaks(document, streaks);
                     }
                     else {
                         Log.d(TAG, "document does not exist!!");
@@ -406,24 +404,7 @@ public interface HabitFirebase extends EventFirebase, Days{
 
     }
 
-    default void setStreaks(DocumentReference document, int streaks) {
-        //increment the streaks value
-        String newStreaks = String.valueOf(streaks +1);
-        document.update("streaks", newStreaks)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        Log.w(TAG, "Streaks have been successfully updated");
 
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error updating document", e);
-                    }
-                });
-    }
 
     /**
      * Retrieve the day of the week

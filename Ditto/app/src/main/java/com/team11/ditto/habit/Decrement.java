@@ -8,6 +8,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -30,8 +32,6 @@ public class Decrement extends BroadcastReceiver implements Days {
         Log.d("BRUH15", String.valueOf(habitIDs));
 
         //get habits due today
-        //if habitDoneToday is true -> increment streak
-        //if habitDone is false -> decrement streak
         database = FirebaseFirestore.getInstance();
         Log.d("HELLO", "DOES THIS WORK");
 
@@ -48,8 +48,12 @@ public class Decrement extends BroadcastReceiver implements Days {
                         if (documentSnapshot.exists()) {
                             //retrieve the habitDoneToday value
                             Boolean habitDoneToday = documentSnapshot.getBoolean("habitDoneToday");
+                            int streaks = Integer.valueOf(documentSnapshot.getString("streaks"));
                             Log.d("YK", "HABITDONETODAY  " + habitDoneToday);
 
+                            //if habitDoneToday is true -> increment streak
+                            //if habitDone is false -> decrement streak
+                            setStreaks(docRef, streaks, habitDoneToday);
 
                         } else {
                             Log.d("YK", "document does not exist!!");
@@ -65,6 +69,35 @@ public class Decrement extends BroadcastReceiver implements Days {
 
         }
 
+    }
+
+
+    private void setStreaks(DocumentReference document, int streaks, boolean habitDoneToday) {
+        String newStreaks;
+
+        if (habitDoneToday) {
+            //increment the streaks value
+            newStreaks = String.valueOf(streaks +1);
+        }
+        else {
+            //decrement the streaks value
+            newStreaks=String.valueOf(streaks -1);
+        }
+
+        document.update("streaks", newStreaks)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        Log.w("YUH", "Streaks have been successfully updated");
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("YUH", "Error updating document", e);
+                    }
+                });
     }
 
 

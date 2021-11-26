@@ -120,7 +120,6 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
 
         currentTab(tabLayout, DUE_TODAY_TAB);
         switchTabs(this, tabLayout, DUE_TODAY_TAB);
-        String dayItIs = toTitleCase(LocalDate.now().getDayOfWeek().toString());
 
 
     }
@@ -194,15 +193,24 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
         _intent.putStringArrayListExtra("HABITS_DUE", habitIDs);
 
 
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, PendingIntent.FLAG_ONE_SHOT);
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(pendingIntent);
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 1);
-        calendar.set(Calendar.MINUTE, 14);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 1);
         calendar.set(Calendar.SECOND, 0);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+
+        if (calendar.before(Calendar.getInstance())) { //if its in the past, dont do anything now
+            //do nothing
+        }
+        else {
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+
+        }
+
+
+
     }
 
 }
