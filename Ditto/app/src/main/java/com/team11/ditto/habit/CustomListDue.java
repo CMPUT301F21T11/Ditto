@@ -15,6 +15,8 @@
 package com.team11.ditto.habit;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +27,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.team11.ditto.R;
 
 import java.util.ArrayList;
@@ -37,6 +44,8 @@ public class CustomListDue extends ArrayAdapter<Habit> {
 
     private final ArrayList<Habit> habits;
     private final Context context;
+    FirebaseFirestore database;
+
 
     public CustomListDue(Context context, ArrayList<Habit> habits) {
         super(context,0, habits);
@@ -61,7 +70,61 @@ public class CustomListDue extends ArrayAdapter<Habit> {
 
         habitName.setText(habit.getTitle());
         habitDescription.setText(habit.getReason());
+        //get the streak value from database
+        database = FirebaseFirestore.getInstance();
+        DocumentReference docRef = database.collection("Habit").document(habit.getHabitID());
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot documentSnapshot = task.getResult();
+                    if (documentSnapshot.exists()) {
+                        //retrieve the habitDoneToday value
+                        int streaks = Integer.valueOf(documentSnapshot.getString("streaks"));
+
+                        //if streaks is less than -3 -> sad face
+                        //if streaks between -3 and 5 -> neutral
+                        //if streaks greater than 5 -> happy face
+                        setIcon(streaks, progress);
+
+
+
+
+
+                    } else {
+                        Log.d("YK", "document does not exist!!");
+                    }
+
+                } else {
+                    Log.d("YK", task.getException().toString());
+                }
+
+
+            }
+        });
+
 
         return view;
+    }
+
+    private void setIcon(int streaks, ImageView icon) {
+        int lB = -3;
+        int uB = 5;
+        if (streaks < lB) {
+            icon.setImageResource(R.drawable.sad);
+            icon.setColorFilter(Color.RED);
+
+        }
+        else if (streaks >= lB && streaks <= uB) {
+            icon.setImageResource(R.drawable.neutral);
+            icon.setColorFilter(Color.rgb(255,191,0));
+
+        }
+        else if (streaks > uB) {
+            icon.setImageResource(R.drawable.happiness);
+            icon.setColorFilter(Color.rgb(50,205,50));
+
+
+        }
     }
 }

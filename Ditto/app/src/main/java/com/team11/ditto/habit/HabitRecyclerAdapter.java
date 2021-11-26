@@ -88,6 +88,7 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
         //set the streak icon
         //get the streak value from database
         database = FirebaseFirestore.getInstance();
+        Log.d("HELLO", habit.getHabitID());
         DocumentReference docRef = database.collection("Habit").document(habit.getHabitID());
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -96,7 +97,6 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
                     DocumentSnapshot documentSnapshot = task.getResult();
                     if (documentSnapshot.exists()) {
                         //retrieve the habitDoneToday value
-                        Boolean habitDoneToday = documentSnapshot.getBoolean("habitDoneToday");
                         int streaks = Integer.valueOf(documentSnapshot.getString("streaks"));
 
                         //if streaks is less than -3 -> sad face
@@ -127,7 +127,9 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
         int uB = 5;
         if (streaks < lB) {
             holder.icon.setImageResource(R.drawable.sad);
-            holder.icon.setColorFilter(Color.GREEN);
+            holder.icon.setColorFilter(Color.RED);
+
+
 
         }
         else if (streaks >= lB && streaks <= uB) {
@@ -138,6 +140,7 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
         else if (streaks > uB) {
             holder.icon.setImageResource(R.drawable.happiness);
             holder.icon.setColorFilter(Color.rgb(50,205,50));
+
 
 
         }
