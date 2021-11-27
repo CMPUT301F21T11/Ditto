@@ -119,8 +119,10 @@ public interface HabitFirebase extends EventFirebase, Days{
      * delete the habit and ensure the associated habit events also get deleted
      * @param db firebase cloud
      * @param oldEntry Habit already on cloud to remove
+     * @param s
+     * @param dHabits
      */
-    default void deleteDataMyHabit(FirebaseFirestore db, Habit oldEntry) {
+    default void deleteDataMyHabit(FirebaseFirestore db, Habit oldEntry, int s, ArrayList<Habit> dHabits) {
         //ALSO REMOVE THE ASSOCIATED HABIT EVENTS
         db.collection(HABIT_KEY).document(oldEntry.getHabitID()).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -146,6 +148,31 @@ public interface HabitFirebase extends EventFirebase, Days{
                 }
             }
         });
+
+        //decrement all the habit positions after the one that was deleted
+        int c = s;
+        for (int i=0; i<dHabits.size();i++) {
+            DocumentReference docRef = db.collection(HABIT_KEY).document(dHabits.get(i).getHabitID());
+
+            //set position of from habit to toPos
+            docRef.update("position", c)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Log.d(TAG, "DocumentSnapshot successfully updated!");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error updating document", e);
+                        }
+                    });
+            c--;
+
+        }
+
+
 
     }
 

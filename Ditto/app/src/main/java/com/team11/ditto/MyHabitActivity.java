@@ -270,10 +270,28 @@ public class MyHabitActivity extends AppCompatActivity implements
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
             Habit oldEntry = (Habit) habitDataList.get(viewHolder.getAbsoluteAdapterPosition());
+
+
+            ArrayList<Habit> dHabits = new ArrayList<Habit>();
+
+            //get an arraylist of habits after the moved object
+            int s = viewHolder.getAbsoluteAdapterPosition()+1;
+            int t = habitRecyclerAdapter.getItemCount();
+            if (t==s) {
+                //empty arraylist
+            }
+            else {
+                //iterate through the habits and add them to the arraylist
+                for (int i=s; i<t; i++) {
+                    dHabits.add(habitDataList.get(i));
+                }
+            }
+
             habitDataList.remove(viewHolder.getAbsoluteAdapterPosition());
             habitRecyclerAdapter.notifyDataSetChanged();
-
-            deleteDataMyHabit(db, oldEntry);
+            Log.d("NAUR", String.valueOf(dHabits));
+            Collections.reverse(dHabits);
+            deleteDataMyHabit(db, oldEntry, s, dHabits);
 
         }
 
@@ -322,6 +340,11 @@ public class MyHabitActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
+    /**
+     * add the days to the dates
+     * @param dates
+     * @param objectMap
+     */
     public void handleDays(ArrayList<String> dates, Map<String, Object> objectMap){
 
         for (int i = 0; i < NUM_DAYS; i++) {
