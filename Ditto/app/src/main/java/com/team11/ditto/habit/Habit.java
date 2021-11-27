@@ -19,6 +19,7 @@ import android.os.Parcelable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Purpose: Habit class represents a habit object and holds data for
@@ -44,6 +45,7 @@ public class Habit implements Serializable {
     private int streak;
     private int position;
     private boolean habitDoneToday;
+    private Date lastDone;
 
     /**
      * Constructor for Habit object
@@ -58,6 +60,7 @@ public class Habit implements Serializable {
         this.isPublic = isPublic;
         this.streak = 0; //Basic habit, not in db yet means it is BRAND NEW
         this.habitID = "";
+        this.lastDone = null;
     }
 
     /**
@@ -67,13 +70,14 @@ public class Habit implements Serializable {
      * @param reason Reason for habit
      * @param dates Days of the week for scheduling
      */
-    public Habit(String id, String title, String reason, ArrayList<String> dates, boolean isPublic, int streak) {
+    public Habit(String id, String title, String reason, ArrayList<String> dates, boolean isPublic, int streak, Date lastDone) {
         this.habitID = id;
         this.title = title;
         this.reason = reason;
         this.setDate(dates);
         this.isPublic = isPublic;
         this.streak = streak;
+        this.lastDone = lastDone;
     }
 
     /**
@@ -85,6 +89,10 @@ public class Habit implements Serializable {
     public Habit(String title, String reason){
         this.title = title;
         this.reason = reason;
+    }
+
+    public Date getLastDone(){
+        return this.lastDone;
     }
 
     public int getStreak(){

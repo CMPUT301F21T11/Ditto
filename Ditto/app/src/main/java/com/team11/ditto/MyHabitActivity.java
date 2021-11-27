@@ -56,6 +56,7 @@ import com.team11.ditto.login.ActiveUser;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
@@ -153,6 +154,12 @@ public class MyHabitActivity extends AppCompatActivity implements
                             String title = (String) document.getData().get(TITLE);
                             String reason = (String) document.getData().get(REASON);
                             String streaks =  (String) Objects.requireNonNull(document.getData().get("streaks"));
+                            Date date = null;
+                            if(document.getData().get("lastDone") != null){
+                                date = document.getTimestamp("lastDone").toDate();
+                            }
+
+
                             int s = Integer.parseInt(streaks);
                             ArrayList<String> days = new ArrayList<>();
                             handleDays(days, document.getData());
@@ -162,7 +169,7 @@ public class MyHabitActivity extends AppCompatActivity implements
                             } else {
                                 isPublic = (boolean) document.getData().get("is_public");
                             }
-                            Habit habit = new Habit(id, title, reason, days, isPublic, s);
+                            Habit habit = new Habit(id, title, reason, days, isPublic, s, date);
                             habitDataList.add(habit);
                         }
 

@@ -19,11 +19,13 @@ import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.habit_event.HabitEventRecyclerAdapter;
 import com.team11.ditto.login.ActiveUser;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.Nullable;
 
@@ -147,6 +149,8 @@ public interface EventFirebase extends Firebase{
         String habitTitle = event.getHabitTitle();
         //get unique timestamp for ordering our list
         Date currentTime = Calendar.getInstance().getTime();
+        Log.d("CURRENTDAY", Integer.toString(currentTime.getDay())); //returns day of the week in integer
+
         eventData.put(USER_ID, FirebaseAuth.getInstance().getUid());
         eventData.put(HABIT_ID, habitID);
         eventData.put(COMMENT, comment);
@@ -190,4 +194,23 @@ public interface EventFirebase extends Firebase{
                 .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
     }
 
+    default void resetDueToday(FirebaseFirestore db, ArrayList<HabitEvent> habitEventsData){
+        ActiveUser currentUser = new ActiveUser();
+        db.collection("Habits")
+                .whereEqualTo(USER_ID, currentUser.getUID())
+                .orderBy("position")
+                .addSnapshotListener((value, error) -> {
+                    if (value != null) {
+                        for (QueryDocumentSnapshot document : value) {
+                            //Check if we need to decrement since last time habit was updated
+                            Boolean doneToday = (Boolean) document.getData().get("habitDoneToday");
+                            Date currentDate = Calendar.getInstance().getTime();
+                            Date lastDone = document.getDate("lastDone");
+                            //If the current day is not the same anymore, then reset boolean
+
+                        }
+
+                    }
+                });
+    }
 }

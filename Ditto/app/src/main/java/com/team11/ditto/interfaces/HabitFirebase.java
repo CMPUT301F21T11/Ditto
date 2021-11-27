@@ -1,9 +1,12 @@
 package com.team11.ditto.interfaces;
 
+import android.os.Build;
+import android.telephony.TelephonyCallback;
 import android.util.Log;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -27,6 +30,7 @@ import com.team11.ditto.login.ActiveUser;
 import org.w3c.dom.Document;
 
 import java.lang.reflect.Array;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -46,6 +50,7 @@ public interface HabitFirebase extends EventFirebase, Days{
     String TITLE = "title";
     String REASON = "reason";
     String IS_PUBLIC = "is_public";
+
 
     default void logHabitData(@Nullable QuerySnapshot queryDocumentSnapshots){
         if (queryDocumentSnapshots != null) {
@@ -155,7 +160,9 @@ public interface HabitFirebase extends EventFirebase, Days{
     default void pushEditData(FirebaseFirestore database, Habit habit) {
         //get unique timestamp for ordering our list
         final String habitID = habit.getHabitID();
+
         Date currentTime = Calendar.getInstance().getTime();
+
         habitData.put(TITLE, habit.getTitle());
         habitData.put(REASON, habit.getReason());
 
@@ -165,6 +172,8 @@ public interface HabitFirebase extends EventFirebase, Days{
         habitData.put(IS_PUBLIC, habit.isPublic());
         habitData.put("habitDoneToday", false);
         habitData.put("streaks", Integer.toString(habit.getStreak()));
+        habitData.put("lastDone", habit.getLastDone());
+
 
         //this field is used to add the current timestamp of the item, to be used to order the items
         //habitData.put("order", currentTime);
@@ -340,67 +349,98 @@ public interface HabitFirebase extends EventFirebase, Days{
      * @param today integer representation the current day
      * @param newHabitEvent the new habit event added
      */
-    default void isHabitDoneToday(FirebaseFirestore db, int today, HabitEvent newHabitEvent) {
-        //get days ...
-        final Integer[] daysOfWeek = new Integer[7];
-        DocumentReference document = db.collection(HABIT_KEY).document(newHabitEvent.getHabitId()); //get the associated habit
-        document.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+    default void checkHabitDoneToday(FirebaseFirestore db, int today, HabitEvent newHabitEvent) {
+        //get days ..
+
+        DocumentReference documentReference = db.collection(HABIT_KEY).document(newHabitEvent.getHabitId()); //get the habit
+
+
+        //now set the lastDone in habit to the current Date
+
+        documentReference.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
+                if(task.isSuccessful()){
                     DocumentSnapshot documentSnapshot = task.getResult();
-                    if (documentSnapshot.exists()) {
-                        //retrieve the order value
-                        int numDays = 7;
-                        for (int i=0;i<numDays;i++) {
-                            Boolean isDay; //is the day "true" in for this Habit
-                            String day = daysForHabit(i);
-                            isDay = documentSnapshot.getBoolean(day);
-                            if (isDay==true) { daysOfWeek[i] = i+1; }
-                            else { daysOfWeek[i] = 0; }
+                    if(documentSnapshot.exists()){
+                        Date lastDone = documentSnapshot.getDate("lastDone");
+                        Date currentDate = Calendar.getInstance().getTime();
+                        String streak = documentSnapshot.getString("streaks");
+                        //If current date is after, and day of week is different
+                        if(lastDone != null){
+                            if(currentDate.after(lastDone) && currentDate.getDay() != lastDone.getDay()){
+                                setHabitDoneToday(documentReference, streak);
+                            }
+                        } else {
+                            setHabitDoneToday(documentReference, streak);
                         }
-                        //if today is in the set of days chosen, update habitDoneToday to true
-                        setHabitDoneToday(document, daysOfWeek, today);
+                        setNewTime(documentReference);
                     }
-                    else {
-                        Log.d(TAG, "document does not exist!!");
-                    }
-                }
-                else {
-                    Log.d(TAG, task.getException().toString());
                 }
             }
         });
     }
 
+    default void setNewTime(DocumentReference document){
+        document.update("lastDone", Calendar.getInstance().getTime())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        Log.d(TAG, "DocumentSnapshot successfully updated!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error updating document", e);
+                    }
+                });
+    }
+
     /**
      * Handle setting the habitDoneToday boolean field in firestore after an event has been posted.
+     * This function assumes the correct checking has already been done for streak credit
      * @param document firebase cloud
-     * @param daysOfWeek a list of the days of the week that the Habit is to be done
-     * @param today the current day as an int (1-7)
      */
-    default void setHabitDoneToday(DocumentReference document, Integer[] daysOfWeek, int today) {
-        for (int i=0; i<daysOfWeek.length;i++) {
-            if (today == daysOfWeek[i]) {
-                //then we set ishabitDone to true
-                document.update("habitDoneToday", true)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void unused) {
-                                Log.d(TAG, "DocumentSnapshot successfully updated!");
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.w(TAG, "Error updating document", e);
-                            }
-                        });
+    default void setHabitDoneToday(DocumentReference document, String streak) {
+        //then we set ishabitDone to true
+        document.update("habitDoneToday", true)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        Log.d(TAG, "DocumentSnapshot successfully updated!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error updating document", e);
+                    }
+                });
 
-            }
-        }
+        int streakInt = Integer.parseInt(streak);
+        Log.d("STREAK", streak);
+
+        streakInt = streakInt + 1;
+
+        streak = Integer.toString(streakInt);
+
+        document.update("streaks", streak)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        Log.d(TAG, "DocumentSnapshot successfully updated!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error updating document", e);
+                    }
+                });
 
     }
+
 
 
 

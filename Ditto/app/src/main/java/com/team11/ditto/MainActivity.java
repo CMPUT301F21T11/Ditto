@@ -125,6 +125,8 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         // Load the Habit Event data (This will be converted to use the Firebase interface in the future)
         queryList();
 
+        resetDueToday(db, habitEventsData);
+
         LinearLayoutManager manager = new LinearLayoutManager(this);
         habitEventList.setLayoutManager(manager);
         habitEventList.setAdapter(habitEventRecyclerAdapter);
@@ -183,15 +185,19 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         //THEN set habitDoneToday to true
         habitEventList.setVisibility(View.INVISIBLE);
 
-        //handle setting the habitDoneToday field for the Habit
-        isHabitDoneToday(db, todayIs(), newHabitEvent);
+        //set the habit done if not already, if it is no credit given
+        checkHabitDoneToday(db, todayIs(), newHabitEvent);
 
         //Adds the item to the database and then immediately retrieves it from the list
+
+        //CHECK MOST RECENT DATE FOR THE ATTACHED HABIT
+
+
+
         pushHabitEventData(db, newHabitEvent);
         habitEventRecyclerAdapter.notifyDataSetChanged();
 
         fadeInView();
-
     }
 
     /**
@@ -254,9 +260,6 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                                 }
 
                             });
-
-
-                            //habitEventsData.add(new HabitEvent(eventID, eHabitId, eComment, ePhoto, eLocation, eHabitTitle, uid));  // Add the event to the event list
                         }
                     }
                 });

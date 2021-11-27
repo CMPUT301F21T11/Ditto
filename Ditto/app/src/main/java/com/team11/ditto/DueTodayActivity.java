@@ -58,6 +58,7 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
     private ArrayAdapter<Habit> dueTodayAdapter ;
     private ArrayList<Habit> habits; //list of habits due today
     private ActiveUser currentUser;
+    private String dayItIs;
 
     /**
      *Directions for creating this Activity
@@ -75,7 +76,6 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
         setContentView(R.layout.activity_due_today);
         tabLayout = findViewById(R.id.tabs);
         list = findViewById(R.id.due_today_custom_list);
-
         setTitle(buildDateString());
 
         habits = new ArrayList<>();
@@ -96,7 +96,7 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
                             String habitID = (String) document.getId();
                             ArrayList<String> days = new ArrayList<>();
                             updateDaysFromData(days, document.getData());
-                            String dayItIs = toTitleCase(LocalDate.now().getDayOfWeek().toString());
+                            dayItIs = toTitleCase(LocalDate.now().getDayOfWeek().toString());
                             if (days.contains(dayItIs)) {
                                 String title = (String) document.getData().get("title");
                                 String reason = (String) document.getData().get("reason");
@@ -107,7 +107,6 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
 
                             }// Add to the habit list
                         }
-                        checkDecrement(this, habits);
 
                     }
 
@@ -165,48 +164,6 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
         return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
     }
 
-    @Override
-    public void onPause(){
-        overridePendingTransition(0,0);
-        super.onPause();
-    }
-
-    public static void checkDecrement(Context context, ArrayList<Habit> habits) {
-        Intent _intent = new Intent(context, Decrement.class);
-
-
-        ArrayList<String> habitIDs = new ArrayList<>();
-
-
-
-        for(int i = 0; i < habits.size(); i++){
-            habitIDs.add(habits.get(i).getHabitID());
-        }
-
-
-            Log.d("BRUH69", String.valueOf(habitIDs));
-
-        _intent.putStringArrayListExtra("HABITS_DUE", habitIDs);
-
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, PendingIntent.FLAG_IMMUTABLE);
-        AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 1);
-        calendar.set(Calendar.SECOND, 0);
-
-        if (calendar.before(Calendar.getInstance())) { //if its in the past, dont do anything now
-            //do nothing
-        }
-        else {
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
-
-        }
-
-
-
-    }
 
 }
 

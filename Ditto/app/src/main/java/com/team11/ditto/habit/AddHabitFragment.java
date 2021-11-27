@@ -118,5 +118,4 @@ public class AddHabitFragment extends DialogFragment implements Days {
                 .create();
     }
 
-
 }
