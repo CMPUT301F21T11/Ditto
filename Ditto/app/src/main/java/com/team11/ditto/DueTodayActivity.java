@@ -16,10 +16,8 @@ package com.team11.ditto;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,21 +35,21 @@ import com.team11.ditto.habit.Decrement;
 import com.team11.ditto.habit.Habit;
 import com.team11.ditto.interfaces.Days;
 import com.team11.ditto.interfaces.Firebase;
+import com.team11.ditto.interfaces.HabitFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 
-import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.util.Date;
+import java.util.Objects;
 
 /**
  * Activity to display a list of the ActiveUser's Habits that are scheduled to be done today
  * @author Aidan Horemans, Kelly Shih, Vivek Malhotra, Matthew Asgari
  */
-public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, Firebase, Days {
+public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, Firebase, Days, HabitFirebase {
     FirebaseFirestore db;
     private TabLayout tabLayout;
     private ListView list;
@@ -85,29 +83,29 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
 
         // Load habits
         currentUser = new ActiveUser();
+        adjustScore(db,currentUser, (CustomListDue) dueTodayAdapter);
         db.collection("Habit")
-                .whereEqualTo("uid", currentUser.getUID())
-                .addSnapshotListener((value, error) -> {
+                .whereEqualTo("uid",currentUser.getUID())
+                .get()
+                .addOnCompleteListener( task -> {
+                    if(task.isSuccessful()){
 
-                    habits.clear();
-                    if (value != null) {
-                        for (QueryDocumentSnapshot document: value) {
-                            // For each document parse the data and create a habit object
-                            String habitID = (String) document.getId();
+                        for(QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
+                            String habitID = (String) snapshot.getId();
                             ArrayList<String> days = new ArrayList<>();
-                            updateDaysFromData(days, document.getData());
+                            updateDaysFromData(days, snapshot.getData());
                             String dayItIs = toTitleCase(LocalDate.now().getDayOfWeek().toString());
                             if (days.contains(dayItIs)) {
-                                String title = (String) document.getData().get("title");
-                                String reason = (String) document.getData().get("reason");
-                                boolean isPublic = (boolean) document.getData().get("is_public");
+                                String title = (String) snapshot.getData().get("title");
+                                String reason = (String) snapshot.getData().get("reason");
+                                boolean isPublic = (boolean) snapshot.getData().get("is_public");
                                 Habit habit = new Habit(title, reason, days, isPublic);
                                 habit.setHabitID(habitID);
                                 habits.add(habit);
 
                             }// Add to the habit list
+
                         }
-                        //checkDecrement(this, habits);
 
                     }
 
@@ -207,6 +205,8 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
 
 
     }
+
+
 
 }
 
