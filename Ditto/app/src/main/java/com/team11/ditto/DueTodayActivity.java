@@ -14,13 +14,9 @@
  */
 package com.team11.ditto;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -31,7 +27,6 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.team11.ditto.habit.CustomListDue;
-import com.team11.ditto.habit.Decrement;
 import com.team11.ditto.habit.Habit;
 import com.team11.ditto.interfaces.Days;
 import com.team11.ditto.interfaces.Firebase;
@@ -42,7 +37,6 @@ import com.team11.ditto.login.ActiveUser;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Objects;
 
 /**
