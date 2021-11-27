@@ -49,6 +49,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.team11.ditto.habit.Decrement;
+import com.team11.ditto.habit.Habit;
 import com.team11.ditto.habit_event.AddHabitEventFragment;
 import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.habit_event.HabitEventRecyclerAdapter;
@@ -58,12 +59,15 @@ import com.team11.ditto.interfaces.FollowFirebase;
 import com.team11.ditto.interfaces.HabitFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
+import com.team11.ditto.DueTodayActivity;
+
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+
 
 /**
  * Role: Class for Habit Event Activity, be able to see you feed and add a habit event
@@ -89,6 +93,10 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     HashMap<String, Object> data = new HashMap<>();
 
     private ActiveUser activeUser;
+    private ArrayList<Habit> habits; //list of habits due today
+    private ActiveUser currentUser;
+
+
 
     /**
      * Create the Activity instance for the "Homepage" screen, control flow of actions
@@ -109,6 +117,8 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 
         progressBar = findViewById(R.id.progress_bar);
         tabLayout = findViewById(R.id.tabs);
+        habits = new ArrayList<>();
+
 
         setTitle("My Feed");
 
@@ -145,7 +155,80 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 
         fadeInView();
 
+        getHabitsDue();
+
+
+
+
     }
+
+    private void getHabitsDue() {
+        // Load habits
+        currentUser = new ActiveUser();
+        db.collection("Habit")
+                .whereEqualTo("uid", currentUser.getUID())
+                .addSnapshotListener((value, error) -> {
+                    habits.clear();
+                    if (value != null) {
+                        for (QueryDocumentSnapshot document: value) {
+                            // For each document parse the data and create a habit object
+                            String habitID = (String) document.getId();
+                            ArrayList<String> days = new ArrayList<>();
+                            updateDaysFromData(days, document.getData());
+                            String dayItIs = DueTodayActivity.toTitleCase(LocalDate.now().getDayOfWeek().toString());
+                            if (days.contains(dayItIs)) {
+                                String title = (String) document.getData().get("title");
+                                String reason = (String) document.getData().get("reason");
+                                boolean isPublic = (boolean) document.getData().get("is_public");
+                                Habit habit = new Habit(title, reason, days, isPublic);
+                                habit.setHabitID(habitID);
+                                habits.add(habit);
+
+                            }// Add to the habit list
+                        }
+                        checkDecrement(this, habits);
+
+                    }
+                });
+    }
+
+    public static void checkDecrement(Context context, ArrayList<Habit> habits) {
+        Intent _intent = new Intent(context, Decrement.class);
+
+
+        ArrayList<String> habitIDs = new ArrayList<>();
+
+
+
+        for(int i = 0; i < habits.size(); i++){
+            habitIDs.add(habits.get(i).getHabitID());
+        }
+
+
+        Log.d("BRUH69", String.valueOf(habitIDs));
+
+        _intent.putStringArrayListExtra("HABITS_DUE", habitIDs);
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, PendingIntent.FLAG_ONE_SHOT);
+        AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 21);
+        calendar.set(Calendar.MINUTE, 2);
+        calendar.set(Calendar.SECOND, 0);
+
+        if (calendar.before(Calendar.getInstance())) { //if its in the past, dont do anything now
+            //do nothing
+        }
+        else {
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+
+        }
+
+
+
+    }
+
 
     private void fadeInView(){
         habitEventList.setAlpha(1f);

@@ -107,7 +107,7 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
 
                             }// Add to the habit list
                         }
-                        checkDecrement(this, habits);
+                        //checkDecrement(this, habits);
 
                     }
 
@@ -188,12 +188,12 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
 
         _intent.putStringArrayListExtra("HABITS_DUE", habitIDs);
 
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, PendingIntent.FLAG_ONE_SHOT);
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 19);
+        calendar.set(Calendar.MINUTE, 54);
         calendar.set(Calendar.SECOND, 0);
 
         if (calendar.before(Calendar.getInstance())) { //if its in the past, dont do anything now
