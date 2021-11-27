@@ -80,12 +80,17 @@ public class CustomListDue extends ArrayAdapter<Habit> {
                     DocumentSnapshot documentSnapshot = task.getResult();
                     if (documentSnapshot.exists()) {
                         //retrieve the habitDoneToday value
-                        int streaks = Integer.valueOf(documentSnapshot.getString("streaks"));
+                        if( documentSnapshot.getString("streaks") != null ){
+                            int streaks = Integer.parseInt(documentSnapshot.getString("streaks")) ;
+                            Log.d("Streak score ",String.valueOf(streaks)) ;
 
-                        //if streaks is less than -3 -> sad face
-                        //if streaks between -3 and 5 -> neutral
-                        //if streaks greater than 5 -> happy face
-                        setIcon(streaks, progress);
+                            //if streaks is less than -3 -> sad face
+                            //if streaks between -3 and 5 -> neutral
+                            //if streaks greater than 5 -> happy face
+                            setIcon(streaks, progress);
+                        }
+
+
 
 
 
