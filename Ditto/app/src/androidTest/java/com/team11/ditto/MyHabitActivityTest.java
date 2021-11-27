@@ -11,30 +11,14 @@
  */
 
 package com.team11.ditto;
-import static androidx.test.InstrumentationRegistry.getTargetContext;
-import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
-
-import static androidx.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static androidx.test.espresso.matcher.ViewMatchers.withText;
-
-
-import static org.hamcrest.CoreMatchers.anything;
-import static org.hamcrest.Matchers.allOf;
-
-import android.content.ComponentName;
-
 import androidx.test.espresso.Espresso;
-
 import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
-
-import com.team11.ditto.habit.ViewHabitActivity;
-import com.team11.ditto.login.SignUpActivity;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,16 +29,18 @@ public class MyHabitActivityTest {
 
     @Test
     public void addHabitButton(){
+        // Test if the add button display the add habit fragment
         Espresso.onView(ViewMatchers.withId(R.id.add_habit)).perform(click());
-        onView(withId(R.id.addHabitFragement)).check(matches(isDisplayed()));
+        onView(withId(R.id.addHabitFragment)).check(matches(isDisplayed()));
 
     }
 
-//    @Test
-//    public void viewHabit(){
-//        onData(anything()).inAdapterView(allOf(withId(R.id.list), isDisplayed())).atPosition(0).perform(click());
-//        onView(withId(R.id.list)).check(matches(hasDescendant(withText("How well am I tracking?"))));
-//    }
+    @Test
+    public void viewHabit(){
+        // Test if clicking on a habit will view it
+        Espresso.onView(ViewMatchers.withId(R.id.list)).perform(click());
+        //onView(withId(R.id.list)).check(matches(hasDescendant(withText("How well am I tracking?"))));
+    }
 
 
 }

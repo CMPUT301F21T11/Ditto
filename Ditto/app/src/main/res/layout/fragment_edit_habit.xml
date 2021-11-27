@@ -15,25 +15,26 @@
         limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    android:id="@+id/editHabitFragment"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/title_textView"
         android:layout_width="match_parent"
         android:layout_height="37dp"
         android:ems="10"
-        android:textSize="12pt"
-        android:maxLength="40" />
+        android:maxLength="40"
+        android:textSize="12pt" />
 
     <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/privacySwitchEdit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/pub"
-        android:textOn="@string/pub"
-        android:textOff="@string/priv"/>
+        android:textOff="@string/priv"
+        android:textOn="@string/pub" />
 
     <EditText
         android:id="@+id/reason_editText"
@@ -47,50 +48,50 @@
         android:id="@+id/day_selection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
+        android:gravity="center"
+        android:orientation="horizontal">
+
         <CheckBox
             android:id="@+id/monday_select"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/m">
-        </CheckBox>
+            android:text="@string/m"></CheckBox>
+
         <CheckBox
             android:id="@+id/tuesday_select"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/t">
-        </CheckBox>
+            android:text="@string/t"></CheckBox>
+
         <CheckBox
             android:id="@+id/wednesday_select"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/w">
-        </CheckBox>
+            android:text="@string/w"></CheckBox>
+
         <CheckBox
             android:id="@+id/thursday_select"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/t">
-        </CheckBox>
+            android:text="@string/t"></CheckBox>
+
         <CheckBox
             android:id="@+id/friday_select"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/f">
-        </CheckBox>
+            android:text="@string/f"></CheckBox>
+
         <CheckBox
             android:id="@+id/saturday_select"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/s">
-        </CheckBox>
+            android:text="@string/s"></CheckBox>
+
         <CheckBox
             android:id="@+id/sunday_select"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/s">
-        </CheckBox>
+            android:text="@string/s"></CheckBox>
     </LinearLayout>
 
 </LinearLayout>
