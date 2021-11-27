@@ -173,12 +173,9 @@ public interface HabitFirebase extends EventFirebase, Days{
         habitData.put("habitDoneToday", false);
         habitData.put("streaks", Integer.toString(habit.getStreak()));
         habitData.put("lastDone", habit.getLastDone());
-
-
-        //this field is used to add the current timestamp of the item, to be used to order the items
-        //habitData.put("order", currentTime);
-
-        //pushToDB(database, HABIT_KEY, habitID, habitData);
+        //These have to be dealt with
+        habitData.put("dateCreated", habit.getDateCreated());
+        habitData.put("dateDecremented", habit.getDateDecremented());
 
         //get the number of documents in collection
         ActiveUser currentUser = new ActiveUser();

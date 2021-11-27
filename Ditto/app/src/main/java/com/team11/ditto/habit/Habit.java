@@ -46,6 +46,8 @@ public class Habit implements Serializable {
     private int position;
     private boolean habitDoneToday;
     private Date lastDone;
+    private Date dateCreated;
+    private Date dateDecremented;
 
     /**
      * Constructor for Habit object
@@ -70,7 +72,7 @@ public class Habit implements Serializable {
      * @param reason Reason for habit
      * @param dates Days of the week for scheduling
      */
-    public Habit(String id, String title, String reason, ArrayList<String> dates, boolean isPublic, int streak, Date lastDone) {
+    public Habit(String id, String title, String reason, ArrayList<String> dates, boolean isPublic, int streak, Date lastDone, Date dateCreated, Date dateDecremented) {
         this.habitID = id;
         this.title = title;
         this.reason = reason;
@@ -78,6 +80,8 @@ public class Habit implements Serializable {
         this.isPublic = isPublic;
         this.streak = streak;
         this.lastDone = lastDone;
+        this.dateCreated = dateCreated;
+        this.dateDecremented = dateDecremented;
     }
 
     /**
@@ -89,6 +93,14 @@ public class Habit implements Serializable {
     public Habit(String title, String reason){
         this.title = title;
         this.reason = reason;
+    }
+
+    public Date getDateCreated(){
+        return this.dateCreated;
+    }
+
+    public Date getDateDecremented(){
+        return this.dateDecremented;
     }
 
     public Date getLastDone(){
