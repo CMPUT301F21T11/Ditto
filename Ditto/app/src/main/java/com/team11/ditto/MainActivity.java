@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     public static String EXTRA_HABIT_EVENT = "EXTRA_HABIT_EVENT";
     private ArrayList<HabitEvent> habitEventsData;
     private ArrayList<String> idList;
+    private ActiveUser currentUser;
 
     private RecyclerView habitEventList;
     private HabitEventRecyclerAdapter habitEventRecyclerAdapter;
@@ -78,8 +79,6 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-
         // If device has userID, go to app - else, go to login
         if (new ActiveUser().getUID().equals("")) {
             Intent intent = new Intent(this, WelcomeActivity.class);
@@ -88,19 +87,20 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         }
 
         tabLayout = findViewById(R.id.tabs);
-
         setTitle("My Feed");
-
         habitEventList = findViewById(R.id.list_habit_event);
+        db = FirebaseFirestore.getInstance();
+
+        currentUser = new ActiveUser();
         habitEventsData = new ArrayList<>();
         idList = new ArrayList<>();
-        idList.add(new ActiveUser().getUID());
-        getFollowedByActiveUser(db, new ActiveUser(), idList);
+        idList.add(currentUser.getUID());
+        getFollowedByActiveUser(db, currentUser, idList);
 
         habitEventRecyclerAdapter = new HabitEventRecyclerAdapter(this, habitEventsData, this);
 
+
         // Load the Habit Event data (This will be converted to use the Firebase interface in the future)
-        db = FirebaseFirestore.getInstance();
         for (int i = 0; i < idList.size(); i++){
             try {
                 db.collection(HABIT_EVENT_KEY)

@@ -43,7 +43,7 @@ import java.util.Objects;
  * Activity to display a list of Users that follow the ActiveUser
  * @author Vivek Malhotra
  */
-public class FollowingActivity extends AppCompatActivity implements SwitchTabs, Firebase, FollowFirebase {
+public class FollowingActivity extends AppCompatActivity implements SwitchTabs, FollowFirebase {
 
     //Declarations
     private TabLayout tabLayout;
@@ -74,21 +74,18 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
         userDataList = new ArrayList<>();
         userAdapter = new CustomListFollowerFollowing(FollowingActivity.this, userDataList);
 
-
         followingListView.setAdapter(userAdapter);
-
-
-
-        userAdapter.notifyDataSetChanged();
 
         //Enable tab switching
         currentTab(tabLayout, PROFILE_TAB);
         switchTabs(this, tabLayout, PROFILE_TAB);
+
         // Get the current user's followers
-
         getFollowedByActiveUser(db,currentUser,followedByActiveUser);
-
         getFollowerList();
+
+        userAdapter.notifyDataSetChanged();
+        
         //View User profile if user in list is clicked
         onProfileClick();
 
@@ -114,11 +111,11 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
     public void onProfileClick() {
         followingListView.setOnItemClickListener((adapterView, view, i, l) -> {
             User followedByMe = (User) followingListView.getAdapter().getItem(i);
-            String followedByMeEmail = followedByMe.getPassword();
+            String followedByMeEmail = followedByMe.getEmail();
             String followedByMeName = followedByMe.getUsername();
             Intent intent = new Intent(FollowingActivity.this, FriendHabitActivity.class);
             Bundle b = new Bundle();
-            b.putStringArray("following", new String[]{followedByMeName, followedByMeEmail});
+            b.putStringArray(FOLLOWING_KEY, new String[]{followedByMeName, followedByMeEmail});
             intent.putExtras(b);
             Log.d("Opening profile of : ",followedByMeEmail);
             startActivity(intent);
@@ -130,23 +127,25 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
      * This method shows all users followed by active user on screen
      */
     public void showData(){
-
-        for (int i =0; i< followedByActiveUser.size(); i++){
-            int finalI = i;
-            db.collection("User")
-                    .whereEqualTo("email", followedByActiveUser.get(i))
-                    .get()
-                    .addOnCompleteListener(task -> {
-                        if(task.isSuccessful()){
-                            for(QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
-                                userDataList.add( new User(snapshot.get("name").toString(), followedByActiveUser.get(finalI))  );
-                                Log.d("Followed", followedByActiveUser.get(finalI));
-                                Collections.sort(userDataList, (user, t1) -> user.getUsername().compareTo(t1.getUsername()));
-                            }
-                            userAdapter.notifyDataSetChanged();
-                        }
-                    });
-        }
+       if (!followedByActiveUser.isEmpty()) {
+            for (int i = 0; i < followedByActiveUser.size(); i++) {
+               int finalI = i;
+               db.collection(USER_KEY)
+                       .whereEqualTo(USER_ID, followedByActiveUser.get(i))
+                       .get()
+                       .addOnCompleteListener(task -> {
+                           if (task.isSuccessful()) {
+                               for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())) {
+                                   userDataList.add(new User(snapshot.get(USERNAME).toString(),
+                                           followedByActiveUser.get(finalI), snapshot.get(USER_ID).toString()));
+                                   Log.d(FOLLOWED, followedByActiveUser.get(finalI));
+                                   Collections.sort(userDataList, (user, t1) -> user.getUsername().compareTo(t1.getUsername()));
+                               }
+                               userAdapter.notifyDataSetChanged();
+                           }
+                       });
+           }
+       }
     }
 
     /**
@@ -156,13 +155,14 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
     // This is causing data to not show onCreation of activity
     // So just calling the showData() once the data has been returned successfully
     public void getFollowerList(){
-        db.collection("Following")
-                .whereEqualTo("followedBy",currentUser.getEmail())
+        db.collection(FOLLOWING_KEY)
+                .whereEqualTo(FOLLOWED_BY, currentUser.getUID())
                 .get().addOnCompleteListener(task -> {
-            if(task.isSuccessful()){
-                for(QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
-                    if(! followedByActiveUser.contains(snapshot.get("followed")) && (!snapshot.get("followed").toString().equals(currentUser.getEmail()))){
-                        followedByActiveUser.add(snapshot.get("followedBy").toString());
+            if(task.isSuccessful() && task.getResult() != null){
+                for(QueryDocumentSnapshot snapshot : task.getResult()){
+                    if(!followedByActiveUser.contains(snapshot.get(FOLLOWED))
+                            && (!snapshot.get(FOLLOWED).toString().equals(currentUser.getUID()) ) ){
+                        followedByActiveUser.add(snapshot.get(FOLLOWED_BY).toString());
                     }
                 }
                 showData();
@@ -181,13 +181,13 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
      * @param view view selected
      */
     public void onRemovePress(View view){
-        String cUserEmail = currentUser.getEmail();
+        String currentUID = currentUser.getUID();
         int position = followingListView.getPositionForView((View) view.getParent());
         //View v = followingListView.getChildAt(position);
 
         User removeFollower = (User) followingListView.getAdapter().getItem(position);
-        String removeFollowerEmail = removeFollower.getPassword();
-        removeFollowingFromList(db,removeFollowerEmail,cUserEmail);
+        String removeFollowerID = removeFollower.getID();
+        removeFollowingFromList(db,removeFollowerID,currentUID);
         followedByActiveUser.clear();
 
         userDataList.remove(position);

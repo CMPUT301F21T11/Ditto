@@ -61,7 +61,7 @@ public class FriendHabitActivity extends AppCompatActivity implements SwitchTabs
         //Set layouts
         super.onCreate(savedInstanceState);
         b = this.getIntent().getExtras();
-        followingDetails = b.getStringArray("following");
+        followingDetails = b.getStringArray(FOLLOWING_KEY);
         followedByMeName = followingDetails[0];
         followedByMeEmail = followingDetails[1];
 

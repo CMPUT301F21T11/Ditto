@@ -117,7 +117,8 @@ public class SignUpActivity extends AppCompatActivity {
                                 .setDisplayName(userData.get("name"))
                                 .build();
                         user.updateProfile(profileChangeRequest);
-                        storeUserData(user.getUid(), userData);
+                        userData.put("uid", user.getUid());
+                        storeUserData(userData);
                     } else {
                         // If sign in fails, display a message to the user.
                         Toast.makeText(SignUpActivity.this, task.getException().getMessage(),
@@ -128,13 +129,12 @@ public class SignUpActivity extends AppCompatActivity {
 
     /**
      * Push new User data to database
-     * @param uid uid of user
      * @param userData the data to store under the uid
      */
     // Store user data on Firestore
-    private void storeUserData(String uid, HashMap<String, String> userData) {
+    private void storeUserData(HashMap<String, String> userData) {
         CollectionReference collectionReference = db.collection("User");
-        DocumentReference documentReference = collectionReference.document(uid);
+        DocumentReference documentReference = collectionReference.document(userData.get("uid"));
 
         documentReference
                 .set(userData)

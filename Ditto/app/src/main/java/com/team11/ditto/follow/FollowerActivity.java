@@ -49,7 +49,7 @@ public class FollowerActivity extends AppCompatActivity implements SwitchTabs, F
     private ListView followingListView;
     private ArrayAdapter<User> userAdapter;
     private ArrayList<User> userDataList;
-    private static ArrayList<String> followers = new ArrayList<>();
+    private static final ArrayList<String> followers = new ArrayList<>();
     private FirebaseFirestore db;
     private ActiveUser currentUser;
 
@@ -96,21 +96,23 @@ public class FollowerActivity extends AppCompatActivity implements SwitchTabs, F
      *
      */
     public void showData(){
-        for (int i =0; i< followers.size(); i++){
-            int finalI = i;
-            db.collection("User")
-                    .whereEqualTo("email",followers.get(i).toString() )
-                    .get()
-                    .addOnCompleteListener(task -> {
-                        if(task.isSuccessful()){
-                            for(QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
-                                userDataList.add( new User(snapshot.get("name").toString(), followers.get(finalI))  );
-                                Collections.sort(userDataList, (user, t1) -> user.getUsername().compareTo(t1.getUsername()));
-                                Log.d("Followed", followers.get(finalI));
+        if (!followers.isEmpty()){
+            for (int i =0; i< followers.size(); i++){
+                int finalI = i;
+                db.collection(USER_KEY)
+                        .whereEqualTo(USER_ID, followers.get(i))
+                        .get()
+                        .addOnCompleteListener(task -> {
+                            if(task.isSuccessful()){
+                                for(QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
+                                    userDataList.add( new User(Objects.requireNonNull(snapshot.get(USERNAME)).toString(), followers.get(finalI))  );
+                                    Collections.sort(userDataList, (user, t1) -> user.getUsername().compareTo(t1.getUsername()));
+                                    Log.d("Followed", followers.get(finalI));
+                                }
+                                userAdapter.notifyDataSetChanged();
                             }
-                            userAdapter.notifyDataSetChanged();
-                        }
-                    });
+                        });
+            }
         }
     }
 
@@ -121,13 +123,13 @@ public class FollowerActivity extends AppCompatActivity implements SwitchTabs, F
     // This is causing data to not show onCreation of activity
     // So just calling the showData() once the data has been returned successfully
     public void getFollowersList(){
-        db.collection("Following")
-                .whereEqualTo("followed",currentUser.getEmail())
+        db.collection(FOLLOWING_KEY)
+                .whereEqualTo(FOLLOWED, currentUser.getID())
                 .get().addOnCompleteListener(task -> {
                     if(task.isSuccessful()){
                         for(QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
-                            if(! followers.contains(snapshot.get("followedBy"))){
-                                followers.add(snapshot.get("followedBy").toString());
+                            if(!followers.contains(snapshot.get(FOLLOWED_BY))){
+                                followers.add(Objects.requireNonNull(snapshot.get(FOLLOWED_BY)).toString());
                             }
                         }
                         showData();
@@ -146,13 +148,12 @@ public class FollowerActivity extends AppCompatActivity implements SwitchTabs, F
      * @param view view
      */
     public void onRemovePress(View view){
-        String cUserEmail = currentUser.getEmail();
+        String currentUID = currentUser.getUID();
         int position = followingListView.getPositionForView((View) view.getParent());
-        //View v = followingListView.getChildAt(position);
 
         User removeFollower = (User) followingListView.getAdapter().getItem(position);
-        String removeFollowerEmail = removeFollower.getPassword();
-        removeFollowerFromList(db,removeFollowerEmail,cUserEmail);
+        String removeFollowerID = removeFollower.getID();
+        removeFollowerFromList(db,removeFollowerID,currentUID);
         followers.clear();
 
         userDataList.remove(position);

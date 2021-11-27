@@ -50,7 +50,7 @@ public class SentRequestActivity extends AppCompatActivity
     private ArrayList<User> userDataList;
     FirebaseFirestore db;
     private ActiveUser currentUser;
-    private final ArrayList<String> sentRequestEmails = new ArrayList<>();
+    private final ArrayList<String> sentRequestIDs = new ArrayList<>();
 
     /**
      * Instructions for Activity creation
@@ -67,7 +67,7 @@ public class SentRequestActivity extends AppCompatActivity
 
         //Initialize values
         userDataList = new ArrayList<>();
-        userAdapter = new CustomListSentRequest(SentRequestActivity.this,userDataList);
+        userAdapter = new CustomListSentRequest(SentRequestActivity.this, userDataList);
         sentRequestListView.setAdapter(userAdapter);
         currentUser = new ActiveUser();
         db = FirebaseFirestore.getInstance();   // get db instance
@@ -76,7 +76,7 @@ public class SentRequestActivity extends AppCompatActivity
         currentTab(tabLayout, PROFILE_TAB);
         switchTabs(this, tabLayout, PROFILE_TAB);
 
-        getSentRequestUsers(db,currentUser,sentRequestEmails,userDataList, (CustomListSentRequest) userAdapter);
+        getSentRequestUsers(db, currentUser, sentRequestIDs, userDataList, (CustomListSentRequest) userAdapter);
 
 
     }
@@ -93,7 +93,7 @@ public class SentRequestActivity extends AppCompatActivity
 
 
     public void removeFromFollowRequestSent(View view){
-        String cUserEmail = currentUser.getEmail();
+        String currentUID = currentUser.getUID();
 
         int position  = sentRequestListView.getPositionForView((View) view.getParent());
         View v = sentRequestListView.getChildAt(position);
@@ -105,10 +105,10 @@ public class SentRequestActivity extends AppCompatActivity
         User wantToRemove = (User) sentRequestListView.getAdapter().getItem(position);
 
         // using email stored in password while fetching from db, since we don't want to know their actual password
-        String wantToRemoveEmail = wantToRemove.getPassword();
+        String wantToRemoveID = wantToRemove.getID();
 
-        cancel_follow_request(db,wantToRemoveEmail,cUserEmail);
-        removeFromSentRequest(db,wantToRemoveEmail,cUserEmail);
+        cancelFollowRequest(db,wantToRemoveID,currentUID);
+        removeFromSentRequest(db,wantToRemoveID,currentUID);
         userDataList.remove(wantToRemove);
         userAdapter.notifyDataSetChanged();
     }

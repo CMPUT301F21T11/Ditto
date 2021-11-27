@@ -23,7 +23,7 @@ import com.team11.ditto.profile_details.User;
 
 /**
  * Represents the User who is currently logged in
- * @author Courtenay Laing-Kobe
+ * @author Courtenay Laing-Kobe, Matt Asgari Motlagh
  */
 public class ActiveUser extends User {
 

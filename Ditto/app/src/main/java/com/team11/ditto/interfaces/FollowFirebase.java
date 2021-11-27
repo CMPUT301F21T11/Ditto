@@ -7,7 +7,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.team11.ditto.follow.CustomListSentRequest;
 import com.team11.ditto.follow.FollowRequestList;
 import com.team11.ditto.follow.FriendHabitList;
@@ -20,15 +19,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
 public interface FollowFirebase extends Firebase{
 
     String USER_KEY = "User";
     String FOLLOWING_KEY = "Following";
-
-    String USERNAME = "username";
-    String PASSWORD = "password";
+    String USERNAME = "name";
+    String EMAIL = "email";
 
     String FOLLOWED_BY = "followedBy";
     String FOLLOWED = "followed";
@@ -36,22 +32,8 @@ public interface FollowFirebase extends Firebase{
     String RECEIVED = "follow_requests";
 
 
-    default void getFeedIDs(FirebaseFirestore db, ActiveUser currentUser, ArrayList<String> followedIDs){
-
-        db.collection(FOLLOWING_KEY)
-                .whereEqualTo(FOLLOWED_BY,currentUser.getID())
-                .get().addOnCompleteListener( task -> {
-            if(task.isSuccessful()){
-                for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())) {
-
-                    //followedIDs.add();
-                }
-            }
-        });
-    }
-
     /**
-     * This method gets the email ids of all users followed by active user and store them in array
+     * This method gets the ids of all users followed by active user and store them in array
      * @param db Firebase cloud
      * @param currentUser Active User
      * @param followedByActiveUser Arraylist<String>
@@ -59,13 +41,13 @@ public interface FollowFirebase extends Firebase{
     default void getFollowedByActiveUser(FirebaseFirestore db, ActiveUser currentUser, ArrayList<String> followedByActiveUser){
 
         db.collection(FOLLOWING_KEY)
-                .whereEqualTo(FOLLOWED_BY,currentUser.getID())
+                .whereEqualTo(FOLLOWED_BY, currentUser.getUID())
                 .get().addOnCompleteListener( task -> {
             if(task.isSuccessful()){
                 for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
 
-                    if(! followedByActiveUser.contains(snapshot.get(FOLLOWED).toString())){
-                        followedByActiveUser.add(snapshot.get(FOLLOWED).toString());
+                    if(! followedByActiveUser.contains(Objects.requireNonNull(snapshot.get(FOLLOWED)).toString())){
+                        followedByActiveUser.add(Objects.requireNonNull(snapshot.get(FOLLOWED)).toString());
                     }
 
                 }
@@ -95,6 +77,7 @@ public interface FollowFirebase extends Firebase{
 
             if (value != null && value.exists()) {
                 List<String> listReceived = (List<String>) value.get(RECEIVED);
+                if (listReceived != null && !listReceived.isEmpty()){
                 for (int i = 0; i < listReceived.size(); i++) {
                     if (!re.contains(listReceived.get(i))) {
                         re.add(listReceived.get(i));
@@ -104,6 +87,7 @@ public interface FollowFirebase extends Firebase{
 
                         Log.d(ORDER, listReceived.get(i));
                     }
+                }
                 }
             }
 
@@ -122,17 +106,14 @@ public interface FollowFirebase extends Firebase{
                 db.collection(USER_KEY).whereEqualTo(USER_ID, receivedRequestIDs.get(i))
                         .get()
                         .addOnCompleteListener(task2 -> {
-                            if (task2.isSuccessful()) {
-                                for (int k = 0; k < 1; k++) {
-                                    if ((Objects.requireNonNull(task2.getResult())
-                                            .getDocuments().get(k).getString(USER_ID))
-                                            .equals(receivedID)) {
-                                        String name = task2.getResult()
-                                                .getDocuments().get(k).getString(USERNAME);
-                                        userDataList.add(new User(name, receivedID));
-
-                                    }
+                            if (task2.isSuccessful() && !receivedRequestIDs.isEmpty()) {
+                                if (Objects.equals(Objects.requireNonNull(task2.getResult())
+                                        .getDocuments().get(0).getString(USER_ID), receivedID)) {
+                                    String name = task2.getResult()
+                                            .getDocuments().get(0).getString(USERNAME);
+                                    userDataList.add(new User(name, receivedID));
                                 }
+
                                 userAdapter.notifyDataSetChanged();
                             }
                         });
@@ -155,8 +136,9 @@ public interface FollowFirebase extends Firebase{
         documentReference.get().addOnCompleteListener( task -> {
             if(task.isSuccessful()){
                 DocumentSnapshot documentSnapshot = task.getResult();
+                assert documentSnapshot != null;
                 List<String> listSent = (List<String>) documentSnapshot.get(SENT);
-                if(listSent != null){
+                if(listSent != null && !listSent.isEmpty()){
                     for (String str : listSent){
                         if(! sentRequestIDs.contains(str)){
                             sentRequestIDs.add(str);
@@ -165,24 +147,22 @@ public interface FollowFirebase extends Firebase{
                     }
                 }
             }
-            for(int i = 0;  i< sentRequestIDs.size();i++){
+            for(int i = 0;  i < sentRequestIDs.size(); i++){
                 String sentID = sentRequestIDs.get(i);
                 Log.d("Looping over", String.valueOf(sentRequestIDs.size()));
                 db.collection(USER_KEY).whereEqualTo(USER_ID,sentRequestIDs.get(i))
                         .get()
                         .addOnCompleteListener(task2 -> {
                             if(task2.isSuccessful()){
-                                for (int k =0; k < 1;k++){
-                                    if((Objects.requireNonNull(task2.getResult())
-                                            .getDocuments().get(k).getString(USER_ID))
-                                            .equals(sentID)){
-                                        String name = task2.getResult()
-                                                .getDocuments().get(k).getString(USERNAME);
-                                        userDataList.add(new User(name, sentID));
-                                        Log.d("Sent request", sentID);
-                                        userAdapter.notifyDataSetChanged();
-                                    }
+                                if(Objects.equals(Objects.requireNonNull(task2.getResult())
+                                        .getDocuments().get(0).getString(USER_ID), sentID)){
+                                    String name = task2.getResult()
+                                            .getDocuments().get(0).getString(USERNAME);
+                                    userDataList.add(new User(name, sentID));
+                                    Log.d("Sent request", sentID);
+                                    userAdapter.notifyDataSetChanged();
                                 }
+
                             }
                         });
             }
@@ -205,6 +185,7 @@ public interface FollowFirebase extends Firebase{
         documentReference.get().addOnCompleteListener(task -> {
             if(task.isSuccessful()){
                 DocumentSnapshot documentSnapshot = task.getResult();
+                assert documentSnapshot != null;
                 List<String> listSent = (List<String>) documentSnapshot.get(SENT);
                 if(listSent != null){
                     if(listSent.size()>0){
@@ -273,7 +254,7 @@ public interface FollowFirebase extends Firebase{
      * @param activeUserID email id of active user
      *
      */
-    default void cancel_follow_request(FirebaseFirestore db, String undesiredUserID, String activeUserID ){
+    default void cancelFollowRequest(FirebaseFirestore db, String undesiredUserID, String activeUserID ){
         db.collection(USERNAME)
                 .whereEqualTo(USER_ID,undesiredUserID)
                 .get().addOnCompleteListener( Task -> {
@@ -320,15 +301,15 @@ public interface FollowFirebase extends Firebase{
      * @param activeUserID   email of active user
      */
     default void removeFollowerFromList(FirebaseFirestore db, String removeFollowerID, String activeUserID){
-        db.collection("Following").whereEqualTo("followed", activeUserID)
-                .whereEqualTo("followedBy", removeFollowerID)
+        db.collection(FOLLOWING_KEY).whereEqualTo(FOLLOWED, activeUserID)
+                .whereEqualTo(FOLLOWED_BY, removeFollowerID)
                 .get()
                 .addOnCompleteListener( task -> {
                     if(task.isSuccessful()){
                         for (QueryDocumentSnapshot snapshot: Objects.requireNonNull(task.getResult())){
                             String id = snapshot.getId();
                             Log.d("ID TO DELETE ", id);
-                            db.collection("Following")
+                            db.collection(FOLLOWING_KEY)
                                     .document(id)
                                     .delete()
                                     .addOnSuccessListener(unused -> Log.d("Remove Follower ", "DocumentSnapshot successfully deleted!"))
@@ -347,15 +328,15 @@ public interface FollowFirebase extends Firebase{
      * @param activeUserID   email of active user
      */
     default void removeFollowingFromList(FirebaseFirestore db, String removeFollowingID, String activeUserID){
-        db.collection("Following").whereEqualTo("followed", removeFollowingID)
-                .whereEqualTo("followedBy", activeUserID)
+        db.collection(FOLLOWING_KEY).whereEqualTo(FOLLOWED, removeFollowingID)
+                .whereEqualTo(FOLLOWED_BY, activeUserID)
                 .get()
                 .addOnCompleteListener( task -> {
                     if(task.isSuccessful()){
                         for (QueryDocumentSnapshot snapshot: Objects.requireNonNull(task.getResult())){
                             String id = snapshot.getId();
                             Log.d("ID TO DELETE ", id);
-                            db.collection("Following")
+                            db.collection(FOLLOWING_KEY)
                                     .document(id)
                                     .delete()
                                     .addOnSuccessListener(unused -> Log.d("Remove Follower ", "DocumentSnapshot successfully deleted!"))
@@ -395,8 +376,9 @@ public interface FollowFirebase extends Firebase{
                                                 documentReference.get().addOnCompleteListener( task3 ->{
                                                     if(task3.isSuccessful()){
                                                         DocumentSnapshot documentSnapshot = task3.getResult();
-                                                        String title = documentSnapshot.get("title").toString();
-                                                        String reason = documentSnapshot.get("reason").toString();
+                                                        assert documentSnapshot != null;
+                                                        String title = Objects.requireNonNull(documentSnapshot.get("title")).toString();
+                                                        String reason = Objects.requireNonNull(documentSnapshot.get("reason")).toString();
                                                         Log.d("Title ", title);
                                                         Log.d("Reason ", reason);
                                                         habitData.add(new Habit(title,reason));

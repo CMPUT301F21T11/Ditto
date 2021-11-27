@@ -31,6 +31,7 @@ public interface Firebase {
 
     String TAG = "add";
     String USER_ID = "uid";
+    String HABIT_EVENT_KEY = "HabitEvent";
     String ORDER = "order";
 
     /**

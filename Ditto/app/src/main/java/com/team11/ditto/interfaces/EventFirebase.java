@@ -27,7 +27,6 @@ import javax.annotation.Nullable;
 
 public interface EventFirebase extends Firebase{
 
-    String HABIT_EVENT_KEY = "HabitEvent";
 
     String HABIT_ID = "habitID";
     String HABIT_TITLE = "habitTitle";

@@ -46,9 +46,12 @@ import java.util.Set;
  */
 public class SearchUserActivity extends AppCompatActivity implements SwitchTabs, FollowFirebase {
 
+    //MACROS
+    String SEND = "send";
+    String CANCEL = "cancel";
     //Declarations
     private TabLayout tabLayout;
-    private ListView user_listView;
+    private ListView userListView;
     private static ArrayAdapter<User> searchAdapter;
 
     private ArrayList<User> userDataList;
@@ -71,24 +74,19 @@ public class SearchUserActivity extends AppCompatActivity implements SwitchTabs,
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_users);
-        user_listView = findViewById(R.id.search_list_custom);
+        userListView = findViewById(R.id.search_list_custom);
         searchView = findViewById(R.id.search_user);
         tabLayout = findViewById(R.id.tabs);
-
 
         currentUser = new ActiveUser();         // get active  user
         db = FirebaseFirestore.getInstance();   // get db instance
 
-
-
         userDataList = new ArrayList<>();
         searchAdapter = new SearchList(SearchUserActivity.this,userDataList);
-        user_listView.setAdapter(searchAdapter);
+        userListView.setAdapter(searchAdapter);
 
         currentTab(tabLayout, PROFILE_TAB);
         switchTabs(this, tabLayout, PROFILE_TAB);
-
-        user_listView.setAdapter(searchAdapter);
 
         retrieveSentRequest(db,currentUser,sentRequest);
         getFollowedByActiveUser(db, currentUser, followedByActiveUser);
@@ -104,21 +102,22 @@ public class SearchUserActivity extends AppCompatActivity implements SwitchTabs,
 
             @Override
             public boolean onQueryTextChange(String s) {
-                String cUserEmail = currentUser.getEmail();
+                String currentUID = currentUser.getUID();
                 String s_lower = s.toLowerCase(Locale.getDefault());
                 userDataList.clear();
 
                 // this is where I am searching in the database
-                db.collection("User")
-                        .whereGreaterThanOrEqualTo("name",s.toUpperCase())
+                db.collection(USER_KEY)
+                        .whereGreaterThanOrEqualTo(USERNAME, s.toUpperCase())
                         .get()
                         .addOnCompleteListener(task -> {
                             if(task.isSuccessful()){
 
                                 for (int i = 0; i < Objects.requireNonNull(task.getResult()).size(); i++){
-                                    if(Objects.requireNonNull(task.getResult().getDocuments().get(i).getString("name")).toLowerCase().startsWith(s_lower)){
-                                        String username = task.getResult().getDocuments().get(i).getString("name");
-                                        String email = task.getResult().getDocuments().get(i).getString("email");
+                                    if(Objects.requireNonNull(task.getResult().getDocuments().get(i).getString(USERNAME)).toLowerCase().startsWith(s_lower)){
+                                        String username = task.getResult().getDocuments().get(i).getString(USERNAME);
+                                        String email = task.getResult().getDocuments().get(i).getString(EMAIL);
+                                        String id = task.getResult().getDocuments().get(i).getString(USER_ID);
 
                                         Log.d("TAG",email);
 
@@ -126,17 +125,19 @@ public class SearchUserActivity extends AppCompatActivity implements SwitchTabs,
                                         // Only add if there is something in search view
                                         // do not add the active user to search list
                                         // do not show if follow request already sent
-                                        if( (! s.equals("")) &(! Objects.requireNonNull(email).equals(cUserEmail) ) &(!sentRequest.contains(email)) &(! followedByActiveUser.contains(email))){
-                                            userDataList.add(new User(username, email));
+                                        if( (! s.equals(""))
+                                                &(! Objects.requireNonNull(email).equals(currentUID) )
+                                                &(!sentRequest.contains(email))
+                                                &(! followedByActiveUser.contains(email))){
+                                            userDataList.add(new User(username, email, id));
                                             searchAdapter.notifyDataSetChanged();
                                         }
                                         // loop through and find duplicates
                                         // if duplicate found, delete it
-                                        // In this case, I am using email as password (email is unique)
                                         // user is not setup as originally planned in db
                                         for (int i2 = 0; i2 < userDataList.size(); i2++){
                                             for (int j = i2+1; j < userDataList.size(); j++){
-                                                if(userDataList.get(i2).getPassword().equals(userDataList.get(j).getPassword())){
+                                                if(userDataList.get(i2).getEmail().equals(userDataList.get(j).getEmail())){
                                                     userDataList.remove(j);
                                                     j--;
                                                 }
@@ -177,40 +178,40 @@ public class SearchUserActivity extends AppCompatActivity implements SwitchTabs,
      */
     public void sendFollowRequest(View view) {
 
-        String cUserEmail = currentUser.getEmail();
+        String currentUID = currentUser.getUID();
 
-        int position  = user_listView.getPositionForView((View) view.getParent());
-        View v = user_listView.getChildAt(position);
+        int position  = userListView.getPositionForView((View) view.getParent());
+        View v = userListView.getChildAt(position);
         ImageView sr = (ImageView) v.findViewById(R.id.send_request);
 
         String currentImage = (String) sr.getTag();
 
         // user that I want to follow
-        User wantToFollow = (User) user_listView.getAdapter().getItem(position);
+        User wantToFollow = (User) userListView.getAdapter().getItem(position);
 
         // using email stored in password while fetching from db, since we don't want to know their actual password
-        String wantToFollowEmail = wantToFollow.getPassword();
+        String wantToFollowID = wantToFollow.getID();
 
 
 
         // if request is not sent, then send it
-        if (currentImage.equals("send")){
+        if (currentImage.equals(SEND)){
             sr.setImageResource(R.drawable.cancel_request);
-            sr.setTag("cancel");
-            send_follow_request(db,wantToFollowEmail,cUserEmail);
-            addToSentRequest(db,wantToFollowEmail,cUserEmail);
-            sentRequest.add(wantToFollowEmail);
+            sr.setTag(CANCEL);
+            send_follow_request(db,wantToFollowID,currentUID);
+            addToSentRequest(db,wantToFollowID,currentUID);
+            sentRequest.add(wantToFollowID);
 
         }
 
         // if request is already sent, then cancel request
         else{
             sr.setImageResource(R.drawable.ic_round_send_24);
-            sr.setTag("send");
+            sr.setTag(SEND);
 
-            cancel_follow_request(db,wantToFollowEmail,cUserEmail);
-            removeFromSentRequest(db,wantToFollowEmail,cUserEmail);
-            sentRequest.remove(wantToFollowEmail);
+            cancelFollowRequest(db,wantToFollowID,currentUID);
+            removeFromSentRequest(db,wantToFollowID,currentUID);
+            sentRequest.remove(wantToFollowID);
         }
         searchAdapter.notifyDataSetChanged();
     }

@@ -31,11 +31,12 @@ import com.team11.ditto.follow.FollowerActivity;
 import com.team11.ditto.follow.FollowingActivity;
 import com.team11.ditto.follow.SentRequestActivity;
 import com.team11.ditto.interfaces.Firebase;
+import com.team11.ditto.interfaces.FollowFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 import com.team11.ditto.profile_details.SearchUserActivity;
 
-public class UserProfileActivity extends AppCompatActivity implements SwitchTabs, Firebase {
+public class UserProfileActivity extends AppCompatActivity implements SwitchTabs, FollowFirebase {
 
     private ImageView imageView;
     private TextView followers;
@@ -82,7 +83,7 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
 
         // Get the current user's followers
         db.collection("Following")
-            .whereEqualTo("followed", currentUser.getEmail())
+            .whereEqualTo("followed", currentUser.getUID())
             .get()
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
@@ -94,7 +95,7 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
 
         // Get the accounts the current user is following
         db.collection("Following")
-            .whereEqualTo("followedBy", currentUser.getEmail())
+            .whereEqualTo("followedBy", currentUser.getUID())
             .get()
             .addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {

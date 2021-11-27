@@ -96,22 +96,21 @@ public class FollowRequestActivity extends AppCompatActivity
      */
     public void onAcceptPress(View view){
 
-        String cUserEmail = currentUser.getEmail();
+        String currentUID = currentUser.getID();
         int position = friendList.getPositionForView((View) view.getParent());
 
         User acceptRequest = (User) friendList.getAdapter().getItem(position);
-        String acceptRequestEmail = acceptRequest.getPassword();
+        String acceptRequestID = acceptRequest.getID();
         Map<String, Object> docData = new HashMap<>();
-        docData.put("followed",cUserEmail);
-        docData.put("followedBy", acceptRequestEmail);
+        docData.put(FOLLOWED,currentUID);
+        docData.put(FOLLOWED_BY, acceptRequestID);
 
-        db.collection("Following")
+        db.collection(FOLLOWING_KEY)
                 .add(docData);
 
-
         userDataList.remove(position);
-        cancel_follow_request(db,cUserEmail,acceptRequestEmail);
-        removeFromSentRequest(db,cUserEmail,acceptRequestEmail);
+        cancelFollowRequest(db,currentUID,acceptRequestID);
+        removeFromSentRequest(db,currentUID,acceptRequestID);
         userAdapter.notifyDataSetChanged();
     }
 
@@ -120,18 +119,18 @@ public class FollowRequestActivity extends AppCompatActivity
      * @param view view for item
      */
     public void onRejectPress(View view){
-        String cUserEmail = currentUser.getEmail();
+        String currentUID = currentUser.getID();
         int position = friendList.getPositionForView((View) view.getParent());
 
         User acceptRequest = (User) friendList.getAdapter().getItem(position);
-        String acceptRequestEmail = acceptRequest.getPassword();
+        String acceptRequestID = acceptRequest.getID();
         Map<String, Object> docData = new HashMap<>();
-        docData.put("followed",cUserEmail);
-        docData.put("followedBy", acceptRequestEmail);
+        docData.put("followed",currentUID);
+        docData.put("followedBy", acceptRequestID);
 
         userDataList.remove(position);
-        cancel_follow_request(db,cUserEmail,acceptRequestEmail);
-        removeFromSentRequest(db,cUserEmail,acceptRequestEmail);
+        cancelFollowRequest(db,currentUID,acceptRequestID);
+        removeFromSentRequest(db,currentUID,acceptRequestID);
         userAdapter.notifyDataSetChanged();
     }
 
