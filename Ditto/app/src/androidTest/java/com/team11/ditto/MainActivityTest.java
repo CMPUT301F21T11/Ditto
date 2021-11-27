@@ -26,9 +26,11 @@ import androidx.test.core.app.ActivityScenario;
 import androidx.test.espresso.Espresso;
 import androidx.test.espresso.action.ViewActions;
 import androidx.test.espresso.matcher.ViewMatchers;
+import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -39,6 +41,9 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4ClassRunner.class)
 public class MainActivityTest {
 
+    @Rule
+    public ActivityScenarioRule<MainActivity> activityRule = new ActivityScenarioRule<>(MainActivity.class);
+
 
     /**
      * test to check if the tabs change
@@ -46,7 +51,6 @@ public class MainActivityTest {
     @Test
     public void changTab() {
         // check if the tabs change
-        ActivityScenario<MainActivity> activityScenario = ActivityScenario.launch(MainActivity.class);
         onView(withId(R.id.tabs)).check(matches(isDisplayed()));
         Espresso.onView(ViewMatchers.withText("PROFILE")).perform(ViewActions.click()); // click on PROFILE TAB
         Espresso.onView(ViewMatchers.withText("DUE")).perform(ViewActions.click()); // click on PROFILE TAB
@@ -55,6 +59,14 @@ public class MainActivityTest {
         SystemClock.sleep(5000);
         onView(withId(R.id.add_habit_event)).perform(click());
         SystemClock.sleep(5000);
+    }
+
+    @Test
+    public void addHabitEventButton() {
+        // check if the plus button for adding a habit event works
+        Espresso.onView(ViewMatchers.withId(R.id.add_habit_event)).perform(ViewActions.click());
+        SystemClock.sleep(5000);
+
     }
 
     @After
