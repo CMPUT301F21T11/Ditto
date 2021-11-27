@@ -190,4 +190,24 @@ public interface EventFirebase extends Firebase{
                 .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
     }
 
+    default void resetDueToday(FirebaseFirestore db, ArrayList<HabitEvent> habitEventsData){
+        ActiveUser currentUser = new ActiveUser();
+        db.collection("Habits")
+                .whereEqualTo(USER_ID, currentUser.getUID())
+                .orderBy("position")
+                .addSnapshotListener((value, error) -> {
+                    if (value != null) {
+                        for (QueryDocumentSnapshot document : value) {
+                            //Check if we need to decrement since last time habit was updated
+                            Boolean doneToday = (Boolean) document.getData().get("habitDoneToday");
+                            Date currentDate = Calendar.getInstance().getTime();
+                            Date lastDone = document.getDate("lastDone");
+                            //If the current day is not the same anymore, then reset boolean
+
+                        }
+
+                    }
+                });
+    }
+
 }
