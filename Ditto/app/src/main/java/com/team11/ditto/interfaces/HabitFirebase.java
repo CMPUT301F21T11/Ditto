@@ -3,13 +3,8 @@ package com.team11.ditto.interfaces;
 import android.util.Log;
 import android.widget.Spinner;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -18,21 +13,16 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.team11.ditto.MyHabitActivity;
 import com.team11.ditto.habit.Habit;
 import com.team11.ditto.habit.HabitRecyclerAdapter;
 import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.login.ActiveUser;
 
-import org.w3c.dom.Document;
-
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -167,7 +157,7 @@ public interface HabitFirebase extends EventFirebase, Days{
         habitData.put("habitDoneToday", false);
 
         //this field is used to add the current timestamp of the item, to be used to order the items
-        //habitData.put("order", currentTime);
+        habitData.put("order", currentTime);
 
         //pushToDB(database, HABIT_KEY, habitID, habitData);
 
@@ -177,21 +167,18 @@ public interface HabitFirebase extends EventFirebase, Days{
         database.collection(HABIT_KEY)
                 .whereEqualTo("uid", currentUser.getUID())
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            int count = 0;
-                            for (DocumentSnapshot document : task.getResult()) {
-                                count++;
-                            }
-                            habit.setPosition(count);
-                            habitData.put("position", count);
-                            pushToDB(database,HABIT_KEY,habitID, habitData);
-                            Log.d(TAG, "SET POSITION " + habit.getPosition());
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        int count = 0;
+                        for (DocumentSnapshot ignored : task.getResult()) {
+                            count++;
                         }
+                        habit.setPosition(count);
+                        habitData.put("position", count);
+                        pushToDB(database,HABIT_KEY,habitID, habitData);
+                        Log.d(TAG, "SET POSITION " + habit.getPosition());
+                    } else {
+                        Log.d(TAG, "Error getting documents: ", task.getException());
                     }
                 });
 
@@ -257,18 +244,8 @@ public interface HabitFirebase extends EventFirebase, Days{
         //set position of from habit to toPos
         movedRef
                 .update("position", toPos)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        Log.d(TAG, "DocumentSnapshot successfully updated!");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error updating document", e);
-                    }
-                });
+                .addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!"))
+                .addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
 
         //decrement all habit positions after the "fromPos"
         int c = fromPos;
@@ -278,18 +255,8 @@ public interface HabitFirebase extends EventFirebase, Days{
             //set position of from habit to toPos
             docRef
                     .update("position", c)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void unused) {
-                            Log.d(TAG, "DocumentSnapshot successfully updated!");
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.w(TAG, "Error updating document", e);
-                        }
-                    });
+                    .addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!"))
+                    .addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
             c--;
 
         }
@@ -303,18 +270,8 @@ public interface HabitFirebase extends EventFirebase, Days{
             //set position of from habit to toPos
             docRef
                     .update("position", counter)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void unused) {
-                            Log.d(TAG, "DocumentSnapshot successfully updated!");
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.w(TAG, "Error updating document", e);
-                        }
-                    });
+                    .addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!"))
+                    .addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
             counter++;
 
         }
@@ -327,52 +284,39 @@ public interface HabitFirebase extends EventFirebase, Days{
         //get days ...
         final Integer[] daysOfWeek = new Integer[7];
         DocumentReference document = db.collection(HABIT_KEY).document(newHabitEvent.getHabitId());
-        document.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot documentSnapshot = task.getResult();
-                    if (documentSnapshot.exists()) {
-                        //retrieve the order value
-                        int numDays = 7;
-                        for (int i=0;i<numDays;i++) {
-                            Boolean isDay; //is the day "true" in for this Habit
-                            String day = daysForHabit(i);
-                            isDay = documentSnapshot.getBoolean(day);
-                            if (isDay==true) { daysOfWeek[i] = i+1; }
-                            else { daysOfWeek[i] = 0; }
-                        }
-                        //if today is in the set of days chosen, update habitDoneToday to true
-                        setHabitDoneToday(document, daysOfWeek, today);
+        document.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot documentSnapshot = task.getResult();
+                if (documentSnapshot.exists()) {
+                    //retrieve the order value
+                    int numDays = 7;
+                    for (int i=0;i<numDays;i++) {
+                        Boolean isDay; //is the day "true" in for this Habit
+                        String day = daysForHabit(i);
+                        isDay = documentSnapshot.getBoolean(day);
+                        if (isDay) { daysOfWeek[i] = i+1; }
+                        else { daysOfWeek[i] = 0; }
                     }
-                    else {
-                        Log.d(TAG, "document does not exist!!");
-                    }
+                    //if today is in the set of days chosen, update habitDoneToday to true
+                    setHabitDoneToday(document, daysOfWeek, today);
                 }
                 else {
-                    Log.d(TAG, task.getException().toString());
+                    Log.d(TAG, "document does not exist!!");
                 }
+            }
+            else {
+                Log.d(TAG, task.getException().toString());
             }
         });
     }
 
     default void setHabitDoneToday(DocumentReference document, Integer[] daysOfWeek, int today) {
-        for (int i=0; i<daysOfWeek.length;i++) {
-            if (today == daysOfWeek[i]) {
+        for (Integer integer : daysOfWeek) {
+            if (today == integer) {
                 //then we set ishabitDone to true
                 document.update("habitDoneToday", true)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void unused) {
-                                Log.d(TAG, "DocumentSnapshot successfully updated!");
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.w(TAG, "Error updating document", e);
-                            }
-                        });
+                        .addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!"))
+                        .addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
 
             }
         }

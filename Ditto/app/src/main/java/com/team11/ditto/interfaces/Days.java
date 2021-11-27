@@ -63,12 +63,13 @@ public interface Days {
     default void updateDaysFromData(ArrayList<String> dates, Map<String, Object> data){
 
         dates.clear();
-        for (int i = 0; i<7; i++){
+        for (int i = 0; i<NUM_DAYS; i++){
             Object current = data.get(WEEKDAYS[i]);
             if ( current != null && (boolean) current){
                 dates.add(WEEKDAYS[i]);
             }
         }
     }
+
 
 }

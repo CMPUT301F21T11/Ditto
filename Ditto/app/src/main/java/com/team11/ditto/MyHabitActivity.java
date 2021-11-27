@@ -53,14 +53,10 @@ import com.team11.ditto.login.ActiveUser;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Map;
 
 /**To display the listview of Habits for a user in the "My Habits" tab
  *Allow a user to add a habit, swipe left to delete a habit
- * TODO:
- *     -A user can add a habit to the database, but cannot delete a habit from the db yet
- *     -Add the days of week to db
- *     -Allow user to edit an existing habit
+ * TODO
  *     -Visually make it better
  *     -Get the happy faces for the level of completion for each habit
  *     -WHEN YOU DELETE A HABIT, ALSO DELETE THE HABIT EVENT ITS ASSOCIATED WITH
@@ -105,7 +101,6 @@ public class MyHabitActivity extends AppCompatActivity implements
         tabLayout = findViewById(R.id.tabs);
 
         habitRecyclerAdapter = new HabitRecyclerAdapter(habitDataList, this, this);
-
         LinearLayoutManager manager = new LinearLayoutManager(this);
         habitListView.setLayoutManager(manager);
         habitListView.setAdapter(habitRecyclerAdapter);
@@ -122,7 +117,7 @@ public class MyHabitActivity extends AppCompatActivity implements
                             String title = (String) document.getData().get("title");
                             String reason = (String) document.getData().get("reason");
                             ArrayList<String> days = new ArrayList<>();
-                            handleDays(days, document.getData());
+                            this.updateDaysFromData(days, document.getData());
                             boolean isPublic;
                             if (document.getData().get("is_public") == null){
                                 isPublic = true;
@@ -238,16 +233,11 @@ public class MyHabitActivity extends AppCompatActivity implements
                 }
             }
 
-
-
-
             Log.d(TAG, "FROM POS " + fromPos+" TITLE "+to.getTitle());
             Log.d(TAG, "TO POS " + toPos);
             Log.d(TAG, "ARRAY TO UPDATE " + updateHabits);
 
             reOrderPosition(db, movedObject, fromPos, toPos, updateHabits, decrementHabits);
-
-
 
             return false;
         }
@@ -312,15 +302,7 @@ public class MyHabitActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
-    public void handleDays(ArrayList<String> dates, Map<String, Object> objectMap){
 
-        for (int i = 0; i < NUM_DAYS; i++) {
-            if (objectMap.get(WEEKDAYS[i]) != null && (boolean) objectMap.get(WEEKDAYS[i])) {
-                dates.add(WEEKDAYS[i]);
-            }
-        }
-
-    }
 
     @Override
     public void onPause(){

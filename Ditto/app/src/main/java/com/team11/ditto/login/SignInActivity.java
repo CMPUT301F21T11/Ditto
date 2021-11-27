@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -78,8 +79,10 @@ public class SignInActivity extends AppCompatActivity {
                         startActivity(intent);
                     } else {
                         Log.d(TAG, "loginUserWithEmail:failure");
+                        Toast.makeText(getApplicationContext(),"Wrong username/password.",Toast.LENGTH_LONG).show();
                     }
                 });
+
         });
     }
 
