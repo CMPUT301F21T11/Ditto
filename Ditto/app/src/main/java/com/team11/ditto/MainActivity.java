@@ -155,78 +155,6 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 
         fadeInView();
 
-        getHabitsDue();
-
-
-
-
-    }
-
-    private void getHabitsDue() {
-        // Load habits
-        currentUser = new ActiveUser();
-        db.collection("Habit")
-                .whereEqualTo("uid", currentUser.getUID())
-                .addSnapshotListener((value, error) -> {
-                    habits.clear();
-                    if (value != null) {
-                        for (QueryDocumentSnapshot document: value) {
-                            // For each document parse the data and create a habit object
-                            String habitID = (String) document.getId();
-                            ArrayList<String> days = new ArrayList<>();
-                            updateDaysFromData(days, document.getData());
-                            String dayItIs = DueTodayActivity.toTitleCase(LocalDate.now().getDayOfWeek().toString());
-                            if (days.contains(dayItIs)) {
-                                String title = (String) document.getData().get("title");
-                                String reason = (String) document.getData().get("reason");
-                                boolean isPublic = (boolean) document.getData().get("is_public");
-                                Habit habit = new Habit(title, reason, days, isPublic);
-                                habit.setHabitID(habitID);
-                                habits.add(habit);
-
-                            }// Add to the habit list
-                        }
-                        checkDecrement(this, habits);
-
-                    }
-                });
-    }
-
-    public static void checkDecrement(Context context, ArrayList<Habit> habits) {
-        Intent _intent = new Intent(context, Decrement.class);
-
-
-        ArrayList<String> habitIDs = new ArrayList<>();
-
-
-
-        for(int i = 0; i < habits.size(); i++){
-            habitIDs.add(habits.get(i).getHabitID());
-        }
-
-
-        Log.d("BRUH69", String.valueOf(habitIDs));
-
-        _intent.putStringArrayListExtra("HABITS_DUE", habitIDs);
-
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, PendingIntent.FLAG_ONE_SHOT);
-        AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 21);
-        calendar.set(Calendar.MINUTE, 2);
-        calendar.set(Calendar.SECOND, 0);
-
-        if (calendar.before(Calendar.getInstance())) { //if its in the past, dont do anything now
-            //do nothing
-        }
-        else {
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
-
-        }
-
-
-
     }
 
 
@@ -292,9 +220,12 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         }
     }
 
+
+    /**
+     * Get all the user following
+     * Then query their info and the user's
+     */
     public void queryList(){
-        //First get all the user following
-        //Then query their info and the user's
         db = FirebaseFirestore.getInstance();
 
         db.collection(HABIT_EVENT_KEY)
@@ -338,8 +269,6 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 
                             });
 
-
-                            //habitEventsData.add(new HabitEvent(eventID, eHabitId, eComment, ePhoto, eLocation, eHabitTitle, uid));  // Add the event to the event list
                         }
                     }
                 });

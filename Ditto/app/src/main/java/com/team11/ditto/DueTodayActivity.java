@@ -129,6 +129,10 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
         startActivity(intent);
     }
 
+    /**
+     * returns the current date
+     * @return date a String format of the current date
+     */
     @RequiresApi(api = Build.VERSION_CODES.O)
     private String buildDateString(){
 
@@ -168,44 +172,6 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
         overridePendingTransition(0,0);
         super.onPause();
     }
-
-    public static void checkDecrement(Context context, ArrayList<Habit> habits) {
-        Intent _intent = new Intent(context, Decrement.class);
-
-
-        ArrayList<String> habitIDs = new ArrayList<>();
-
-
-
-        for(int i = 0; i < habits.size(); i++){
-            habitIDs.add(habits.get(i).getHabitID());
-        }
-
-
-            Log.d("BRUH69", String.valueOf(habitIDs));
-
-        _intent.putStringArrayListExtra("HABITS_DUE", habitIDs);
-
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, PendingIntent.FLAG_ONE_SHOT);
-        AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 19);
-        calendar.set(Calendar.MINUTE, 54);
-        calendar.set(Calendar.SECOND, 0);
-
-        if (calendar.before(Calendar.getInstance())) { //if its in the past, dont do anything now
-            //do nothing
-        }
-        else {
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
-
-        }
-
-
-
-    }
-
 
 
 }

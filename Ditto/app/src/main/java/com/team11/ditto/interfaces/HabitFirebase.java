@@ -385,8 +385,6 @@ public interface HabitFirebase extends EventFirebase, Days{
      * @param today the current day as an int (1-7)
      */
     default void setHabitDoneToday(DocumentReference document, Integer[] daysOfWeek, int today, int StreakScore) {
-
-        //int StreakScore = Integer.parseInt(document.get().getResult().get("streaks").toString());
         int newStreak = (int) (StreakScore + 2);
         newStreak = Math.min(8,newStreak);
         String newStreakStr = String.valueOf(newStreak);
@@ -451,7 +449,7 @@ public interface HabitFirebase extends EventFirebase, Days{
     }
 
     /**
-     * This method will update the streak score of a habit in db
+     * This method will update the streak score of a habit in db, accounts for days since the last opening of the app
      * @param db FirebaseFirestore
      * @param currentUser ActiveUser
      * @param dueTodayAdapter CustomListDue adapter
