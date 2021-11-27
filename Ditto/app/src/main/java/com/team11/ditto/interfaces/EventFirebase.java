@@ -4,9 +4,13 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -190,7 +194,7 @@ public interface EventFirebase extends Firebase{
                 .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
     }
 
-    default void resetDueToday(FirebaseFirestore db, ArrayList<HabitEvent> habitEventsData){
+    default void resetDueToday(FirebaseFirestore db){
         ActiveUser currentUser = new ActiveUser();
         db.collection("Habits")
                 .whereEqualTo(USER_ID, currentUser.getUID())
@@ -201,13 +205,48 @@ public interface EventFirebase extends Firebase{
                             //Check if we need to decrement since last time habit was updated
                             Boolean doneToday = (Boolean) document.getData().get("habitDoneToday");
                             Date currentDate = Calendar.getInstance().getTime();
-                            Date lastDone = document.getDate("lastDone");
+                            Calendar cDate = Calendar.getInstance();
+                            cDate.setTime(currentDate);
+
+                            Date lastDone = document.getDate("Last_Adjusted");
+                            Calendar lDone = Calendar.getInstance();
+                            lDone.setTime(lastDone);
+
+                            String habitID = document.getId();
+
+
                             //If the current day is not the same anymore, then reset boolean
+                            boolean sameDay = cDate.get(Calendar.DAY_OF_YEAR) == lDone.get(Calendar.DAY_OF_YEAR) &&
+                                    cDate.get(Calendar.YEAR) == lDone.get(Calendar.YEAR);
+
+
+                            if (!sameDay) {
+                                //how many days they missed inbetween currentday and last decremented
+                                DocumentReference movedRef = db.collection("Habit").document(habitID);
+                                //set habitDoneToday to false
+                                movedRef
+                                        .update("habitDoneToday", false)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void unused) {
+                                                Log.d(TAG, "DocumentSnapshot successfully updated!");
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.w(TAG, "Error updating document", e);
+                                            }
+                                        });
+
+                            }
+
 
                         }
 
                     }
                 });
+
     }
 
 }
