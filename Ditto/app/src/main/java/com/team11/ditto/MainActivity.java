@@ -36,9 +36,11 @@ import com.team11.ditto.habit_event.AddHabitEventFragment;
 import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.habit_event.HabitEventRecyclerAdapter;
 import com.team11.ditto.habit_event.ViewEventActivity;
+import com.team11.ditto.interfaces.FollowFirebase;
 import com.team11.ditto.interfaces.HabitFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
+import com.team11.ditto.profile_details.User;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -53,11 +55,13 @@ import java.util.Calendar;
  */
 
 public class MainActivity extends AppCompatActivity implements SwitchTabs,
-        AddHabitEventFragment.OnFragmentInteractionListener, HabitFirebase,
+        AddHabitEventFragment.OnFragmentInteractionListener, HabitFirebase, FollowFirebase,
         HabitEventRecyclerAdapter.EventClickListener {
+
     private TabLayout tabLayout;
     public static String EXTRA_HABIT_EVENT = "EXTRA_HABIT_EVENT";
     private ArrayList<HabitEvent> habitEventsData;
+    private ArrayList<String> idList;
 
     private RecyclerView habitEventList;
     private HabitEventRecyclerAdapter habitEventRecyclerAdapter;
@@ -74,6 +78,8 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+
         // If device has userID, go to app - else, go to login
         if (new ActiveUser().getUID().equals("")) {
             Intent intent = new Intent(this, WelcomeActivity.class);
@@ -87,28 +93,38 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 
         habitEventList = findViewById(R.id.list_habit_event);
         habitEventsData = new ArrayList<>();
+        idList = new ArrayList<>();
+        idList.add(new ActiveUser().getUID());
+        getFollowedByActiveUser(db, new ActiveUser(), idList);
 
         habitEventRecyclerAdapter = new HabitEventRecyclerAdapter(this, habitEventsData, this);
 
         // Load the Habit Event data (This will be converted to use the Firebase interface in the future)
         db = FirebaseFirestore.getInstance();
-        db.collection(HABIT_EVENT_KEY)
-                .whereEqualTo("uid", FirebaseAuth.getInstance().getUid())  // Query only current user events for now
-                .addSnapshotListener((value, error) -> {
-                    habitEventsData.clear();
-                    for (QueryDocumentSnapshot doc: value) {
-                        // Parse the event data for each document
-                        String eventID = (String) doc.getId();
-                        String eHabitId = (String) doc.getData().get("habitID");
-                        String eHabitTitle = (String) doc.getData().get("habitTitle");
-                        String eComment = (String) doc.getData().get("comment");
-                        String ePhoto = (String) doc.getData().get("photo");
-                        String eLocation = (String) doc.getData().get("location");
-                        String uid = (String) doc.getData().get("uid");
-                        habitEventsData.add(new HabitEvent(eventID, eHabitId, eComment, ePhoto, eLocation, eHabitTitle, uid));  // Add the event to the event list
-                    }
-                    habitEventRecyclerAdapter.notifyDataSetChanged();  // Refresh the recycler
-                });
+        for (int i = 0; i < idList.size(); i++){
+            try {
+                db.collection(HABIT_EVENT_KEY)
+                        .whereEqualTo(USER_ID, idList.get(i))
+                        .addSnapshotListener((value, error) -> {
+                            habitEventsData.clear();
+                            for (QueryDocumentSnapshot doc : value) {
+                                // Parse the event data for each document
+                                String eventID = (String) doc.getId();
+                                String eHabitId = (String) doc.getData().get("habitID");
+                                String eHabitTitle = (String) doc.getData().get("habitTitle");
+                                String eComment = (String) doc.getData().get("comment");
+                                String ePhoto = (String) doc.getData().get("photo");
+                                String eLocation = (String) doc.getData().get("location");
+                                String uid = (String) doc.getData().get("uid");
+                                habitEventsData.add(new HabitEvent(eventID, eHabitId, eComment, ePhoto, eLocation, eHabitTitle, uid));  // Add the event to the event list
+                            }
+                            habitEventRecyclerAdapter.notifyDataSetChanged();  // Refresh the recycler
+                        });
+            }
+            catch (NullPointerException skip){
+                continue;
+            }
+        }
 
         LinearLayoutManager manager = new LinearLayoutManager(this);
         habitEventList.setLayoutManager(manager);

@@ -83,7 +83,7 @@ public class SignUpActivity extends AppCompatActivity {
             if (TextUtils.isEmpty(name)) {
                 nameField.setError("Name is required.");
             } else if (TextUtils.isEmpty(email)) {
-                emailField.setError("email is required.");
+                emailField.setError("Email is required.");
             } else if (TextUtils.isEmpty(password)) {
                 passwordField.setError("Password is required.");
             } else if (TextUtils.isEmpty(passwordConfirm)) {

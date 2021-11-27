@@ -28,25 +28,26 @@ public interface FollowFirebase extends Firebase{
     String FOLLOWING_KEY = "Following";
 
     String USERNAME = "username";
-    String EMAIL = "email";
     String PASSWORD = "password";
 
     String FOLLOWED_BY = "followedBy";
     String FOLLOWED = "followed";
     String SENT = "sent_requests";
     String RECEIVED = "follow_requests";
-    ArrayList<User> usersFirebase = new ArrayList<>();
 
 
-    default void logUserData(@Nullable QuerySnapshot queryDocumentSnapshots) {
-        if (queryDocumentSnapshots != null) {
-            for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                Log.d(TAG, String.valueOf(doc.getData().get(USERNAME)));
-                String uUsername = (String) doc.getData().get(USERNAME);
-                String uPassword = (String) doc.getData().get(PASSWORD);
-                usersFirebase.add(new User(uUsername, uPassword));
+    default void getFeedIDs(FirebaseFirestore db, ActiveUser currentUser, ArrayList<String> followedIDs){
+
+        db.collection(FOLLOWING_KEY)
+                .whereEqualTo(FOLLOWED_BY,currentUser.getID())
+                .get().addOnCompleteListener( task -> {
+            if(task.isSuccessful()){
+                for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())) {
+
+                    //followedIDs.add();
+                }
             }
-        }
+        });
     }
 
     /**
@@ -58,7 +59,7 @@ public interface FollowFirebase extends Firebase{
     default void getFollowedByActiveUser(FirebaseFirestore db, ActiveUser currentUser, ArrayList<String> followedByActiveUser){
 
         db.collection(FOLLOWING_KEY)
-                .whereEqualTo(FOLLOWED_BY,currentUser.getEmail())
+                .whereEqualTo(FOLLOWED_BY,currentUser.getID())
                 .get().addOnCompleteListener( task -> {
             if(task.isSuccessful()){
                 for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
@@ -79,11 +80,11 @@ public interface FollowFirebase extends Firebase{
      * This method retrieves all User objects who sent follow request to active user in real time
      * @param db Firebase cloud
      * @param currentUser active user
-     * @param receivedRequestEmails list of emails received follow requests from
+     * @param receivedRequestIDs list of User IDs received follow requests from
      * @param userDataList list of User object
      * @param userAdapter Custom adapter to show user object
      */
-    default void getReceivedRequestUsers(FirebaseFirestore db, ActiveUser currentUser, ArrayList<String> receivedRequestEmails, ArrayList<User> userDataList, FollowRequestList userAdapter){
+    default void getReceivedRequestUsers(FirebaseFirestore db, ActiveUser currentUser, ArrayList<String> receivedRequestIDs, ArrayList<User> userDataList, FollowRequestList userAdapter){
         DocumentReference documentReference = db.collection(USER_KEY).document(currentUser.getUID());
         documentReference.addSnapshotListener((value, error) -> {
             if (error != null) {
@@ -98,8 +99,8 @@ public interface FollowFirebase extends Firebase{
                     if (!re.contains(listReceived.get(i))) {
                         re.add(listReceived.get(i));
                     }
-                    if(! receivedRequestEmails.contains(listReceived.get(i))){
-                        receivedRequestEmails.add(receivedRequestEmails.size(), listReceived.get(i));
+                    if(! receivedRequestIDs.contains(listReceived.get(i))){
+                        receivedRequestIDs.add(receivedRequestIDs.size(), listReceived.get(i));
 
                         Log.d(ORDER, listReceived.get(i));
                     }
@@ -107,28 +108,28 @@ public interface FollowFirebase extends Firebase{
             }
 
 
-            for(int k =0; k< receivedRequestEmails.size(); k++){
-                if(! re.contains(receivedRequestEmails.get(k))){
-                    receivedRequestEmails.remove(k);
+            for(int k =0; k< receivedRequestIDs.size(); k++){
+                if(! re.contains(receivedRequestIDs.get(k))){
+                    receivedRequestIDs.remove(k);
                 }
             }
 
             userDataList.clear();
 
-            for (int i = 0; i < receivedRequestEmails.size(); i++) {
+            for (int i = 0; i < receivedRequestIDs.size(); i++) {
 
-                String receivedEmail = receivedRequestEmails.get(i);
-                db.collection(USER_KEY).whereEqualTo(EMAIL, receivedRequestEmails.get(i))
+                String receivedID = receivedRequestIDs.get(i);
+                db.collection(USER_KEY).whereEqualTo(USER_ID, receivedRequestIDs.get(i))
                         .get()
                         .addOnCompleteListener(task2 -> {
                             if (task2.isSuccessful()) {
                                 for (int k = 0; k < 1; k++) {
                                     if ((Objects.requireNonNull(task2.getResult())
-                                            .getDocuments().get(k).getString(EMAIL))
-                                            .equals(receivedEmail)) {
+                                            .getDocuments().get(k).getString(USER_ID))
+                                            .equals(receivedID)) {
                                         String name = task2.getResult()
                                                 .getDocuments().get(k).getString(USERNAME);
-                                        userDataList.add(new User(name, receivedEmail));
+                                        userDataList.add(new User(name, receivedID));
 
                                     }
                                 }
@@ -145,11 +146,11 @@ public interface FollowFirebase extends Firebase{
      * This method retrieves all User objects to whom follow requests are sent by active user
      * @param db Firebase cloud
      * @param currentUser active user
-     * @param sentRequestEmails list of emails sent follow requests to
+     * @param sentRequestIDs list of emails sent follow requests to
      * @param userDataList list of User object
      * @param userAdapter  Custom adapter to show user objects
      */
-    default void getSentRequestUsers(FirebaseFirestore db, ActiveUser currentUser, ArrayList<String> sentRequestEmails, ArrayList<User> userDataList, CustomListSentRequest userAdapter){
+    default void getSentRequestUsers(FirebaseFirestore db, ActiveUser currentUser, ArrayList<String> sentRequestIDs, ArrayList<User> userDataList, CustomListSentRequest userAdapter){
         DocumentReference documentReference = db.collection(USER_KEY).document(currentUser.getUID());
         documentReference.get().addOnCompleteListener( task -> {
             if(task.isSuccessful()){
@@ -157,28 +158,28 @@ public interface FollowFirebase extends Firebase{
                 List<String> listSent = (List<String>) documentSnapshot.get(SENT);
                 if(listSent != null){
                     for (String str : listSent){
-                        if(! sentRequestEmails.contains(str)){
-                            sentRequestEmails.add(str);
+                        if(! sentRequestIDs.contains(str)){
+                            sentRequestIDs.add(str);
                             Log.d("ADDED TO SENT", str);
                         }
                     }
                 }
             }
-            for(int i = 0;  i< sentRequestEmails.size();i++){
-                String sentEmail = sentRequestEmails.get(i);
-                Log.d("Looping over", String.valueOf(sentRequestEmails.size()));
-                db.collection(USER_KEY).whereEqualTo(EMAIL,sentRequestEmails.get(i))
+            for(int i = 0;  i< sentRequestIDs.size();i++){
+                String sentID = sentRequestIDs.get(i);
+                Log.d("Looping over", String.valueOf(sentRequestIDs.size()));
+                db.collection(USER_KEY).whereEqualTo(USER_ID,sentRequestIDs.get(i))
                         .get()
                         .addOnCompleteListener(task2 -> {
                             if(task2.isSuccessful()){
                                 for (int k =0; k < 1;k++){
                                     if((Objects.requireNonNull(task2.getResult())
-                                            .getDocuments().get(k).getString(EMAIL))
-                                            .equals(sentEmail)){
+                                            .getDocuments().get(k).getString(USER_ID))
+                                            .equals(sentID)){
                                         String name = task2.getResult()
                                                 .getDocuments().get(k).getString(USERNAME);
-                                        userDataList.add(new User(name, sentEmail));
-                                        Log.d("Sent request", sentEmail);
+                                        userDataList.add(new User(name, sentID));
+                                        Log.d("Sent request", sentID);
                                         userAdapter.notifyDataSetChanged();
                                     }
                                 }
@@ -221,12 +222,12 @@ public interface FollowFirebase extends Firebase{
     /**
      *
      * @param db Firebase cloud
-     * @param undesiredUserEmail email id of user Active user doesn't want to follow
+     * @param undesiredUserID email id of user Active user doesn't want to follow
      * @param activeUserEmail email id of active user
      */
-    default void removeFromSentRequest(FirebaseFirestore db, String undesiredUserEmail, String activeUserEmail){
+    default void removeFromSentRequest(FirebaseFirestore db, String undesiredUserID, String activeUserEmail){
         db.collection(USER_KEY)
-                .whereEqualTo(EMAIL,activeUserEmail)
+                .whereEqualTo(USER_ID,activeUserEmail)
                 .get().addOnCompleteListener( Task -> {
             if (Task.isSuccessful()){
                 for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(Task.getResult())){
@@ -234,7 +235,7 @@ public interface FollowFirebase extends Firebase{
                     String id = snapshot.getId();
                     db.collection((USER_KEY))
                             .document(id)
-                            .update(SENT, FieldValue.arrayRemove(undesiredUserEmail));
+                            .update(SENT, FieldValue.arrayRemove(undesiredUserID));
                 }
             }
         } );
@@ -245,12 +246,12 @@ public interface FollowFirebase extends Firebase{
     /**
      *
      * @param db Firebase cloud
-     * @param desiredUserEmail email id of desired user
-     * @param activeUserEmail email id of active user
+     * @param desiredUserID email id of desired user
+     * @param activeUserID email id of active user
      */
-    default void addToSentRequest(FirebaseFirestore db, String desiredUserEmail, String activeUserEmail){
+    default void addToSentRequest(FirebaseFirestore db, String desiredUserID, String activeUserID){
         db.collection(USER_KEY)
-                .whereEqualTo(EMAIL,activeUserEmail)
+                .whereEqualTo(USER_ID,activeUserID)
                 .get().addOnCompleteListener( Task -> {
             if (Task.isSuccessful()){
                 for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(Task.getResult())){
@@ -258,7 +259,7 @@ public interface FollowFirebase extends Firebase{
                     String id = snapshot.getId();
                     db.collection((USER_KEY))
                             .document(id)
-                            .update(SENT, FieldValue.arrayUnion(desiredUserEmail));
+                            .update(SENT, FieldValue.arrayUnion(desiredUserID));
                 }
             }
         } );
@@ -268,13 +269,13 @@ public interface FollowFirebase extends Firebase{
     /**
      * Cancel follow request from active user to undesired user
      * @param db firebase cloud
-     * @param undesiredUserEmail email id of undesired user
-     * @param activeUserEmail email id of active user
+     * @param undesiredUserID email id of undesired user
+     * @param activeUserID email id of active user
      *
      */
-    default void cancel_follow_request(FirebaseFirestore db, String undesiredUserEmail, String activeUserEmail ){
+    default void cancel_follow_request(FirebaseFirestore db, String undesiredUserID, String activeUserID ){
         db.collection(USERNAME)
-                .whereEqualTo(EMAIL,undesiredUserEmail)
+                .whereEqualTo(USER_ID,undesiredUserID)
                 .get().addOnCompleteListener( Task -> {
             if (Task.isSuccessful()){
                 for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(Task.getResult())){
@@ -282,10 +283,8 @@ public interface FollowFirebase extends Firebase{
                     String id = snapshot.getId();
                     db.collection((USER_KEY))
                             .document(id)
-                            .update(RECEIVED, FieldValue.arrayRemove(activeUserEmail));
+                            .update(RECEIVED, FieldValue.arrayRemove(activeUserID));
                 }
-
-
 
             }
         } );
@@ -295,12 +294,12 @@ public interface FollowFirebase extends Firebase{
     /**
      * Send follow requests from active user to the desired user
      * @param db firebase cloud
-     * @param desiredUserEmail email Id of user Active user want to follow
-     * @param activeUserEmail email id of active user
+     * @param desiredUserID email Id of user Active user want to follow
+     * @param activeUserID email id of active user
      */
-    default void send_follow_request(FirebaseFirestore db, String desiredUserEmail, String activeUserEmail ){
+    default void send_follow_request(FirebaseFirestore db, String desiredUserID, String activeUserID ){
         db.collection(USER_KEY)
-                .whereEqualTo(EMAIL,desiredUserEmail)
+                .whereEqualTo(USER_ID,desiredUserID)
                 .get().addOnCompleteListener( Task -> {
             if (Task.isSuccessful()){
                 for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(Task.getResult())){
@@ -308,7 +307,7 @@ public interface FollowFirebase extends Firebase{
                     String id = snapshot.getId();
                     db.collection((USER_KEY))
                             .document(id)
-                            .update(RECEIVED, FieldValue.arrayUnion(activeUserEmail));
+                            .update(RECEIVED, FieldValue.arrayUnion(activeUserID));
                 }
             }
         } );
@@ -317,12 +316,12 @@ public interface FollowFirebase extends Firebase{
     /**
      * This method will remove a follower a active user's follower list
      * @param db firebase cloud
-     * @param removeFollowerEmail email of user that active user wants to remove
-     * @param activeUserEmail   email of active user
+     * @param removeFollowerID email of user that active user wants to remove
+     * @param activeUserID   email of active user
      */
-    default void removeFollowerFromList(FirebaseFirestore db, String removeFollowerEmail, String activeUserEmail){
-        db.collection("Following").whereEqualTo("followed", activeUserEmail)
-                .whereEqualTo("followedBy", removeFollowerEmail)
+    default void removeFollowerFromList(FirebaseFirestore db, String removeFollowerID, String activeUserID){
+        db.collection("Following").whereEqualTo("followed", activeUserID)
+                .whereEqualTo("followedBy", removeFollowerID)
                 .get()
                 .addOnCompleteListener( task -> {
                     if(task.isSuccessful()){
@@ -344,12 +343,12 @@ public interface FollowFirebase extends Firebase{
     /**
      * This method will remove a user active user follows from following list
      * @param db firebase cloud
-     * @param removeFollowingEmail email of user that active user wants to remove
-     * @param activeUserEmail   email of active user
+     * @param removeFollowingID email of user that active user wants to remove
+     * @param activeUserID   email of active user
      */
-    default void removeFollowingFromList(FirebaseFirestore db, String removeFollowingEmail, String activeUserEmail){
-        db.collection("Following").whereEqualTo("followed", removeFollowingEmail)
-                .whereEqualTo("followedBy", activeUserEmail)
+    default void removeFollowingFromList(FirebaseFirestore db, String removeFollowingID, String activeUserID){
+        db.collection("Following").whereEqualTo("followed", removeFollowingID)
+                .whereEqualTo("followedBy", activeUserID)
                 .get()
                 .addOnCompleteListener( task -> {
                     if(task.isSuccessful()){
@@ -370,13 +369,13 @@ public interface FollowFirebase extends Firebase{
     /**
      * This method will show all public habits of the users whom active user is following
      * @param db database
-     * @param followedByMeEmail email of follow-ee
+     * @param followedByMeID email of follow-ee
      * @param habitData habit
      * @param friendHabitAdapter adapter for listview
      */
-    default void showFriendHabits(FirebaseFirestore db, String followedByMeEmail, ArrayList<Habit> habitData, FriendHabitList friendHabitAdapter ){
-        db.collection("User")
-                .whereEqualTo("email",followedByMeEmail)
+    default void showFriendHabits(FirebaseFirestore db, String followedByMeID, ArrayList<Habit> habitData, FriendHabitList friendHabitAdapter ){
+        db.collection(USER_KEY)
+                .whereEqualTo(USER_ID,followedByMeID)
                 .get()
                 .addOnCompleteListener(task -> {
                     if(task.isSuccessful()){
