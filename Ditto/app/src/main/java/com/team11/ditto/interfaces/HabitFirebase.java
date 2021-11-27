@@ -476,6 +476,7 @@ public interface HabitFirebase extends EventFirebase, Days{
                                     long diffDays = diffTime/(1000 * 60 * 60 * 24);
                                     int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
                                     int newStreak = (int) (StreakScore - diffDays);
+                                    newStreak = Math.max(-5,newStreak);
                                     Log.d("Streak score", String.valueOf(StreakScore));
                                     String newStreakStr = String.valueOf(newStreak);
 
@@ -494,6 +495,7 @@ public interface HabitFirebase extends EventFirebase, Days{
                                     long diffDays = diffTime/(1000 * 60 * 60 * 24);
                                     int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
                                     int newStreak = (int) (StreakScore - diffDays);
+                                    newStreak = Math.max(-5,newStreak);
                                     Log.d("Streak score", String.valueOf(StreakScore));
                                     String newStreakStr = String.valueOf(newStreak);
 
@@ -512,6 +514,7 @@ public interface HabitFirebase extends EventFirebase, Days{
                                     long diffDays = diffTime/(1000 * 60 * 60 * 24);
                                     int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
                                     int newStreak = (int) (StreakScore - diffDays);
+                                    newStreak = Math.max(-5,newStreak);
                                     Log.d("Streak score", String.valueOf(StreakScore));
                                     String newStreakStr = String.valueOf(newStreak);
 
@@ -530,6 +533,7 @@ public interface HabitFirebase extends EventFirebase, Days{
                                     long diffDays = diffTime/(1000 * 60 * 60 * 24);
                                     int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
                                     int newStreak = (int) (StreakScore - diffDays);
+                                    newStreak = Math.max(-5,newStreak);
                                     Log.d("Streak score", String.valueOf(StreakScore));
                                     String newStreakStr = String.valueOf(newStreak);
 
@@ -548,6 +552,7 @@ public interface HabitFirebase extends EventFirebase, Days{
                                     long diffDays = diffTime/(1000 * 60 * 60 * 24);
                                     int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
                                     int newStreak = (int) (StreakScore - diffDays);
+                                    newStreak = Math.max(-5,newStreak);
                                     Log.d("Streak score", String.valueOf(StreakScore));
                                     String newStreakStr = String.valueOf(newStreak);
 
@@ -566,6 +571,7 @@ public interface HabitFirebase extends EventFirebase, Days{
                                     long diffDays = diffTime/(1000 * 60 * 60 * 24);
                                     int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
                                     int newStreak = (int) (StreakScore - diffDays);
+                                    newStreak = Math.max(-5,newStreak);
                                     Log.d("Streak score", String.valueOf(StreakScore));
                                     String newStreakStr = String.valueOf(newStreak);
 
@@ -584,6 +590,7 @@ public interface HabitFirebase extends EventFirebase, Days{
                                     long diffDays = diffTime/(1000 * 60 * 60 * 24);
                                     int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
                                     int newStreak = (int) (StreakScore - diffDays);
+                                    newStreak = Math.max(-5,newStreak);
                                     Log.d("Streak score", String.valueOf(StreakScore));
                                     String newStreakStr = String.valueOf(newStreak);
 
