@@ -364,7 +364,8 @@ public interface HabitFirebase extends EventFirebase, Days{
                             else { daysOfWeek[i] = 0; }
                         }
                         //if today is in the set of days chosen, update habitDoneToday to true
-                        setHabitDoneToday(document, daysOfWeek, today);
+                        int StreakScore = Integer.parseInt(documentSnapshot.get("streaks").toString());
+                        setHabitDoneToday(document, daysOfWeek, today,StreakScore);
                     }
                     else {
                         Log.d(TAG, "document does not exist!!");
@@ -383,11 +384,19 @@ public interface HabitFirebase extends EventFirebase, Days{
      * @param daysOfWeek a list of the days of the week that the Habit is to be done
      * @param today the current day as an int (1-7)
      */
-    default void setHabitDoneToday(DocumentReference document, Integer[] daysOfWeek, int today) {
+    default void setHabitDoneToday(DocumentReference document, Integer[] daysOfWeek, int today, int StreakScore) {
+
+        //int StreakScore = Integer.parseInt(document.get().getResult().get("streaks").toString());
+        int newStreak = (int) (StreakScore + 2);
+        newStreak = Math.min(8,newStreak);
+        String newStreakStr = String.valueOf(newStreak);
+
+
         for (int i=0; i<daysOfWeek.length;i++) {
             if (today == daysOfWeek[i]) {
                 //then we set ishabitDone to true
-                document.update("habitDoneToday", true)
+                document.update("habitDoneToday", true,
+                                    "streaks",newStreakStr)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
