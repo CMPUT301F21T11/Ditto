@@ -20,6 +20,7 @@ Role: Class for Habit Event Activity, be able to see you feed and add a habit ev
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -87,7 +88,6 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     private ActiveUser currentUser;
 
 
-
     /**
      * Create the Activity instance for the "Homepage" screen, control flow of actions
      * @param savedInstanceState
@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         tabLayout = findViewById(R.id.tabs);
         habits = new ArrayList<>();
 
+        currentUser = new ActiveUser();
 
         setTitle("My Feed");
 
@@ -146,11 +147,16 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         addHabitEventButton.setOnClickListener(view -> new AddHabitEventFragment()
                 .show(getSupportFragmentManager(), "ADD_HABIT_EVENT"));
 
+        adjustScore(db, currentUser);
+
         fadeInView();
 
     }
 
-
+    /**
+     * Runs a loading animation for the habitEventList while the data is queried, and then fades
+     * out after all info is properly queried
+     */
     private void fadeInView(){
         habitEventList.setAlpha(1f);
         habitEventList.setVisibility(View.VISIBLE);
@@ -180,7 +186,6 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
      */
     @Override
     public void onOkPressed(HabitEvent newHabitEvent) {
-        //Adds the item to the database and then immediately retrieves it from the list
 
         //if today is the same day as one of the dates they picked,
         //AND in this selected day if there are no other habit events with the same habit
@@ -265,10 +270,6 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                         }
                     }
                 });
-
-
-
-
     }
 
     /**

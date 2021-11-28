@@ -484,7 +484,6 @@ public interface HabitFirebase extends EventFirebase, Days{
      * @param db FirebaseFirestore
      * @param currentUser ActiveUser
      */
-    @RequiresApi(api = Build.VERSION_CODES.O)
     default void adjustScore(FirebaseFirestore db, ActiveUser currentUser){
         Date present_date =  Calendar.getInstance().getTime();
         //Date today = present_date.getTime();
@@ -506,50 +505,55 @@ public interface HabitFirebase extends EventFirebase, Days{
                                 boolean Saturday = snapshot.getBoolean("Saturday");
                                 boolean Sunday = snapshot.getBoolean("Sunday");
 
-                                LocalDate date = LastAdjusted.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                                LocalDate date = null;
+                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                    date = LastAdjusted.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-                                int sum = 0;
 
-                                for (LocalDate dateLoop = date.plusDays(1); dateLoop.isBefore(LocalDate.now()); dateLoop = dateLoop.plusDays(1)){
-                                    //Check for every day between date.plusDays(1) and current day
-                                    Log.d("DATE", dateLoop.toString());
-                                    Log.d("DATE", dateLoop.getDayOfWeek().toString());
-                                    if((Sunday) && dateLoop.getDayOfWeek().toString().equals("SUNDAY")){
-                                        sum = sum + 1;
+                                    int sum = 0;
+
+                                    for (LocalDate dateLoop = date.plusDays(1); dateLoop.isBefore(LocalDate.now()); dateLoop = dateLoop.plusDays(1)) {
+                                        //Check for every day between date.plusDays(1) and current day
+                                        Log.d("DATE", dateLoop.toString());
+                                        Log.d("DATE", dateLoop.getDayOfWeek().toString());
+                                        if ((Sunday) && dateLoop.getDayOfWeek().toString().equals("SUNDAY")) {
+                                            sum = sum + 1;
+                                        }
+                                        if ((Monday) && dateLoop.getDayOfWeek().toString().equals("MONDAY")) {
+                                            sum = sum + 1;
+                                        }
+                                        if ((Tuesday) && dateLoop.getDayOfWeek().toString().equals("TUESDAY")) {
+                                            sum = sum + 1;
+                                        }
+                                        if ((Wednesday) && dateLoop.getDayOfWeek().toString().equals("WEDNESDAY")) {
+                                            sum = sum + 1;
+                                        }
+                                        if ((Thursday) && dateLoop.getDayOfWeek().toString().equals("THURSDAY")) {
+                                            sum = sum + 1;
+                                        }
+                                        if ((Friday) && dateLoop.getDayOfWeek().toString().equals("FRIDAY")) {
+                                            sum = sum + 1;
+                                        }
+                                        if ((Saturday) && dateLoop.getDayOfWeek().toString().equals("SATURDAY")) {
+                                            sum = sum + 1;
+                                        }
                                     }
-                                    if((Monday) && dateLoop.getDayOfWeek().toString().equals("MONDAY")){
-                                        sum = sum + 1;
-                                    }
-                                    if((Tuesday) && dateLoop.getDayOfWeek().toString().equals("TUESDAY")){
-                                        sum = sum + 1;
-                                    }
-                                    if((Wednesday) && dateLoop.getDayOfWeek().toString().equals("WEDNESDAY")){
-                                        sum = sum + 1;
-                                    }
-                                    if((Thursday) && dateLoop.getDayOfWeek().toString().equals("THURSDAY")){
-                                        sum = sum + 1;
-                                    }
-                                    if((Friday) && dateLoop.getDayOfWeek().toString().equals("FRIDAY")){
-                                        sum = sum + 1;
-                                    }
-                                    if((Saturday) && dateLoop.getDayOfWeek().toString().equals("SATURDAY")){
-                                        sum = sum + 1;
-                                    }
+
+
+                                    int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
+
+                                    int streak = StreakScore - sum;
+
+                                    streak = Math.max(-5, streak);
+                                    String streakString = String.valueOf(streak);
+
+                                    // adjust score for all missed days
+                                    db.collection("Habit")
+                                            .document(snapshot.getId())
+                                            .update("streaks", streakString,
+                                                    "Last_Adjusted", present_date
+                                            );
                                 }
-
-                                int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
-
-                                int streak = StreakScore - sum;
-
-                                streak = Math.max(-5, streak);
-                                String streakString = String.valueOf(streak);
-
-                                // adjust score for all missed days
-                                db.collection("Habit")
-                                        .document(snapshot.getId())
-                                        .update("streaks",streakString,
-                                                "Last_Adjusted",present_date
-                                        );
 
                             }
                         }

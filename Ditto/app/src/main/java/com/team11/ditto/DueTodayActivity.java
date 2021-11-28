@@ -90,10 +90,14 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
                             updateDaysFromData(days, snapshot.getData());
                             String dayItIs = toTitleCase(LocalDate.now().getDayOfWeek().toString());
                             if (days.contains(dayItIs)) {
+                                String id = snapshot.getId();
                                 String title = (String) snapshot.getData().get("title");
                                 String reason = (String) snapshot.getData().get("reason");
                                 boolean isPublic = (boolean) snapshot.getData().get("is_public");
-                                Habit habit = new Habit(title, reason, days, isPublic);
+                                String streaks =  (String) Objects.requireNonNull(snapshot.getData().get("streaks"));
+                                int s = Integer.parseInt(streaks);
+
+                                Habit habit = new Habit(id, title, reason, days, isPublic, s);
                                 habit.setHabitID(habitID);
                                 habits.add(habit);
 

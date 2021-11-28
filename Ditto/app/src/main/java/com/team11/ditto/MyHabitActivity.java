@@ -91,7 +91,6 @@ public class MyHabitActivity extends AppCompatActivity implements
 
     /**
      * Create the Activity instance for the "My Habits" screen, control flow of actions
-     *
      * @param savedInstanceState saved state
      */
     @Override
@@ -104,6 +103,8 @@ public class MyHabitActivity extends AppCompatActivity implements
 
         setTitle("My Habits");
 
+        currentUser = new ActiveUser();
+
         habitDataList = new ArrayList<>();
         habitListView = findViewById(R.id.list);
         tabLayout = findViewById(R.id.tabs);
@@ -113,6 +114,8 @@ public class MyHabitActivity extends AppCompatActivity implements
         LinearLayoutManager manager = new LinearLayoutManager(this);
         habitListView.setLayoutManager(manager);
         habitListView.setAdapter(habitRecyclerAdapter);
+
+        adjustScore(db, currentUser);
 
         // Load habits
         queryHabits(db);
@@ -141,7 +144,6 @@ public class MyHabitActivity extends AppCompatActivity implements
     }
 
     public void queryHabits(FirebaseFirestore db) {
-        currentUser = new ActiveUser();
         db.collection(HABIT_KEY)
                 .whereEqualTo(USER_ID, currentUser.getUID())
                 .orderBy("position")

@@ -70,8 +70,10 @@ public class CustomListDue extends ArrayAdapter<Habit> {
 
         habitName.setText(habit.getTitle());
         habitDescription.setText(habit.getReason());
+        setIcon(habit.getStreak(), progress);
+
         //get the streak value from database
-        database = FirebaseFirestore.getInstance();
+        /*database = FirebaseFirestore.getInstance();
         DocumentReference docRef = database.collection("Habit").document(habit.getHabitID());
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -106,7 +108,7 @@ public class CustomListDue extends ArrayAdapter<Habit> {
 
 
             }
-        });
+        });*/
 
 
         return view;
@@ -120,12 +122,12 @@ public class CustomListDue extends ArrayAdapter<Habit> {
             icon.setColorFilter(Color.RED);
 
         }
-        else if (streaks >= lB && streaks <= uB) {
+        else if (streaks >= lB && streaks < uB) {
             icon.setImageResource(R.drawable.neutral);
             icon.setColorFilter(Color.rgb(255,191,0));
 
         }
-        else if (streaks > uB) {
+        else if (streaks >= uB) {
             icon.setImageResource(R.drawable.happiness);
             icon.setColorFilter(Color.rgb(50,205,50));
 
