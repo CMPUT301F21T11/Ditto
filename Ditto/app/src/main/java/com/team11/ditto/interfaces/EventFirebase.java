@@ -7,6 +7,7 @@ import android.widget.Spinner;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,6 +29,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -54,7 +56,14 @@ public interface EventFirebase extends Firebase{
                 String eHabitTitle = (String) doc.getData().get(HABIT_TITLE);
                 String eComment = (String) doc.getData().get(COMMENT);
                 String ePhoto = (String) doc.getData().get(PHOTO);
-                String eLocation = (String) doc.getData().get(LOCATION);
+
+                Map<String, Object> data = doc.getData();
+                @Nullable ArrayList<Double> eLocation = null;
+
+                if (doc.getData().get(LOCATION) != "") {
+                    eLocation = (ArrayList) data.get(LOCATION);
+                }
+
                 HabitEvent hEvent = new HabitEvent(eHabitId, eComment, ePhoto, eLocation, eHabitTitle);
                 hEvent.setEventID(doc.getId());
                 Log.d(TAG, "EVENT ID IS" + hEvent.getEventID());
@@ -147,8 +156,10 @@ public interface EventFirebase extends Firebase{
         String habitID = event.getHabitId();
         String comment = event.getComment();
         String photo = event.getPhoto();
-        String location = event.getLocation();
         String habitTitle = event.getHabitTitle();
+        List<Double> location = event.getLocation();
+
+
         //get unique timestamp for ordering our list
         Date currentTime = Calendar.getInstance().getTime();
         eventData.put(USER_ID, FirebaseAuth.getInstance().getUid());

@@ -27,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.team11.ditto.R;
+import com.team11.ditto.interfaces.FirebaseMedia;
 import com.team11.ditto.profile_details.User;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ import java.util.ArrayList;
  * Custom ArrayAdapter for sent requests
  * @author Vivek Malhotra
  */
-public class CustomListSentRequest extends ArrayAdapter<User> {
+public class CustomListSentRequest extends ArrayAdapter<User> implements FirebaseMedia {
 
     //Declare values
     private ArrayList<User> users;
@@ -74,7 +75,7 @@ public class CustomListSentRequest extends ArrayAdapter<User> {
         ImageView userPhoto = view.findViewById(R.id.sent_request_photo);
 
         username.setText(user.getUsername());
-        userPhoto.setImageResource(R.drawable.background);
+        setProfilePhoto(user.getID(), userPhoto);
 
         return view;
     }

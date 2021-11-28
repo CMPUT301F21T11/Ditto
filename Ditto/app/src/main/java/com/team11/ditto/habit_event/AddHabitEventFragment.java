@@ -42,10 +42,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.team11.ditto.LocationPicker;
 import com.team11.ditto.R;
 import com.team11.ditto.interfaces.HabitFirebase;
+import com.team11.ditto.interfaces.MapHandler;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +58,7 @@ import java.util.List;
  * TODO: allow user to add photo and location
  * @author Kelly Shih, Aidan Horemans
  */
-public class AddHabitEventFragment extends DialogFragment implements HabitFirebase {
+public class AddHabitEventFragment extends DialogFragment implements HabitFirebase, MapHandler {
     //Declare necessary values
     private EditText hComment;
     private Button acc_photo;
@@ -62,6 +66,7 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
     private OnFragmentInteractionListener listener;
     private FirebaseFirestore db;
     final String TAG = "dbs";
+    private @Nullable ArrayList<Double> location = null;
 
     //Declare interface
     public interface OnFragmentInteractionListener {
@@ -135,6 +140,7 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
 
         // Listen for when the location button is pressed
         locationButton.setOnClickListener(view1 -> {
+            LocationPicker.callback = this;  // Really bad implementation - should be fixed
             Intent intent = new Intent(getActivity(), LocationPicker.class);
             startActivity(intent);
         });
@@ -163,7 +169,6 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
 
                         //set photo and location
                         String photo = "";
-                        String location = "";
 
                         listener.onOkPressed(new HabitEvent(IDhabit[0], comment, photo, location, hHabit[0]));
 
@@ -172,5 +177,18 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
                 .setNegativeButton("Cancel", null)
                 .create();
 
+    }
+
+    @Override
+    public void handleLocationChange(@Nullable LatLng location) {
+        if (location == null) {
+            this.location = null;
+            this.locationButton.setText("Add location");
+        } else {
+            this.location = new ArrayList<>();
+            this.location.add(location.latitude);
+            this.location.add(location.longitude);
+            this.locationButton.setText("Update location");
+        }
     }
 }

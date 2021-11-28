@@ -15,9 +15,15 @@
 package com.team11.ditto;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.ImageDecoder;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -34,21 +40,28 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.team11.ditto.follow.FollowRequestActivity;
 import com.team11.ditto.follow.FollowerActivity;
 import com.team11.ditto.follow.FollowingActivity;
 import com.team11.ditto.follow.SentRequestActivity;
 import com.team11.ditto.interfaces.Firebase;
+import com.team11.ditto.interfaces.FirebaseMedia;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 import com.team11.ditto.profile_details.SearchUserActivity;
 
-public class UserProfileActivity extends AppCompatActivity implements SwitchTabs, Firebase {
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+public class UserProfileActivity extends AppCompatActivity implements SwitchTabs, Firebase, FirebaseMedia {
 
     private ImageView profilePhoto;
     private TextView followers;
@@ -119,8 +132,9 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
                     Log.w(TAG, "UserProfileActivity - could not fetch following");
                 }
             });
-
         username.setText(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
+
+        setProfilePhoto(FirebaseAuth.getInstance().getUid(), profilePhoto);
 
         onFollowingTap();
         onFollowNumberTap();
@@ -142,7 +156,6 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
 
     @Override
     public void onBackPressed() {
-
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
@@ -205,11 +218,8 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
     }
 
     public void onProfilePhotoTap() {
-        profilePhoto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                displayMediaOptions();
-            }
+        profilePhoto.setOnClickListener(view -> {
+            displayMediaOptions();
         });
     }
 
@@ -232,7 +242,7 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             // Display camera
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            startActivity(intent);
+            startActivityForResult(intent, CAMERA_REQUEST_CODE);
         } else {
             // Display permission request
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
@@ -244,7 +254,7 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             // Show media library
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            startActivity(intent);
+            startActivityForResult(intent, MEDIA_REQUEST_CODE);
         } else {
             // Display permission request
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, MEDIA_REQUEST_CODE);
@@ -278,4 +288,39 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
                 break;
         }
     }
+
+    private Bitmap loadFromUri(Uri photoUri) {
+        Bitmap image = null;
+        try {
+            // check version of Android on device
+            if(Build.VERSION.SDK_INT > 27){
+                // on newer versions of Android, use the new decodeBitmap method
+                ImageDecoder.Source source = ImageDecoder.createSource(this.getContentResolver(), photoUri);
+                image = ImageDecoder.decodeBitmap(source);
+            } else {
+                // support older versions of Android by using getBitmap
+                image = MediaStore.Images.Media.getBitmap(this.getContentResolver(), photoUri);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return image;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            Bitmap photo = (Bitmap) data.getExtras().get("data");
+            profilePhoto.setImageBitmap(photo);
+            uploadProfilePhoto(FirebaseAuth.getInstance().getUid(), photo);
+        } else if (requestCode == MEDIA_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            Uri photoUri = data.getData();
+            Bitmap photo = loadFromUri(photoUri);
+            profilePhoto.setImageBitmap(photo);
+            uploadProfilePhoto(FirebaseAuth.getInstance().getUid(), photo);
+        }
+    }
+
 }

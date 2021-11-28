@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -36,6 +37,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.team11.ditto.R;
+import com.team11.ditto.interfaces.FirebaseMedia;
 
 import java.util.ArrayList;
 
@@ -43,7 +45,7 @@ import java.util.ArrayList;
  * Custom RecyclerViewAdapter for HabitEvents item
  * @author Kelly Shih, Aidan Horemans
  */
-public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRecyclerAdapter.ViewHolderEvent>{
+public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRecyclerAdapter.ViewHolderEvent> implements FirebaseMedia {
     //Declarations
     private ArrayList<HabitEvent> eventArrayList;
     private Context context;
@@ -105,6 +107,7 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
         }
 
         holder.habitEventComment.setText(habitEvent.getComment());
+        setProfilePhoto(habitEvent.getUid(), holder.profilePhoto);
     }
 
     /**
@@ -115,6 +118,7 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
         private TextView habitEventComment;
         private TextView habitUsername;
         private TextView habitSeparator;
+        private ImageView profilePhoto;
         EventClickListener eventClickListener;
 
         /**
@@ -128,6 +132,7 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
             habitEventTitle = itemView.findViewById(R.id.habit_name);
             habitEventComment = itemView.findViewById(R.id.habit_com);
             habitSeparator = itemView.findViewById(R.id.separator);
+            profilePhoto = itemView.findViewById(R.id.event_cell_profile_photo);
             this.eventClickListener = eventClickListener;
 
             itemView.setOnClickListener(this);

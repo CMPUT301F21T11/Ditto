@@ -16,6 +16,7 @@
 -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/user_profile_constraint_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -43,66 +44,12 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:adjustViewBounds="true"
+        android:background="@android:color/darker_gray"
         android:scaleType="fitXY"
-        android:src="@drawable/background"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:shapeAppearanceOverlay="@style/roundimageview"
         app:strokeColor="#000000" />
-
-    <TextView
-        android:id="@+id/followers"
-        android:clickable="true"
-        android:layout_width="88dp"
-        android:layout_height="21dp"
-        android:layout_marginTop="68dp"
-        android:text="@string/followers"
-        android:textColor="#000000"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.234"
-        app:layout_constraintStart_toEndOf="@+id/imageView2"
-        app:layout_constraintTop_toTopOf="@+id/imageView2"
-        android:focusable="true" />
-
-    <TextView
-        android:id="@+id/following"
-        android:clickable="true"
-        android:layout_width="88dp"
-        android:layout_height="21dp"
-        android:layout_marginTop="68dp"
-        android:text="@string/following"
-        android:textColor="#000000"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.349"
-        app:layout_constraintStart_toEndOf="@+id/followers"
-        app:layout_constraintTop_toTopOf="@+id/imageView2"
-        android:focusable="true" />
-
-    <TextView
-        android:id="@+id/no_followers"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/none"
-        android:textColor="#000000"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/followers"
-        app:layout_constraintTop_toBottomOf="@+id/followers"
-        app:layout_constraintVertical_bias="0.001" />
-
-    <TextView
-        android:id="@+id/no_following_1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/none"
-        android:textColor="#000000"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/following"
-        app:layout_constraintTop_toBottomOf="@+id/following"
-        app:layout_constraintVertical_bias="0.003" />
 
     <Button
         android:id="@+id/follow_request_sent"
