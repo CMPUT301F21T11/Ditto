@@ -30,15 +30,18 @@
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginHorizontal="10dp"
         android:layout_marginTop="10dp"
+        android:textStyle="bold"
         android:text="@string/tracking"/>
 
     <TextView
         android:id="@+id/habit_tracking"
         android:layout_width="match_parent"
-        android:layout_height="19dp"
+        android:layout_height="wrap_content"
+        android:textSize="6pt"
+        android:hint="tracking"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tracking"
-        android:layout_marginHorizontal="10dp"/>
+        android:layout_marginHorizontal="10dp" />
 
     <TextView
         android:id="@+id/days"
@@ -47,13 +50,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/habit_tracking"
         android:layout_marginHorizontal="10dp"
+        android:textStyle="bold"
         android:layout_marginTop="10dp"
         android:text="@string/days"/>
 
     <TextView
         android:id="@+id/habit_days"
         android:layout_width="match_parent"
-        android:layout_height="19dp"
+        android:layout_height="wrap_content"
+        android:textSize="6pt"
+        android:hint="No Days Selected"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/days"
         android:layout_marginHorizontal="10dp"/>
@@ -65,13 +71,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/habit_days"
         android:layout_marginHorizontal="10dp"
+        android:textStyle="bold"
         android:layout_marginTop="10dp"
         android:text="@string/reason"/>
 
     <TextView
         android:id="@+id/habit_reason"
         android:layout_width="match_parent"
-        android:layout_height="19dp"
+        android:layout_height="wrap_content"
+        android:textSize="6pt"
+        android:hint="No reason given"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/reason"
         android:layout_marginHorizontal="10dp"/>
