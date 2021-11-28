@@ -194,6 +194,11 @@ public interface EventFirebase extends Firebase{
                 .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
     }
 
+    /**
+     * Handle resetting the habitDueToday boolean and updating the streak value
+     * according to the number of days they've missed their habit
+     * @param db firebase cloud
+     */
     default void resetDueToday(FirebaseFirestore db){
         ActiveUser currentUser = new ActiveUser();
         db.collection("Habits")

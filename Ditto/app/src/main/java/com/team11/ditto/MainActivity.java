@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         // Load the Habit Event data (This will be converted to use the Firebase interface in the future)
         queryList();
 
-        resetDueToday(db);
+        resetDueToday(db); //reset the habitDoneToday boolean in the database
 
 
         LinearLayoutManager manager = new LinearLayoutManager(this);

@@ -339,7 +339,6 @@ public interface HabitFirebase extends EventFirebase, Days{
 
         }
 
-
         //increment all habit positions after the "toPos"
         int counter = toPos+1;
         for (int i=0; i<habitsUpdate.size();i++) {
