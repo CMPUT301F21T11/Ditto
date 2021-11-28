@@ -35,7 +35,7 @@
             android:paddingTop="5dp"
             android:paddingEnd="20dp"
             android:text="@string/sample_user"
-            android:textColor="@color/black"
+            android:textColor="?android:textColorPrimary"
             android:textSize="15sp"
             app:layout_constraintBottom_toBottomOf="parent"
 
@@ -75,7 +75,7 @@
         android:src="@drawable/happiness"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="#1FAA0F">
+        >
 
     </ImageView>
 

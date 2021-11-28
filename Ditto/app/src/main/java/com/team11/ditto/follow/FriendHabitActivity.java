@@ -15,11 +15,13 @@
 package com.team11.ditto.follow;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.tabs.TabLayout;
@@ -30,6 +32,8 @@ import com.team11.ditto.interfaces.FollowFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 // Need an active user for this page to work
 
@@ -56,6 +60,7 @@ public class FriendHabitActivity extends AppCompatActivity implements SwitchTabs
      * Simple listview with bottom tabs
      * @param savedInstanceState current app state
      */
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         //Set layouts
@@ -75,6 +80,14 @@ public class FriendHabitActivity extends AppCompatActivity implements SwitchTabs
         habitData = new ArrayList<>();
         friendHabitAdapter = new FriendHabitList(FriendHabitActivity.this, habitData);
         friendHabitList.setAdapter(friendHabitAdapter);
+        Collections.sort(habitData, new Comparator<Habit>() {
+            @Override
+            public int compare(Habit habit, Habit t1) {
+                return habit.getTitle().compareTo(t1.getTitle());
+            }
+        });
+
+        friendHabitAdapter.notifyDataSetChanged();
 
         //Enable tab switching
         currentTab(tabLayout, PROFILE_TAB);
