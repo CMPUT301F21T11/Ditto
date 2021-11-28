@@ -14,19 +14,32 @@
  */
 package com.team11.ditto;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -40,11 +53,9 @@ import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 import com.team11.ditto.profile_details.SearchUserActivity;
 
-import java.util.ArrayList;
-
 public class UserProfileActivity extends AppCompatActivity implements SwitchTabs, Firebase {
 
-    private ImageView imageView;
+    private ImageView profilePhoto;
     private TextView followers;
     private TextView no_followers;
     private TextView following;
@@ -60,6 +71,9 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
 
     private ActiveUser currentUser;
 
+    private static final int MEDIA_REQUEST_CODE = 0;
+    private static final int CAMERA_REQUEST_CODE = 1;
+
     FirebaseFirestore db; //when they add button we need to dump into db
     private TabLayout tabLayout;
     //public static Bundle habitBundle = new Bundle();
@@ -72,7 +86,7 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         currentUser = new ActiveUser();
 
         tabLayout = findViewById(R.id.tabs);
-        imageView =findViewById(R.id.imageView2);
+        profilePhoto =findViewById(R.id.profilePhoto);
         followers = findViewById(R.id.followers);
         following = findViewById(R.id.following);
         no_following = findViewById(R.id.no_following_1);
@@ -128,6 +142,7 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         onFollowNumberTap();
         onSentRequestTap();
         onFollowerNumberTap();
+        onProfilePhotoTap();
 
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,7 +154,6 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
             }
         });
     }
-
 
     @Override
     public void onBackPressed() {
@@ -220,4 +234,78 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         });
     }
 
+    public void onProfilePhotoTap() {
+        profilePhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                displayMediaOptions();
+            }
+        });
+    }
+
+    private void displayMediaOptions() {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(UserProfileActivity.this)
+                .setTitle("Load photo from camera or media")
+                .setMessage("Please select where you will load the photo from")
+                .setNeutralButton("Cancel", null)
+                .setNegativeButton("Media", (dialogInterface, i) -> {
+                    loadPhotos();
+                })
+                .setPositiveButton("Camera", (dialogInterface, i) -> {
+                    loadCamera();
+                });
+        builder.show();
+    }
+
+    private void loadCamera() {
+        // Check if app has permission
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            // Display camera
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivity(intent);
+        } else {
+            // Display permission request
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
+        }
+    }
+
+    private void loadPhotos() {
+        // Check if app has permission
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            // Show media library
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivity(intent);
+        } else {
+            // Display permission request
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, MEDIA_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Determine which request code was granted or denied
+        switch (requestCode) {
+            case CAMERA_REQUEST_CODE:
+                if (grantResults.length >= 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission is granted
+                    loadCamera();
+                } else {
+                    // Display error
+                    Snackbar.make(findViewById(R.id.user_profile_constraint_layout), "Ditto does not have camera access", Snackbar.LENGTH_SHORT).setBackgroundTint(getResources().getColor(R.color.error)).show();
+                }
+                break;
+
+            case MEDIA_REQUEST_CODE:
+                if (grantResults.length >= 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission is granted
+                    loadPhotos();
+                } else {
+                    // Display error
+                    Snackbar.make(findViewById(R.id.user_profile_constraint_layout), "Ditto does not have photo access", Snackbar.LENGTH_SHORT).setBackgroundTint(getResources().getColor(R.color.error)).show();
+                }
+                break;
+        }
+    }
 }

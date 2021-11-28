@@ -28,6 +28,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -44,6 +45,7 @@ import androidx.fragment.app.DialogFragment;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.team11.ditto.LocationPicker;
 import com.team11.ditto.interfaces.Firebase;
 import com.team11.ditto.R;
 import com.team11.ditto.interfaces.HabitFirebase;
@@ -60,6 +62,7 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
     //Declare necessary values
     private EditText hComment;
     private Button acc_photo;
+    private Button locationButton;
     private OnFragmentInteractionListener listener;
     private FirebaseFirestore db;
     private DatabaseReference root;
@@ -94,6 +97,7 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
         View view = LayoutInflater.from(getContext()).inflate(R.layout.add_event_fragment, null);
         hComment = view.findViewById(R.id.comment_editText);
         acc_photo = view.findViewById(R.id.add_photo);
+        locationButton = view.findViewById(R.id.event_add_location_button);
         db = FirebaseFirestore.getInstance();
         root = FirebaseDatabase.getInstance().getReference();
         Spinner spinner = view.findViewById(R.id.event_spinner);
@@ -133,6 +137,12 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
 
         //TODO Get camera permission for photo
         acc_photo.setOnClickListener(view1 -> {
+        });
+
+        // Listen for when the location button is pressed
+        locationButton.setOnClickListener(view1 -> {
+            Intent intent = new Intent(getActivity(), LocationPicker.class);
+            startActivity(intent);
         });
 
         //Builds the Dialog for the user to add a new habit event

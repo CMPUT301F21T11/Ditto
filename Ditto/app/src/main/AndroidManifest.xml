@@ -3,7 +3,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.team11.ditto">
 
+    <!--
+         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but you must specify either coarse or fine
+         location permissions for the "MyLocation" functionality.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission
+        android:name="android.permission.MANAGE_DOCUMENTS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <uses-feature android:name="android.hardware.camera2" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
@@ -14,6 +25,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Ditto">
+
+        <!--
+             The API key for Google Maps-based APIs is defined as a string resource.
+             (See the file "res/values/google_maps_api.xml").
+             Note that the API key is linked to the encryption key used to sign the APK.
+             You need a different API key for each encryption key, including the release key that is used to
+             sign the APK for publishing.
+             You can define the keys for the debug and release targets in src/debug/ and src/release/.
+        -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
+        <activity
+            android:name=".LocationPicker"
+            android:exported="true"
+            android:label="@string/title_activity_location_picker" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -23,81 +51,64 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="MyHabitActivity"
-            android:exported="true"/>
+        <activity
+            android:name=".MyHabitActivity"
+            android:exported="true" />
         <activity
             android:name=".UserProfileActivity"
             android:exported="true"
-            android:label="Profile"
-            />
+            android:label="Profile" />
         <activity
             android:name=".follow.FollowingActivity"
             android:exported="true"
             android:label="Following "
-            android:parentActivityName=".UserProfileActivity"
-            />
+            android:parentActivityName=".UserProfileActivity" />
         <activity
             android:name=".DueTodayActivity"
-            android:exported="true"
-            />
+            android:exported="true" />
         <activity
             android:name=".profile_details.SearchUserActivity"
             android:exported="true"
-            android:parentActivityName=".UserProfileActivity"
-
             android:label="Search Users"
-            android:windowSoftInputMode="adjustPan"
-            />
+            android:parentActivityName=".UserProfileActivity"
+            android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".follow.FollowRequestActivity"
             android:exported="true"
-            android:parentActivityName=".UserProfileActivity"
-            android:label="Follow Requests Received"/>
-
+            android:label="Follow Requests Received"
+            android:parentActivityName=".UserProfileActivity" />
         <activity
             android:name=".follow.FollowerActivity"
             android:exported="true"
-            android:parentActivityName=".UserProfileActivity"
-            android:label = "Followers"/>
-
+            android:label="Followers"
+            android:parentActivityName=".UserProfileActivity" />
         <activity
             android:name=".login.SignUpActivity"
             android:exported="true"
-            android:label="Sign Up"
-            />
-
+            android:label="Sign Up" />
         <activity
             android:name=".login.SignInActivity"
             android:exported="true"
-            android:label="Sign In"
-            />
-
+            android:label="Sign In" />
         <activity
-            android:name="WelcomeActivity"
+            android:name=".WelcomeActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            />
-
-
-
+            android:label="@string/app_name" />
         <activity
             android:name=".follow.FriendHabitActivity"
             android:exported="true"
-            android:parentActivityName=".follow.FollowingActivity"/>
-
+            android:parentActivityName=".follow.FollowingActivity" />
         <activity
             android:name=".habit.ViewHabitActivity"
-            android:parentActivityName=".MyHabitActivity"/>
-
+            android:parentActivityName=".MyHabitActivity" />
         <activity
             android:name=".habit_event.ViewEventActivity"
-            android:parentActivityName=".MainActivity"/>
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".follow.SentRequestActivity"
             android:exported="true"
-            android:parentActivityName=".UserProfileActivity"
-            android:label="Follow Request Sent"/>
-
+            android:label="Follow Request Sent"
+            android:parentActivityName=".UserProfileActivity" />
 
         <meta-data
             android:name="preloaded_fonts"
