@@ -65,6 +65,7 @@ public interface FollowFirebase extends Firebase{
                 for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
 
                     if(! followedByActiveUser.contains(snapshot.get(FOLLOWED).toString())){
+                        Log.d("User following ", snapshot.get(FOLLOWED).toString());
                         followedByActiveUser.add(snapshot.get(FOLLOWED).toString());
                     }
 
