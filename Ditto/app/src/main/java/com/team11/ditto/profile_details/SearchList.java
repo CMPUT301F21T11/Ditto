@@ -26,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.team11.ditto.R;
+import com.team11.ditto.interfaces.FirebaseMedia;
 
 import java.util.ArrayList;
 
@@ -33,7 +34,7 @@ import java.util.ArrayList;
  * Custom list view for User search to send follow requests
  * @author Vivek Malhotra
  */
-public class SearchList extends ArrayAdapter<User> {
+public class SearchList extends ArrayAdapter<User> implements FirebaseMedia {
 
     //Declarations
     private final ArrayList<User> users;
@@ -73,9 +74,7 @@ public class SearchList extends ArrayAdapter<User> {
         ImageView sendRequest = view.findViewById(R.id.send_request);
 
         username.setText(user.getUsername());
-        //TODO implement actual profile photos
-        userPhoto.setImageResource(R.drawable.background);
-
+        setProfilePhoto(user.getID(), userPhoto);
 
         return view;
     }

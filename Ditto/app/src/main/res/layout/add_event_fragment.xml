@@ -61,7 +61,7 @@
         android:text="@string/add_photo" />
 
     <Button
-        android:id="@+id/add_location"
+        android:id="@+id/event_add_location_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/add_location" />

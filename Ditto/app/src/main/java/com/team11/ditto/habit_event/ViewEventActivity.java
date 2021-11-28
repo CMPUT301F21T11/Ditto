@@ -16,28 +16,27 @@ package com.team11.ditto.habit_event;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
-import com.google.android.material.navigation.NavigationView;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.team11.ditto.MainActivity;
 import com.team11.ditto.R;
-import com.team11.ditto.habit.EditHabitFragment;
-import com.team11.ditto.habit.Habit;
-import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.interfaces.HabitFirebase;
-
-import java.util.ArrayList;
 
 /**
  * Activity to view a Habit Event
- * @author Kelly Shih, Aidan Horemans
+ * @author Kelly Shih, Aidan Horemans, Matthew Asgari
  */
-public class ViewEventActivity extends AppCompatActivity implements EditEventFragment.OnFragmentInteractionListener, HabitFirebase {
+public class ViewEventActivity extends AppCompatActivity implements EditEventFragment.OnFragmentInteractionListener, HabitFirebase, OnMapReadyCallback {
 
     //Declarations
     HabitEvent habitEvent;
@@ -74,6 +73,14 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
         comment = habitEvent.getComment();
         habitComment.setText(comment);
 
+        //setup map
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map_event);
+        mapFragment.getMapAsync(this);
+
+        if (habitEvent.getLocation() == null || habitEvent.getLocation().size() != 2) {
+            findViewById(R.id.map_event).setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -132,5 +139,17 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
         //Updating old text with new habit stuff
         habitComment.setText(event.getComment());
 
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
+        if (habitEvent.getLocation() != null && habitEvent.getLocation().size() == 2) {
+            LatLng location = new LatLng(habitEvent.getLocation().get(0), habitEvent.getLocation().get(1));
+            googleMap.addMarker(new MarkerOptions()
+                    .position(location)
+                    .title(habitEvent.getHabitTitle()));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
+        }
     }
 }

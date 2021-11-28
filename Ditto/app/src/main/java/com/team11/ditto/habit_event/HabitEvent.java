@@ -14,7 +14,12 @@
  */
 package com.team11.ditto.habit_event;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.io.Serializable;
+import java.util.List;
+
+import javax.annotation.Nullable;
 
 /**
  * Role: Habit Event Object that stores the data for a habit event's
@@ -32,9 +37,9 @@ public class HabitEvent implements Serializable {
     private final String habitTitle;
     private String comment;
     private String photo;
-    private String location;
     private String uid;
     private String name;
+    private List<Double> location;
 
     /**
      * Constructor
@@ -45,7 +50,7 @@ public class HabitEvent implements Serializable {
      * @param habitTitle Title of the Habit whose HabitEvent this is
      */
 
-    public HabitEvent(String eventID, String habitId, String comment, String photo, String location, String habitTitle, String uid, String name) {
+    public HabitEvent(String eventID, String habitId, String comment, String photo, @Nullable List<Double> location, String habitTitle, String uid, String name) {
         this.eventID = eventID;
         this.habitId = habitId;
         this.comment = comment;
@@ -56,7 +61,7 @@ public class HabitEvent implements Serializable {
         this.name = name;
     }
 
-    public HabitEvent(String habitId, String comment, String photo, String location, String habitTitle) {
+    public HabitEvent(String habitId, String comment, String photo, @Nullable List<Double> location, String habitTitle) {
         this.habitId = habitId;
         this.comment = comment;
         this.photo = photo;
@@ -144,7 +149,7 @@ public class HabitEvent implements Serializable {
      * Getter for location
      * @return this location string
      */
-    public String getLocation() {
+    public List<Double> getLocation() {
         return location;
     }
 
@@ -152,7 +157,7 @@ public class HabitEvent implements Serializable {
      * Setter for location
      * @param location new location string
      */
-    public void setLocation(String location) {
+    public void setLocation(List<Double> location) {
         this.location = location;
     }
 

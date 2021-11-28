@@ -26,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.team11.ditto.R;
+import com.team11.ditto.interfaces.FirebaseMedia;
 import com.team11.ditto.profile_details.User;
 
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ import java.util.ArrayList;
  * A custom listview adapter for Users who have requested to follow the ActiveUser
  * @author Vivek Malhotra, Courtenay Laing-Kobe
  */
-public class FollowRequestList extends ArrayAdapter<User> {
+public class FollowRequestList extends ArrayAdapter<User> implements FirebaseMedia {
     //Declarations
     private final ArrayList<User> users;
     private final Context context;
@@ -72,7 +73,7 @@ public class FollowRequestList extends ArrayAdapter<User> {
         ImageView userPhoto = view.findViewById(R.id.fr_user_photo);
 
         username.setText(user.getUsername());
-        userPhoto.setImageResource(R.drawable.background);
+        setProfilePhoto(user.getID(), userPhoto);
 
         return view;
     }

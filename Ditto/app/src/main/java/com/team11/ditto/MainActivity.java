@@ -32,6 +32,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -58,6 +59,7 @@ import com.team11.ditto.login.ActiveUser;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 
 
 /**
@@ -239,7 +241,13 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                             String eHabitTitle = (String) doc.getData().get("habitTitle");
                             String eComment = (String) doc.getData().get("comment");
                             String ePhoto = (String) doc.getData().get("photo");
-                            String eLocation = (String) doc.getData().get("location");
+
+                            @Nullable List<Double> eLocation = null;
+                            if (doc.getData().get(LOCATION) != "") {
+                                eLocation = (List<Double>) doc.getData().get("location");
+                            }
+                            List<Double> locFinal = eLocation;
+
                             String uid = (String) doc.getData().get("uid");
                             DocumentReference userNameReference = db.collection("User").document(uid);
 
@@ -252,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                                         if (documentSnapshot.exists()) {
                                             //retrieve the order value
                                             String name = (String) documentSnapshot.get("name");
-                                            habitEventsData.add(new HabitEvent(eventID, eHabitId, eComment, ePhoto, eLocation, eHabitTitle, uid, name));
+                                            habitEventsData.add(new HabitEvent(eventID, eHabitId, eComment, ePhoto, locFinal, eHabitTitle, uid, name));
                                             habitEventRecyclerAdapter.notifyDataSetChanged();
                                         }
                                         else {
