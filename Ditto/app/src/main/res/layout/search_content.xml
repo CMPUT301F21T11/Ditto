@@ -48,7 +48,7 @@
             android:paddingTop="25dp"
             android:paddingRight="20dp"
             android:text="@string/sample_user"
-            android:textColor="@color/black"
+            android:textColor="?android:textColorPrimary"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="0.015"

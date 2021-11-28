@@ -15,6 +15,7 @@
 package com.team11.ditto.follow;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -75,6 +76,27 @@ public class FriendHabitList extends ArrayAdapter<Habit> {
 
         habitName.setText(habit.getTitle());
         habitDescription.setText(habit.getReason());
+        int streaks = habit.getStreak();
+
+        int lB = -3;
+        int uB = 5;
+        if (streaks < lB) {
+            progress.setImageResource(R.drawable.sad);
+
+
+        }
+        else if (streaks >= lB && streaks < uB) {
+            progress.setImageResource(R.drawable.neutral);
+
+
+        }
+        else if (streaks >= uB) {
+            progress.setImageResource(R.drawable.happiness);
+
+
+
+        }
+
 
         return view;
     }

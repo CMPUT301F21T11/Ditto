@@ -119,17 +119,16 @@ public class CustomListDue extends ArrayAdapter<Habit> {
         int uB = 5;
         if (streaks < lB) {
             icon.setImageResource(R.drawable.sad);
-            icon.setColorFilter(Color.RED);
 
         }
         else if (streaks >= lB && streaks < uB) {
             icon.setImageResource(R.drawable.neutral);
-            icon.setColorFilter(Color.rgb(255,191,0));
+
 
         }
         else if (streaks >= uB) {
             icon.setImageResource(R.drawable.happiness);
-            icon.setColorFilter(Color.rgb(50,205,50));
+            //icon.setColorFilter(Color.rgb(50,205,50));
 
 
         }

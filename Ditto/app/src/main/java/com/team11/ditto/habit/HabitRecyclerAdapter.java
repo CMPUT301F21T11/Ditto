@@ -95,19 +95,19 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
         int uB = 5;
         if (streaks < lB) {
             holder.icon.setImageResource(R.drawable.sad);
-            holder.icon.setColorFilter(Color.RED);
+
 
 
 
         }
         else if (streaks >= lB && streaks < uB) {
             holder.icon.setImageResource(R.drawable.neutral);
-            holder.icon.setColorFilter(Color.rgb(255,191,0));
+
 
         }
         else if (streaks >= uB) {
             holder.icon.setImageResource(R.drawable.happiness);
-            holder.icon.setColorFilter(Color.rgb(50,205,50));
+
 
         }
 

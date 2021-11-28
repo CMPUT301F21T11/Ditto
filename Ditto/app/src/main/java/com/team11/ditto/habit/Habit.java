@@ -82,9 +82,11 @@ public class Habit implements Serializable {
      * @param title title of the habit
      * @param reason reason for habit
      */
-    public Habit(String title, String reason){
+    public Habit(String title, String reason, int streak, int position){
         this.title = title;
         this.reason = reason;
+        this.streak = streak;
+        this.position = position;
     }
 
     public int getStreak(){
