@@ -1,9 +1,11 @@
 package com.team11.ditto.interfaces;
 
+import android.os.Build;
 import android.util.Log;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -28,6 +30,8 @@ import com.team11.ditto.login.ActiveUser;
 import org.w3c.dom.Document;
 
 import java.lang.reflect.Array;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -481,11 +485,9 @@ public interface HabitFirebase extends EventFirebase, Days{
      * @param currentUser ActiveUser
      * @param dueTodayAdapter CustomListDue adapter
      */
+    @RequiresApi(api = Build.VERSION_CODES.O)
     default void adjustScore(FirebaseFirestore db, ActiveUser currentUser, CustomListDue dueTodayAdapter){
         Date present_date =  Calendar.getInstance().getTime();
-        long today = present_date.getTime();
-        Calendar cal = Calendar.getInstance();
-        int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
         //Date today = present_date.getTime();
         db.collection("Habit")
                 .whereEqualTo("uid",currentUser.getUID())
@@ -494,8 +496,9 @@ public interface HabitFirebase extends EventFirebase, Days{
                     if(task.isSuccessful()){
                         for (QueryDocumentSnapshot snapshot: Objects.requireNonNull(task.getResult())){
                             if(snapshot.get("Last_Adjusted") != null){
+
                                 Date LastAdjusted =  snapshot.getTimestamp("Last_Adjusted").toDate();
-                                long LastAdjusted1 = LastAdjusted.getTime();
+
                                 boolean Monday = snapshot.getBoolean("Monday");
                                 boolean Tuesday = snapshot.getBoolean("Tuesday");
                                 boolean Wednesday = snapshot.getBoolean("Wednesday");
@@ -504,141 +507,50 @@ public interface HabitFirebase extends EventFirebase, Days{
                                 boolean Saturday = snapshot.getBoolean("Saturday");
                                 boolean Sunday = snapshot.getBoolean("Sunday");
 
+                                LocalDate date = LastAdjusted.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-                                if((dayOfWeek == 1) & (Sunday)  ){
-                                    long diffTime = (today - LastAdjusted1)/7;
-                                    long diffDays = diffTime/(1000 * 60 * 60 * 24);
-                                    int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
-                                    int newStreak = (int) (StreakScore - diffDays);
-                                    newStreak = Math.max(-5,newStreak);
-                                    Log.d("Streak score", String.valueOf(StreakScore));
-                                    String newStreakStr = String.valueOf(newStreak);
+                                int sum = 0;
 
-                                    Log.d("Adjusted score", newStreakStr);
-                                    // adjust score now
-                                    db.collection("Habit")
-                                            .document(snapshot.getId())
-                                            .update("streaks",newStreakStr,
-                                                    "Last_Adjusted",present_date
-                                            );
-                                    Log.d("Update streak", snapshot.getId() + newStreakStr);
+                                for (LocalDate dateLoop = date.plusDays(1); dateLoop.isBefore(LocalDate.now()); dateLoop = dateLoop.plusDays(1)){
+                                    //Check for every day between date.plusDays(1) and current day
+                                    Log.d("DATE", dateLoop.toString());
+                                    Log.d("DATE", dateLoop.getDayOfWeek().toString());
+                                    if((Sunday) && dateLoop.getDayOfWeek().toString().equals("SUNDAY")){
+                                        sum = sum + 1;
+                                    }
+                                    if((Monday) && dateLoop.getDayOfWeek().toString().equals("MONDAY")){
+                                        sum = sum + 1;
+                                    }
+                                    if((Tuesday) && dateLoop.getDayOfWeek().toString().equals("TUESDAY")){
+                                        sum = sum + 1;
+                                    }
+                                    if((Wednesday) && dateLoop.getDayOfWeek().toString().equals("WEDNESDAY")){
+                                        sum = sum + 1;
+                                    }
+                                    if((Thursday) && dateLoop.getDayOfWeek().toString().equals("THURSDAY")){
+                                        sum = sum + 1;
+                                    }
+                                    if((Friday) && dateLoop.getDayOfWeek().toString().equals("FRIDAY")){
+                                        sum = sum + 1;
+                                    }
+                                    if((Saturday) && dateLoop.getDayOfWeek().toString().equals("SATURDAY")){
+                                        sum = sum + 1;
+                                    }
                                 }
 
-                                if((dayOfWeek == 2) & (Monday)  ){
-                                    long diffTime = (today - LastAdjusted1)/7;
-                                    long diffDays = diffTime/(1000 * 60 * 60 * 24);
-                                    int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
-                                    int newStreak = (int) (StreakScore - diffDays);
-                                    newStreak = Math.max(-5,newStreak);
-                                    Log.d("Streak score", String.valueOf(StreakScore));
-                                    String newStreakStr = String.valueOf(newStreak);
+                                int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
 
-                                    Log.d("Adjusted score", newStreakStr);
-                                    // adjust score now
-                                    db.collection("Habit")
-                                            .document(snapshot.getId())
-                                            .update("streaks",newStreakStr,
-                                                    "Last_Adjusted",present_date
-                                            );
-                                    Log.d("Update streak", snapshot.getId() + newStreakStr);
-                                }
+                                int streak = StreakScore - sum;
 
-                                if((dayOfWeek == 3) & (Tuesday)){
-                                    long diffTime = (today - LastAdjusted1)/7;
-                                    long diffDays = diffTime/(1000 * 60 * 60 * 24);
-                                    int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
-                                    int newStreak = (int) (StreakScore - diffDays);
-                                    newStreak = Math.max(-5,newStreak);
-                                    Log.d("Streak score", String.valueOf(StreakScore));
-                                    String newStreakStr = String.valueOf(newStreak);
+                                streak = Math.max(-5, streak);
+                                String streakString = String.valueOf(streak);
 
-                                    Log.d("Adjusted score", newStreakStr);
-                                    // adjust score now
-                                    db.collection("Habit")
-                                            .document(snapshot.getId())
-                                            .update("streaks",newStreakStr,
-                                                    "Last_Adjusted",present_date
-                                            );
-                                    Log.d("Update streak", snapshot.getId() + newStreakStr);
-                                }
-
-                                if((dayOfWeek == 4 ) & (Wednesday) ){
-                                    long diffTime = (today - LastAdjusted1)/7;
-                                    long diffDays = diffTime/(1000 * 60 * 60 * 24);
-                                    int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
-                                    int newStreak = (int) (StreakScore - diffDays);
-                                    newStreak = Math.max(-5,newStreak);
-                                    Log.d("Streak score", String.valueOf(StreakScore));
-                                    String newStreakStr = String.valueOf(newStreak);
-
-                                    Log.d("Adjusted score", newStreakStr);
-                                    // adjust score now
-                                    db.collection("Habit")
-                                            .document(snapshot.getId())
-                                            .update("streaks",newStreakStr,
-                                                    "Last_Adjusted",present_date
-                                            );
-                                    Log.d("Update streak", snapshot.getId() + newStreakStr);
-                                }
-
-                                if((dayOfWeek == 5) & (Thursday)){
-                                    long diffTime = (today - LastAdjusted1)/7;
-                                    long diffDays = diffTime/(1000 * 60 * 60 * 24);
-                                    int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
-                                    int newStreak = (int) (StreakScore - diffDays);
-                                    newStreak = Math.max(-5,newStreak);
-                                    Log.d("Streak score", String.valueOf(StreakScore));
-                                    String newStreakStr = String.valueOf(newStreak);
-
-                                    Log.d("Adjusted score", newStreakStr);
-                                    // adjust score now
-                                    db.collection("Habit")
-                                            .document(snapshot.getId())
-                                            .update("streaks",newStreakStr,
-                                                    "Last_Adjusted",present_date
-                                            );
-                                    Log.d("Update streak", snapshot.getId() + newStreakStr);
-                                }
-
-                                if((dayOfWeek == 6 ) & (Friday) ){
-                                    long diffTime = (today - LastAdjusted1)/7;
-                                    long diffDays = diffTime/(1000 * 60 * 60 * 24);
-                                    int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
-                                    int newStreak = (int) (StreakScore - diffDays);
-                                    newStreak = Math.max(-5,newStreak);
-                                    Log.d("Streak score", String.valueOf(StreakScore));
-                                    String newStreakStr = String.valueOf(newStreak);
-
-                                    Log.d("Adjusted score", newStreakStr);
-                                    // adjust score now
-                                    db.collection("Habit")
-                                            .document(snapshot.getId())
-                                            .update("streaks",newStreakStr,
-                                                    "Last_Adjusted",present_date
-                                            );
-                                    Log.d("Update streak", snapshot.getId() + newStreakStr);
-                                }
-
-                                if ((dayOfWeek == 7) & (Saturday) ){
-                                    long diffTime = (today - LastAdjusted1)/7;
-                                    long diffDays = diffTime/(1000 * 60 * 60 * 24);
-                                    int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
-                                    int newStreak = (int) (StreakScore - diffDays);
-                                    newStreak = Math.max(-5,newStreak);
-                                    Log.d("Streak score", String.valueOf(StreakScore));
-                                    String newStreakStr = String.valueOf(newStreak);
-
-                                    Log.d("Adjusted score", newStreakStr);
-                                    // adjust score now
-                                    db.collection("Habit")
-                                            .document(snapshot.getId())
-                                            .update("streaks",newStreakStr,
-                                                    "Last_Adjusted",present_date
-                                            );
-                                    Log.d("Update streak", snapshot.getId() + newStreakStr);
-                                }
-
-
+                                // adjust score for all missed days
+                                db.collection("Habit")
+                                        .document(snapshot.getId())
+                                        .update("streaks",streakString,
+                                                "Last_Adjusted",present_date
+                                        );
 
                             }
                             dueTodayAdapter.notifyDataSetChanged();
@@ -649,7 +561,4 @@ public interface HabitFirebase extends EventFirebase, Days{
                     }
                 });
     }
-
-
-
 }
