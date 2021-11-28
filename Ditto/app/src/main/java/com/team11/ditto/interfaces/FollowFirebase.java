@@ -289,6 +289,7 @@ public interface FollowFirebase extends Firebase{
 
             }
         } );
+
     }
 
 
@@ -398,9 +399,22 @@ public interface FollowFirebase extends Firebase{
                                                         DocumentSnapshot documentSnapshot = task3.getResult();
                                                         String title = documentSnapshot.get("title").toString();
                                                         String reason = documentSnapshot.get("reason").toString();
-                                                        Log.d("Title ", title);
-                                                        Log.d("Reason ", reason);
-                                                        habitData.add(new Habit(title,reason));
+
+                                                        try {
+                                                            String streak = documentSnapshot.get("streaks").toString();
+                                                            int position = ((Long) documentSnapshot.get("position")).intValue();
+                                                            int score = Integer.parseInt(streak);
+                                                            Log.d("Title ", title);
+                                                            Log.d("Reason ", reason);
+                                                            habitData.add(new Habit(title,reason,score,position ));
+                                                        }
+                                                        catch (Exception e){
+                                                            Log.w("null streak", e);
+                                                        }
+
+
+
+
                                                         friendHabitAdapter.notifyDataSetChanged();
                                                     }
                                                 });

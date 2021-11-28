@@ -158,7 +158,7 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
                                         }
                                     });
                                 }
-                                userAdapter.notifyDataSetChanged();
+                            userAdapter.notifyDataSetChanged();
                             }
                         }
                     });
@@ -182,7 +182,9 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
                     }
                 }
                 showData();
+
             }
+
         });
     }
 

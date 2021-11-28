@@ -3,12 +3,6 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="../../../../../../../layout/custom_preview.xml" value="0.1921875" />
-        <entry key="..\:/Users/ahore/repos/Ditto/Ditto/app/src/main/res/layout/activity_due_today.xml" value="0.2015625" />
-        <entry key="..\:/Users/ahore/repos/Ditto/Ditto/app/src/main/res/layout/activity_main.xml" value="0.36102564102564105" />
-        <entry key="..\:/Users/ahore/repos/Ditto/Ditto/app/src/main/res/layout/activity_view_habit.xml" value="0.5" />
-        <entry key="..\:/Users/ahore/repos/Ditto/Ditto/app/src/main/res/layout/fragment_my_habit.xml" value="0.19791666666666666" />
-        <entry key="..\:/Users/ahore/repos/Ditto/Ditto/app/src/main/res/layout/list_my_habit_event.xml" value="0.19791666666666666" />
         <entry key="..\:/Users/lkcou/Documents/A_University/CMPUT301/TeamProject/Ditto/Ditto/app/src/main/res/layout/activity_following.xml" value="0.182518115942029" />
         <entry key="..\:/Users/lkcou/Documents/A_University/CMPUT301/TeamProject/Ditto/Ditto/app/src/main/res/layout/activity_login.xml" value="0.182518115942029" />
         <entry key="..\:/Users/lkcou/Documents/A_University/CMPUT301/TeamProject/Ditto/Ditto/app/src/main/res/layout/activity_main.xml" value="0.182518115942029" />
@@ -28,6 +22,19 @@
         <entry key="..\:/Users/lkcou/Documents/A_University/CMPUT301/TeamProject/Ditto/Ditto/app/src/main/res/menu/navigation_bar.xml" value="0.20052083333333334" />
         <entry key="..\:/Users/vip_r/301-project/Ditto/Ditto/app/src/main/res/layout/activity_sign_up.xml" value="0.259963768115942" />
         <entry key="..\:/Users/vip_r/301-project/Ditto/Ditto/app/src/main/res/layout/activity_userprofile.xml" value="0.375" />
+        <entry key="..\:/vivek documents @U OF A/2021 Fall- Semester_5/CMPUT_301/Project/Ditto/Ditto/app/src/main/res/layout/activity_follow_request.xml" value="0.5194444444444445" />
+        <entry key="..\:/vivek documents @U OF A/2021 Fall- Semester_5/CMPUT_301/Project/Ditto/Ditto/app/src/main/res/layout/activity_main.xml" value="0.5212962962962963" />
+        <entry key="..\:/vivek documents @U OF A/2021 Fall- Semester_5/CMPUT_301/Project/Ditto/Ditto/app/src/main/res/layout/activity_userprofile.xml" value="0.4759259259259259" />
+        <entry key="..\:/vivek documents @U OF A/2021 Fall- Semester_5/CMPUT_301/Project/Ditto/Ditto/app/src/main/res/layout/duetoday_content.xml" value="0.4759259259259259" />
+        <entry key="..\:/vivek documents @U OF A/2021 Fall- Semester_5/CMPUT_301/Project/Ditto/Ditto/app/src/main/res/layout/follow_content.xml" value="0.5194444444444445" />
+        <entry key="..\:/vivek documents @U OF A/2021 Fall- Semester_5/CMPUT_301/Project/Ditto/Ditto/app/src/main/res/layout/follow_request_content.xml" value="0.5194444444444445" />
+        <entry key="..\:/vivek documents @U OF A/2021 Fall- Semester_5/CMPUT_301/Project/Ditto/Ditto/app/src/main/res/layout/follower_content.xml" value="0.5194444444444445" />
+        <entry key="..\:/vivek documents @U OF A/2021 Fall- Semester_5/CMPUT_301/Project/Ditto/Ditto/app/src/main/res/layout/follower_list.xml" value="0.5185185185185185" />
+        <entry key="..\:/vivek documents @U OF A/2021 Fall- Semester_5/CMPUT_301/Project/Ditto/Ditto/app/src/main/res/layout/following_list.xml" value="0.5194444444444445" />
+        <entry key="..\:/vivek documents @U OF A/2021 Fall- Semester_5/CMPUT_301/Project/Ditto/Ditto/app/src/main/res/layout/friend_profile_content.xml" value="0.4824074074074074" />
+        <entry key="..\:/vivek documents @U OF A/2021 Fall- Semester_5/CMPUT_301/Project/Ditto/Ditto/app/src/main/res/layout/list_my_habit_event.xml" value="0.5194444444444445" />
+        <entry key="..\:/vivek documents @U OF A/2021 Fall- Semester_5/CMPUT_301/Project/Ditto/Ditto/app/src/main/res/layout/search_content.xml" value="0.5212962962962963" />
+        <entry key="..\:/vivek documents @U OF A/2021 Fall- Semester_5/CMPUT_301/Project/Ditto/Ditto/app/src/main/res/layout/sent_request_content.xml" value="0.5546875" />
         <entry key="app/src/main/res/drawable/ic_baseline_account_circle_24.xml" value="0.2630208333333333" />
         <entry key="app/src/main/res/drawable/ic_baseline_add_24.xml" value="0.2630208333333333" />
         <entry key="app/src/main/res/drawable/ic_baseline_delete_24.xml" value="0.2630208333333333" />
@@ -52,7 +59,6 @@
         <entry key="app/src/main/res/layout/activity_userprofile.xml" value="0.5" />
         <entry key="app/src/main/res/layout/activity_view_event.xml" value="0.2375" />
         <entry key="app/src/main/res/layout/activity_welcome.xml" value="0.33" />
-        <entry key="app/src/main/res/layout/add_event_fragment.xml" value="0.16983695652173914" />
         <entry key="app/src/main/res/layout/content_habit.xml" value="0.182518115942029" />
         <entry key="app/src/main/res/layout/follow_request_content.xml" value="0.23333333333333334" />
         <entry key="app/src/main/res/layout/fragment_due_today.xml" value="0.182518115942029" />
