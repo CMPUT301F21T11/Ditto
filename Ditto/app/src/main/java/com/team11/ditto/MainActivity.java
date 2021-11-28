@@ -121,8 +121,9 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         LinearLayoutManager manager = new LinearLayoutManager(this);
         habitEventList.setLayoutManager(manager);
         habitEventList.setAdapter(habitEventRecyclerAdapter);
+        followedIDs = new ArrayList<>();
 
-    //Show loading page
+        //Show loading page
         habitEventList.setVisibility(View.INVISIBLE);
         progressBar.setVisibility(View.VISIBLE);
 
@@ -132,9 +133,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 
     //Load the Habit Event data
         //getFollowedByActiveUser(db, currentUser, followedEmails);
-        followedEmails = new ArrayList<>(generateFollowList());
-        getIDsToQuery();
-        queryList();
+        generateFollowEventList();
 
     //Notifies if cloud data changes for followed users (EventFirebase)
         autoHabitEventListener(db, habitEventRecyclerAdapter, followedIDs);
@@ -217,14 +216,13 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
      * Get all the user following
      * Then query their info and the user's
      */
-    public void queryList(){
-        for (int i = 0; i < followedIDs.size(); i++)
+    public void queryEventsForID(String userID){
+        Log.d("Starting", "Event Query for "+userID);
         db.collection(HABIT_EVENT_KEY)
-                .whereEqualTo("uid", followedIDs.get(i)) //userevents
+                .whereEqualTo("uid", userID) //userevents
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                        habitEventsData.clear();
                         for (QueryDocumentSnapshot doc: value) {
                             // Parse the event data for each document
                             String eventID = (String) doc.getId();
@@ -246,12 +244,11 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                                             //retrieve the order value
                                             String name = (String) documentSnapshot.get("name");
                                             habitEventsData.add(new HabitEvent(eventID, eHabitId, eComment, ePhoto, eLocation, eHabitTitle, uid, name));
-                                            habitEventRecyclerAdapter.notifyDataSetChanged();
+                                            habitEventRecyclerAdapter.notifyItemInserted(habitEventsData.size()-1);
                                         }
                                         else {
                                             Log.d("retrieve", "document does not exist!!");
                                         }
-
                                     }
                                     else {
                                         Log.d("retrieve", task.getException().toString());
@@ -305,44 +302,45 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         super.onPause();
     }
 
-    public ArrayList<String> generateFollowList(){
-        ArrayList<String> dummy = new ArrayList<>();
+    public void generateFollowEventList(){
         String myEmail = currentUser.getEmail();
-        dummy.add(myEmail);
+        queryEventsForID(currentUser.getUID());
         db.collection("Following")
                 .whereEqualTo("followedBy", myEmail)
-                .get().addOnCompleteListener(task -> {
+                .get()
+                .addOnCompleteListener(task -> {
             task.addOnSuccessListener(success -> {
-                for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())) {
-                    dummy.add(snapshot.get(EMAIL).toString());
+                for (DocumentSnapshot snapshot : Objects.requireNonNull(success.getDocuments())) {
+                    String email = snapshot.get(FOLLOWED).toString();
+                    getID(email);
                 }
             });
         });
-        Log.d("Email list", dummy.toString());
-        return dummy;
+
     }
 
     /**
      *
      */
-    private void getIDsToQuery() {
+    private void getID(String email) {
         Log.d("Starting", "ID Query");
-        followedIDs = new ArrayList<>();
-        for (int i = 0; i < followedEmails.size(); i++) {
-            db.collection(USER_KEY)
-                    .whereEqualTo(EMAIL, followedEmails.get(i))
-                    .get().addOnCompleteListener(Task -> {
-                if (Task.isSuccessful()) {
-                    for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(Task.getResult())) {
+
+        db.collection(USER_KEY)
+          .whereEqualTo(EMAIL, email)
+          .get()
+          .addOnCompleteListener(Task -> {
+              if (Task.isSuccessful()) {
+                  for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(Task.getResult())) {
                         String id = snapshot.getData().get(USER_ID).toString();
                         followedIDs.add(id);
-                        Log.d("Attempted to add", id);
-                    }
-                } else {
+                        Log.d("Added", email+"'s id "+id);
+                        queryEventsForID(id);
+                  }
+              } else {
                     Log.d("ID query", "unsuccessful");
-                }
-            });
-        }
+              }
+          });
+
     }
 
 }
