@@ -1,16 +1,15 @@
 package com.team11.ditto.interfaces;
 
-import android.os.Build;
 import android.util.Log;
 import android.widget.Spinner;
 
-<<<<<<< HEAD
-=======
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 import androidx.fragment.app.FragmentActivity;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -19,34 +18,19 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-<<<<<<< HEAD
-=======
-import com.team11.ditto.MyHabitActivity;
-import com.team11.ditto.habit.CustomListDue;
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 import com.team11.ditto.habit.Habit;
 import com.team11.ditto.habit.HabitRecyclerAdapter;
 import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.login.ActiveUser;
 
-<<<<<<< HEAD
-=======
-import org.w3c.dom.Document;
-
-import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.ZoneId;
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-<<<<<<< HEAD
-=======
-import java.util.Map;
 import java.util.Objects;
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 
 import javax.annotation.Nullable;
 
@@ -197,14 +181,9 @@ public interface HabitFirebase extends EventFirebase, Days{
         //get unique timestamp for ordering our list
         final String habitID = habit.getHabitID();
         Date currentTime = Calendar.getInstance().getTime();
-<<<<<<< HEAD
 
-        habitData.put("title", habit.getTitle());
-        habitData.put("reason", habit.getReason());
-=======
         habitData.put(TITLE, habit.getTitle());
         habitData.put(REASON, habit.getReason());
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 
         for (int i = 0; i<7; i++){
             habitData.put(WEEKDAYS[i], habit.getDates().contains(WEEKDAYS[i]));
@@ -214,7 +193,7 @@ public interface HabitFirebase extends EventFirebase, Days{
         habitData.put("streaks", Integer.toString(habit.getStreak()));
 
         //this field is used to add the current timestamp of the item, to be used to order the items
-        habitData.put("order", currentTime);
+        habitData.put(ORDER, currentTime);
 
         //pushToDB(database, HABIT_KEY, habitID, habitData);
 
@@ -222,49 +201,37 @@ public interface HabitFirebase extends EventFirebase, Days{
         ActiveUser currentUser = new ActiveUser();
 
         database.collection(HABIT_KEY)
-                .whereEqualTo("uid", currentUser.getUID())
+                .whereEqualTo(USER_ID, currentUser.getUID())
                 .get()
-<<<<<<< HEAD
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        int count = 0;
-                        for (DocumentSnapshot ignored : task.getResult()) {
-                            count++;
-=======
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        int count = 0;
                         if (task.isSuccessful()) {
-                            int count = 0;
                             for (DocumentSnapshot document : task.getResult()) {
                                 count++;
                                 habit.setHabitID(document.getId());
-
                             }
                             habit.setPosition(count);
                             habitData.put("position", count);
-                            habitData.put("Start_Date",currentTime);
+                            habitData.put("Start_Date", currentTime);
                             habitData.put("Last_Adjusted", currentTime);
-                            pushToDB(database,HABIT_KEY,habitID, habitData);
+                            pushToDB(database, HABIT_KEY, habitID, habitData);
                             Log.d(TAG, "SET POSITION " + habit.getPosition());
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
                         }
-                        habit.setPosition(count);
-                        habitData.put("position", count);
-                        pushToDB(database,HABIT_KEY,habitID, habitData);
-                        Log.d(TAG, "SET POSITION " + habit.getPosition());
-                    } else {
-                        Log.d(TAG, "Error getting documents: ", task.getException());
                     }
                 });
 
     }
 
 
-
-
+    /**
+     *
+     * @param database firebase ref
+     * @param newHabit Habit to be added
+     */
     default void pushHabitData(FirebaseFirestore database, Habit newHabit){
         habitData.clear();
         habitData.put(USER_ID, new ActiveUser().getUID());
@@ -340,12 +307,6 @@ public interface HabitFirebase extends EventFirebase, Days{
             DocumentReference docRef = database.collection(HABIT_KEY).document(habitsDecrement.get(i).getHabitID());
 
             //set position of from habit to toPos
-<<<<<<< HEAD
-            docRef
-                    .update("position", c)
-                    .addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!"))
-                    .addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
-=======
             docRef.update("position", c)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
@@ -359,7 +320,6 @@ public interface HabitFirebase extends EventFirebase, Days{
                             Log.w(TAG, "Error updating document", e);
                         }
                     });
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
             c--;
 
         }
@@ -392,21 +352,6 @@ public interface HabitFirebase extends EventFirebase, Days{
     default void isHabitDoneToday(FirebaseFirestore db, int today, HabitEvent newHabitEvent) {
         //get days ...
         final Integer[] daysOfWeek = new Integer[7];
-<<<<<<< HEAD
-        DocumentReference document = db.collection(HABIT_KEY).document(newHabitEvent.getHabitId());
-        document.get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                DocumentSnapshot documentSnapshot = task.getResult();
-                if (documentSnapshot.exists()) {
-                    //retrieve the order value
-                    int numDays = 7;
-                    for (int i=0;i<numDays;i++) {
-                        Boolean isDay; //is the day "true" in for this Habit
-                        String day = daysForHabit(i);
-                        isDay = documentSnapshot.getBoolean(day);
-                        if (isDay) { daysOfWeek[i] = i+1; }
-                        else { daysOfWeek[i] = 0; }
-=======
         DocumentReference document = db.collection(HABIT_KEY).document(newHabitEvent.getHabitId()); //get the associated habit
         document.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -425,11 +370,10 @@ public interface HabitFirebase extends EventFirebase, Days{
                         }
                         //if today is in the set of days chosen, update habitDoneToday to true
                         int StreakScore = Integer.parseInt(documentSnapshot.get("streaks").toString());
-                        setHabitDoneToday(document, daysOfWeek, today,StreakScore);
+                        setHabitDoneToday(document, daysOfWeek, today, StreakScore);
                     }
                     else {
                         Log.d(TAG, "document does not exist!!");
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
                     }
                     //if today is in the set of days chosen, update habitDoneToday to true
                     setHabitDoneToday(document, daysOfWeek, today);
@@ -438,21 +382,9 @@ public interface HabitFirebase extends EventFirebase, Days{
                     Log.d(TAG, "document does not exist!!");
                 }
             }
-            else {
-                Log.d(TAG, task.getException().toString());
-            }
         });
     }
 
-<<<<<<< HEAD
-    default void setHabitDoneToday(DocumentReference document, Integer[] daysOfWeek, int today) {
-        for (Integer integer : daysOfWeek) {
-            if (today == integer) {
-                //then we set ishabitDone to true
-                document.update("habitDoneToday", true)
-                        .addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!"))
-                        .addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
-=======
     /**
      * Handle setting the habitDoneToday boolean field in firestore after an event has been posted.
      * @param document firebase cloud
@@ -482,8 +414,6 @@ public interface HabitFirebase extends EventFirebase, Days{
                                 Log.w(TAG, "Error updating document", e);
                             }
                         });
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
-
             }
         }
 
