@@ -77,7 +77,7 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
 
         // Load habits
         currentUser = new ActiveUser();
-        adjustScore(db,currentUser, (CustomListDue) dueTodayAdapter);
+        adjustScore(db,currentUser);
         db.collection("Habit")
                 .whereEqualTo("uid",currentUser.getUID())
                 .get()

@@ -483,10 +483,9 @@ public interface HabitFirebase extends EventFirebase, Days{
      * This method will update the streak score of a habit in db, accounts for days since the last opening of the app
      * @param db FirebaseFirestore
      * @param currentUser ActiveUser
-     * @param dueTodayAdapter CustomListDue adapter
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
-    default void adjustScore(FirebaseFirestore db, ActiveUser currentUser, CustomListDue dueTodayAdapter){
+    default void adjustScore(FirebaseFirestore db, ActiveUser currentUser){
         Date present_date =  Calendar.getInstance().getTime();
         //Date today = present_date.getTime();
         db.collection("Habit")
@@ -553,10 +552,6 @@ public interface HabitFirebase extends EventFirebase, Days{
                                         );
 
                             }
-                            dueTodayAdapter.notifyDataSetChanged();
-
-
-
                         }
                     }
                 });
