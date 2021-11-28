@@ -21,12 +21,16 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.team11.ditto.R;
 import com.team11.ditto.UserProfileActivity;
 import com.team11.ditto.interfaces.Firebase;
@@ -37,6 +41,7 @@ import com.team11.ditto.profile_details.User;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -132,18 +137,29 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
     public void showData(){
 
         for (int i =0; i< followedByActiveUser.size(); i++){
+
             int finalI = i;
             db.collection("User")
-                    .whereEqualTo("email", followedByActiveUser.get(i))
+                    .whereEqualTo("email",followedByActiveUser.get(i).toString() )
                     .get()
-                    .addOnCompleteListener(task -> {
-                        if(task.isSuccessful()){
-                            for(QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
-                                userDataList.add( new User(snapshot.get("name").toString(), followedByActiveUser.get(finalI))  );
-                                Log.d("Followed", followedByActiveUser.get(finalI));
-                                Collections.sort(userDataList, (user, t1) -> user.getUsername().compareTo(t1.getUsername()));
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if(task.isSuccessful()){
+                                for(QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
+
+                                    userDataList.add( new User(snapshot.get("name").toString(), followedByActiveUser.get(finalI))  );
+                                    Log.d("Followed", followedByActiveUser.get(finalI));
+                                    Log.d("Iteration no. ", String.valueOf(finalI));
+                                    Collections.sort(userDataList, new Comparator<User>() {
+                                        @Override
+                                        public int compare(User user, User t1) {
+                                            return user.getUsername().compareTo(t1.getUsername()) ;
+                                        }
+                                    });
+                                }
+                                userAdapter.notifyDataSetChanged();
                             }
-                            userAdapter.notifyDataSetChanged();
                         }
                     });
         }
