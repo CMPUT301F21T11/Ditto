@@ -1,4 +1,4 @@
-/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ Role: Class for Habit Event Activity, be able to see you feed and add a habit ev
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -44,7 +43,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.team11.ditto.habit.Habit;
 import com.team11.ditto.habit_event.AddHabitEventFragment;
 import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.habit_event.HabitEventRecyclerAdapter;
@@ -54,10 +52,9 @@ import com.team11.ditto.interfaces.HabitFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 
-
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
+import java.util.Objects;
 
 
 /**
@@ -68,89 +65,86 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity implements SwitchTabs,
         AddHabitEventFragment.OnFragmentInteractionListener, HabitFirebase,
         HabitEventRecyclerAdapter.EventClickListener, FollowFirebase {
-
+//MACROS
     private static final String TAG = "tab switch";
-    private TabLayout tabLayout;
     public static String EXTRA_HABIT_EVENT = "EXTRA_HABIT_EVENT";
-    private ArrayList<HabitEvent> habitEventsData;
 
-    private ProgressBar progressBar;
+//ACTIVITY WIDE VARIABLES
+    private ArrayList<String> followedEmails;
+    private ArrayList<String> followedIDs;
+    private ArrayList<HabitEvent> habitEventsData;
     private int shortAnimationDuration;
 
+//ACTIVITY WIDE FINAL VARIABLES
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final ActiveUser currentUser = new ActiveUser();
+
+//LAYOUTS & HELPERS
+    private TabLayout tabLayout;
+    private ProgressBar progressBar;
     private RecyclerView habitEventList;
     private HabitEventRecyclerAdapter habitEventRecyclerAdapter;
 
-    private FirebaseFirestore db;
-    HashMap<String, Object> data = new HashMap<>();
-
-    private ActiveUser activeUser;
-    private ArrayList<Habit> habits; //list of habits due today
-    private ActiveUser currentUser;
-
-
     /**
-     * Create the Activity instance for the "Homepage" screen, control flow of actions
-     * @param savedInstanceState
+     * Create the Activity instance for the "Home Page" screen, default screen when back pressed
+     * Shows the Feed of a the logged in User, including events posted by the people they follow
+     * and themselves
+     * @param savedInstanceState saved state to start from
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         overridePendingTransition(0,0);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        // If device has userID, go to app - else, go to login
-        if (new ActiveUser().getUID().equals("")) {
+    // If device has userID, go to app - else, go to login
+        if (new ActiveUser().getUID().equals(ActiveUser.NONE)) {
             Intent intent = new Intent(this, WelcomeActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_CLEAR_TASK);
             this.startActivity(intent);
         }
 
+    //Set layouts
+        setContentView(R.layout.activity_main);
         progressBar = findViewById(R.id.progress_bar);
         tabLayout = findViewById(R.id.tabs);
-        habits = new ArrayList<>();
-
-        currentUser = new ActiveUser();
-
         setTitle("My Feed");
+        final FloatingActionButton addHabitEventButton = findViewById(R.id.add_habit_event);
+        addHabitEventButton.setOnClickListener(view -> new AddHabitEventFragment()
+                .show(getSupportFragmentManager(), "ADD_HABIT_EVENT"));
 
+    //Initialize non-final variables
+        shortAnimationDuration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
         habitEventList = findViewById(R.id.list_habit_event);
         habitEventsData = new ArrayList<>();
-
         habitEventRecyclerAdapter = new HabitEventRecyclerAdapter(this, habitEventsData, this);
-
-        habitEventList.setVisibility(View.INVISIBLE);
-        progressBar.setVisibility(View.VISIBLE);
-
-        shortAnimationDuration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
-
-        // Load the Habit Event data (This will be converted to use the Firebase interface in the future)
-        queryList();
-
-        resetDueToday(db); //reset the habitDoneToday boolean in the database
-
-
         LinearLayoutManager manager = new LinearLayoutManager(this);
         habitEventList.setLayoutManager(manager);
         habitEventList.setAdapter(habitEventRecyclerAdapter);
 
+    //Show loading page
+        habitEventList.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+
+    //Enable tab navigation
         currentTab(tabLayout, HOME_TAB);
         switchTabs(this, tabLayout, HOME_TAB);
 
-        //Get a top level reference to the collection
-        db = FirebaseFirestore.getInstance();
+    //Load the Habit Event data
+        //getFollowedByActiveUser(db, currentUser, followedEmails);
+        followedEmails = new ArrayList<>(generateFollowList());
+        getIDsToQuery();
+        queryList();
 
-        //Notifies if cloud data changes (from Firebase Interface)
-        autoHabitEventListener(db, habitEventRecyclerAdapter);
+    //Notifies if cloud data changes for followed users (EventFirebase)
+        autoHabitEventListener(db, habitEventRecyclerAdapter, followedIDs);
 
-        final FloatingActionButton addHabitEventButton = findViewById(R.id.add_habit_event);
-
-        addHabitEventButton.setOnClickListener(view -> new AddHabitEventFragment()
-                .show(getSupportFragmentManager(), "ADD_HABIT_EVENT"));
-
+    //Update the habitDoneToday boolean in the database
+        resetDueToday(db);
         adjustScore(db, currentUser);
 
+    //Show feed
         fadeInView();
-
     }
 
     /**
@@ -224,10 +218,9 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
      * Then query their info and the user's
      */
     public void queryList(){
-        db = FirebaseFirestore.getInstance();
-
+        for (int i = 0; i < followedIDs.size(); i++)
         db.collection(HABIT_EVENT_KEY)
-                .whereEqualTo("uid", FirebaseAuth.getInstance().getUid()) //userevents
+                .whereEqualTo("uid", followedIDs.get(i)) //userevents
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -311,4 +304,45 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         overridePendingTransition(0,0);
         super.onPause();
     }
+
+    public ArrayList<String> generateFollowList(){
+        ArrayList<String> dummy = new ArrayList<>();
+        String myEmail = currentUser.getEmail();
+        dummy.add(myEmail);
+        db.collection("Following")
+                .whereEqualTo("followedBy", myEmail)
+                .get().addOnCompleteListener(task -> {
+            task.addOnSuccessListener(success -> {
+                for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())) {
+                    dummy.add(snapshot.get(EMAIL).toString());
+                }
+            });
+        });
+        Log.d("Email list", dummy.toString());
+        return dummy;
+    }
+
+    /**
+     *
+     */
+    private void getIDsToQuery() {
+        Log.d("Starting", "ID Query");
+        followedIDs = new ArrayList<>();
+        for (int i = 0; i < followedEmails.size(); i++) {
+            db.collection(USER_KEY)
+                    .whereEqualTo(EMAIL, followedEmails.get(i))
+                    .get().addOnCompleteListener(Task -> {
+                if (Task.isSuccessful()) {
+                    for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(Task.getResult())) {
+                        String id = snapshot.getData().get(USER_ID).toString();
+                        followedIDs.add(id);
+                        Log.d("Attempted to add", id);
+                    }
+                } else {
+                    Log.d("ID query", "unsuccessful");
+                }
+            });
+        }
+    }
+
 }

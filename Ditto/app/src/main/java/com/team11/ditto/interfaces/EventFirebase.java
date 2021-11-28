@@ -68,27 +68,31 @@ public interface EventFirebase extends Firebase{
      * @param database firebase cloud
      * @param adapter adapter between datalist and database
      */
-    default void autoHabitEventListener(FirebaseFirestore database, HabitEventRecyclerAdapter adapter){
-        Query query = database.collection(HABIT_EVENT_KEY).orderBy(ORDER, Query.Direction.DESCENDING);
-        query.addSnapshotListener(new EventListener<QuerySnapshot>() {
-            /**Maintain listview after each activity switch, login, logout
-             *
-             * @param queryDocumentSnapshots
-             *          event data
-             * @param error
-             *          error data
-             */
-            @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable
-                    FirebaseFirestoreException error) {
-                // Clear the old list
-                hEventsFirebase.clear();
-                logEventData(queryDocumentSnapshots);
-                adapter.notifyDataSetChanged();
-                // Notifying the adapter to render any new data fetched from the cloud
+    default void autoHabitEventListener(FirebaseFirestore database, HabitEventRecyclerAdapter adapter,
+                                        ArrayList<String> followedIDs){
+        for (int i = 0; i < followedIDs.size(); i++) {
+            Query query = database.collection(HABIT_EVENT_KEY)
+                    .orderBy(ORDER, Query.Direction.DESCENDING)
+                    .whereEqualTo(USER_ID, followedIDs.get(i));
+            query.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                /**
+                 * Maintain listview after each activity switch, login, logout
+                 *
+                 * @param queryDocumentSnapshots event data
+                 * @param error                  error data
+                 */
+                @Override
+                public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable
+                        FirebaseFirestoreException error) {
+                    // Clear the old list
+                    hEventsFirebase.clear();
+                    logEventData(queryDocumentSnapshots);
+                    adapter.notifyDataSetChanged();
+                    // Notifying the adapter to render any new data fetched from the cloud
 
-            }
-        });
+                }
+            });
+        }
     }
 
     /**

@@ -81,20 +81,25 @@ public class SignInActivity extends AppCompatActivity {
             String email = emailField.getText().toString();
             String password = passwordField.getText().toString();
 
-                Log.d(TAG, "SIGNING IN");
-
-            mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(SignInActivity.this, task -> {
-                    if (task.isSuccessful()) {
-                        // Sign in success, update UI with the signed-in user's information
-                        Log.d(TAG, "loginUserWithEmail:success");
-                        Intent intent = new Intent(context, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                    } else {
-                        Log.d(TAG, "loginUserWithEmail:failure");
-                    }
-                });
+                Log.d(TAG, "ATTEMPTING SIGN IN");
+                try {
+                    mAuth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener(SignInActivity.this, task -> {
+                                if (task.isSuccessful()) {
+                                    // Sign in success, update UI with the signed-in user's information
+                                    Log.d(TAG, "loginUserWithEmail:success");
+                                    Intent intent = new Intent(context, MainActivity.class);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    startActivity(intent);
+                                } else {
+                                    Log.d(TAG, "loginUserWithEmail:failure");
+                                }
+                            });
+                }
+                catch (Exception emptyString){
+                    Toast error = Toast.makeText(this, "Please fill out required fields", Toast.LENGTH_LONG);
+                    error.show();
+                }
         });
     }
 

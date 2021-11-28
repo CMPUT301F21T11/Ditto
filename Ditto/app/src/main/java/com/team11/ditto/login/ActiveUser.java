@@ -29,6 +29,7 @@ public class ActiveUser extends User {
 
     static ActiveUser activeUser;
     FirebaseUser fbUser;
+    public final static String NONE = "";
 
     /**
      * Constructor for the ActiveUser
@@ -78,7 +79,7 @@ public class ActiveUser extends User {
         if (fbUser != null) {
             return fbUser.getUid();
         } else {
-            return "";
+            return NONE;
         }
     }
 
@@ -100,7 +101,7 @@ public class ActiveUser extends User {
             return fbUser.getEmail();
         }
         else{
-            return "";
+            return NONE;
         }
     }
 }
