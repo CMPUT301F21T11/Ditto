@@ -44,6 +44,7 @@ public interface HabitFirebase extends EventFirebase, Days{
     String TITLE = "title";
     String REASON = "reason";
     String IS_PUBLIC = "is_public";
+    String STREAK = "streaks";
 
     default void logHabitData(@Nullable QuerySnapshot queryDocumentSnapshots){
         if (queryDocumentSnapshots != null) {
@@ -369,14 +370,9 @@ public interface HabitFirebase extends EventFirebase, Days{
                             else { daysOfWeek[i] = 0; }
                         }
                         //if today is in the set of days chosen, update habitDoneToday to true
-                        int StreakScore = Integer.parseInt(documentSnapshot.get("streaks").toString());
+                        int StreakScore = Integer.parseInt(documentSnapshot.get(STREAK).toString());
                         setHabitDoneToday(document, daysOfWeek, today, StreakScore);
                     }
-                    else {
-                        Log.d(TAG, "document does not exist!!");
-                    }
-                    //if today is in the set of days chosen, update habitDoneToday to true
-                    setHabitDoneToday(document, daysOfWeek, today);
                 }
                 else {
                     Log.d(TAG, "document does not exist!!");
@@ -462,8 +458,8 @@ public interface HabitFirebase extends EventFirebase, Days{
     default void adjustScore(FirebaseFirestore db, ActiveUser currentUser){
         Date present_date =  Calendar.getInstance().getTime();
         //Date today = present_date.getTime();
-        db.collection("Habit")
-                .whereEqualTo("uid",currentUser.getUID())
+        db.collection(HABIT_KEY)
+                .whereEqualTo(USER_ID,currentUser.getUID())
                 .get()
                 .addOnCompleteListener(task -> {
                     if(task.isSuccessful()){
@@ -515,7 +511,7 @@ public interface HabitFirebase extends EventFirebase, Days{
                                     }
 
 
-                                    int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
+                                    int StreakScore = Integer.parseInt(snapshot.get(STREAK).toString());
 
                                     int streak = StreakScore - sum;
 
@@ -523,9 +519,9 @@ public interface HabitFirebase extends EventFirebase, Days{
                                     String streakString = String.valueOf(streak);
 
                                     // adjust score for all missed days
-                                    db.collection("Habit")
+                                    db.collection(HABIT_KEY)
                                             .document(snapshot.getId())
-                                            .update("streaks", streakString,
+                                            .update(STREAK, streakString,
                                                     "Last_Adjusted", present_date
                                             );
                                 }

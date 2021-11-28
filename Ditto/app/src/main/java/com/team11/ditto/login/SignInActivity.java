@@ -21,10 +21,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-<<<<<<< HEAD
-=======
-import android.widget.TextView;
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -99,10 +95,6 @@ public class SignInActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(),"Wrong username/password.",Toast.LENGTH_LONG).show();
                     }
                 });
-<<<<<<< HEAD
-
-=======
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
         });
     }
 

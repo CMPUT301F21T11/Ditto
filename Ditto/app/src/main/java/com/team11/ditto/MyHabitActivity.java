@@ -53,11 +53,8 @@ import com.team11.ditto.login.ActiveUser;
 
 import java.util.ArrayList;
 import java.util.Collections;
-<<<<<<< HEAD
-=======
 import java.util.Map;
 import java.util.Objects;
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 
 /**To display the listview of Habits for a user in the "My Habits" tab
  *Allow a user to add a habit, swipe left to delete a habit
@@ -114,35 +111,7 @@ public class MyHabitActivity extends AppCompatActivity implements
         adjustScore(db, currentUser);
 
         // Load habits
-<<<<<<< HEAD
-        currentUser = new ActiveUser();
-        db.collection(HABIT_KEY)
-                .whereEqualTo("uid", currentUser.getUID())
-                .addSnapshotListener((value, error) -> {
-                    habitDataList.clear();
-                    if (value != null) {
-                        for (QueryDocumentSnapshot document: value) {
-                            String id = document.getId();
-                            String title = (String) document.getData().get("title");
-                            String reason = (String) document.getData().get("reason");
-                            ArrayList<String> days = new ArrayList<>();
-                            this.updateDaysFromData(days, document.getData());
-                            boolean isPublic;
-                            if (document.getData().get("is_public") == null){
-                                isPublic = true;
-                            }
-                            else{
-                                isPublic = (boolean) document.getData().get("is_public");
-                            }
-                            Habit habit = new Habit(id, title, reason, days, isPublic);
-                            habitDataList.add(habit);
-                        }
-                    }
-                    habitRecyclerAdapter.notifyDataSetChanged();
-                });
-=======
         queryHabits(db);
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 
         currentTab(tabLayout, MY_HABITS_TAB);
         switchTabs(this, tabLayout, MY_HABITS_TAB);
@@ -364,15 +333,12 @@ public class MyHabitActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
-<<<<<<< HEAD
-=======
     /**
      * add the days to the dates
      * @param dates
      * @param objectMap
      */
-    public void handleDays(ArrayList<String> dates, Map<String, Object> objectMap){
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
+    public void handleDays(ArrayList<String> dates, Map<String, Object> objectMap){}
 
 
     @Override

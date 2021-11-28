@@ -20,27 +20,15 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-<<<<<<< HEAD
-    android:padding="10dp"
-    android:orientation= "vertical">
-
-=======
     android:padding="10dp">
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
+
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-<<<<<<< HEAD
-        android:text="@string/pub"
-        android:textOff="@string/priv"
-        android:textOn="@string/pub" />
-
-=======
         android:text="Habit name">
 
     </TextView>
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 
     <EditText
         android:id="@+id/title_editText"
@@ -48,11 +36,6 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="@string/habit_title"
-<<<<<<< HEAD
-        android:inputType="textPersonName"
-        android:maxLength="40" />
-
-=======
         android:maxLength="20"
         android:inputType="textPersonName"
         android:layout_marginVertical="5dp"/>
@@ -64,7 +47,6 @@
         android:text="Habit reason">
 
     </TextView>
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 
     <EditText
         android:id="@+id/reason_editText"
@@ -96,22 +78,11 @@
         android:id="@+id/day_selection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-<<<<<<< HEAD
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <CheckBox
-            android:id="@+id/monday_select"
-            android:button="@drawable/roundimage"
-            android:scaleX="0.5"
-            android:scaleY="0.5"
-=======
         android:orientation="horizontal"
         android:gravity="center"
         android:layout_marginVertical="5dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:paddingHorizontal="2dp">

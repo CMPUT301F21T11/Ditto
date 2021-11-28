@@ -14,27 +14,14 @@
  */
 package com.team11.ditto.habit_event;
 
-import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.team11.ditto.R;
 
 import java.util.ArrayList;
@@ -45,26 +32,17 @@ import java.util.ArrayList;
  */
 public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRecyclerAdapter.ViewHolderEvent>{
     //Declarations
-<<<<<<< HEAD
     private final ArrayList<HabitEvent> eventArrayList;
     private final EventClickListener eventClickListener;
-=======
-    private ArrayList<HabitEvent> eventArrayList;
-    private Context context;
-    private EventClickListener eventClickListener;
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
-    private FirebaseFirestore db;
 
     /**
      * Constructor
-     * @param context activity context
      * @param eventArrayList list of HabitEvents
      * @param eventClickListener listener for interaction
      */
-    public HabitEventRecyclerAdapter(Context context, ArrayList<HabitEvent> eventArrayList, EventClickListener eventClickListener){
+    public HabitEventRecyclerAdapter(ArrayList<HabitEvent> eventArrayList, EventClickListener eventClickListener){
         this.eventArrayList = eventArrayList;
         this.eventClickListener = eventClickListener;
-        db = FirebaseFirestore.getInstance();
     }
 
     /**
@@ -119,7 +97,7 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
         private TextView habitEventTitle;
         private TextView habitEventComment;
         private TextView habitUsername;
-        private TextView habitSeparator;
+        private final TextView habitSeparator;
         EventClickListener eventClickListener;
 
         /**

@@ -37,10 +37,8 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.team11.ditto.habit.Habit;
 import com.team11.ditto.habit.HabitRecyclerAdapter;
 import com.team11.ditto.interfaces.Days;
-<<<<<<< HEAD
-=======
+
 import com.team11.ditto.interfaces.Firebase;
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 import com.team11.ditto.interfaces.HabitFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
@@ -48,32 +46,21 @@ import com.team11.ditto.login.ActiveUser;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
-<<<<<<< HEAD
 import java.util.Collections;
-=======
 import java.util.Objects;
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
+
 
 /**
  * Activity to display a list of the ActiveUser's Habits that are scheduled to be done today
  * @author Aidan Horemans, Kelly Shih, Vivek Malhotra, Matthew Asgari
  */
-<<<<<<< HEAD
 public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, HabitFirebase, Days,
         HabitRecyclerAdapter.HabitClickListener {
     FirebaseFirestore db;
     private TabLayout tabLayout;
     private RecyclerView list;
     private HabitRecyclerAdapter dueTodayAdapter ;
-    private ArrayList<Habit> habits;
-=======
-public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, Firebase, Days, HabitFirebase {
-    FirebaseFirestore db;
-    private TabLayout tabLayout;
-    private ListView list;
-    private ArrayAdapter<Habit> dueTodayAdapter ;
     private ArrayList<Habit> habits; //list of habits due today
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
     private ActiveUser currentUser;
 
     /**
@@ -96,40 +83,16 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
         setTitle(buildDateString());
 
         habits = new ArrayList<>();
-<<<<<<< HEAD
         LinearLayoutManager manager = new LinearLayoutManager(this);
         list.setLayoutManager(manager);
         dueTodayAdapter = new HabitRecyclerAdapter(habits, this, this);
-=======
-        dueTodayAdapter = new CustomListDue(DueTodayActivity.this, habits);
-
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
         list.setAdapter(dueTodayAdapter);
 
         // Load habits
         currentUser = new ActiveUser();
         adjustScore(db,currentUser);
-        db.collection("Habit")
-<<<<<<< HEAD
-                .whereEqualTo("uid", currentUser.getUID())
-                .addSnapshotListener((value, error) -> {
-                    habits.clear();
-                    if (value != null) {
-                        for (QueryDocumentSnapshot document: value) {
-                            // For each document parse the data and create a habit object
-                            String dayItIs = toTitleCase(LocalDate.now().getDayOfWeek().toString());
-                            if (document.getData().get(dayItIs) != null
-                                    && (boolean) document.getData().get(dayItIs)
-                                    && document.getData().get("habitDoneToday") != null
-                                    && ! (boolean) document.getData().get("habitDoneToday")) {
-                                String title = (String) document.getData().get("title");
-                                String reason = (String) document.getData().get("reason");
-                                boolean isPublic = (boolean) document.getData().get("is_public");
-                                ArrayList<String> days = new ArrayList<>();
-                                updateDaysFromData(days, document.getData());
-                                Habit habit = new Habit(title, reason, days, isPublic);
-=======
-                .whereEqualTo("uid",currentUser.getUID())
+        db.collection(HABIT_KEY)
+                .whereEqualTo(USER_ID, currentUser.getUID())
                 .get()
                 .addOnCompleteListener( task -> {
                     if(task.isSuccessful()){
@@ -141,15 +104,14 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
                             String dayItIs = toTitleCase(LocalDate.now().getDayOfWeek().toString());
                             if (days.contains(dayItIs)) {
                                 String id = snapshot.getId();
-                                String title = (String) snapshot.getData().get("title");
-                                String reason = (String) snapshot.getData().get("reason");
-                                boolean isPublic = (boolean) snapshot.getData().get("is_public");
-                                String streaks =  (String) Objects.requireNonNull(snapshot.getData().get("streaks"));
+                                String title = (String) snapshot.getData().get(TITLE);
+                                String reason = (String) snapshot.getData().get(REASON);
+                                boolean isPublic = (boolean) snapshot.getData().get(IS_PUBLIC);
+                                String streaks =  (String) Objects.requireNonNull(snapshot.getData().get(STREAK));
                                 int s = Integer.parseInt(streaks);
 
                                 Habit habit = new Habit(id, title, reason, days, isPublic, s);
                                 habit.setHabitID(habitID);
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
                                 habits.add(habit);
 
                             }// Add to the habit list
@@ -164,12 +126,8 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
         currentTab(tabLayout, DUE_TODAY_TAB);
         switchTabs(this, tabLayout, DUE_TODAY_TAB);
 
-<<<<<<< HEAD
         ItemTouchHelper helper = new ItemTouchHelper(callback);
         helper.attachToRecyclerView(list);
-=======
-
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
     }
 
     /**
@@ -227,7 +185,6 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
         super.onPause();
     }
 
-<<<<<<< HEAD
     @Override
     public void onHabitClick(int position) {
 
@@ -342,9 +299,6 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
             return false;
         }
     };
-
-=======
->>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 
 }
 
