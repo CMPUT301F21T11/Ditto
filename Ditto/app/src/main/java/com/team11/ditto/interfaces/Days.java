@@ -25,14 +25,12 @@ public interface Days {
     int NUM_DAYS = 7;
 
     default void updateDayList(ArrayList<String> dates, ArrayList<CheckBox> checkboxes) {
-
         dates.clear();
         for (int i = 0; i < NUM_DAYS; i++) {
             if (checkboxes.get(i).isChecked()) {
                 dates.add(WEEKDAYS[i]);
             }
         }
-
     }
 
     default void initializeCheckBoxes(ArrayList<String> dates, ArrayList<CheckBox> checkBoxes){
@@ -70,5 +68,4 @@ public interface Days {
             }
         }
     }
-
 }

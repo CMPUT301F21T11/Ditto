@@ -1,4 +1,4 @@
-/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -42,11 +42,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.team11.ditto.LocationPicker;
-import com.team11.ditto.interfaces.Firebase;
 import com.team11.ditto.R;
 import com.team11.ditto.interfaces.HabitFirebase;
 
@@ -65,7 +61,6 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
     private Button locationButton;
     private OnFragmentInteractionListener listener;
     private FirebaseFirestore db;
-    private DatabaseReference root;
     final String TAG = "dbs";
 
     //Declare interface
@@ -99,7 +94,6 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
         acc_photo = view.findViewById(R.id.add_photo);
         locationButton = view.findViewById(R.id.event_add_location_button);
         db = FirebaseFirestore.getInstance();
-        root = FirebaseDatabase.getInstance().getReference();
         Spinner spinner = view.findViewById(R.id.event_spinner);
         final List<String> habits = new ArrayList<>();
         final List<String> habitIDs = new ArrayList<>();

@@ -77,33 +77,24 @@ public class SignInActivity extends AppCompatActivity {
         passwordField = findViewById(R.id.login_password_field);
         loginButton = findViewById(R.id.login_button);
 
-        db = FirebaseFirestore.getInstance();
-        final CollectionReference collectionReference = db.collection("User");
-
-        loginButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                String email = emailField.getText().toString();
-                String password = passwordField.getText().toString();
+        loginButton.setOnClickListener(view -> {
+            String email = emailField.getText().toString();
+            String password = passwordField.getText().toString();
 
                 Log.d(TAG, "SIGNING IN");
 
-                mAuth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(SignInActivity.this, new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                // Sign in success, update UI with the signed-in user's information
-                                Log.d(TAG, "loginUserWithEmail:success");
-                                Intent intent = new Intent(context, MainActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                startActivity(intent);
-                            } else {
-                                Log.d(TAG, "loginUserWithEmail:failure");
-                            }
-                        }
-                    });
-            }
+            mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(SignInActivity.this, task -> {
+                    if (task.isSuccessful()) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(TAG, "loginUserWithEmail:success");
+                        Intent intent = new Intent(context, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                    } else {
+                        Log.d(TAG, "loginUserWithEmail:failure");
+                    }
+                });
         });
     }
 

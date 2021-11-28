@@ -27,11 +27,13 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -39,6 +41,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.team11.ditto.habit.AddHabitFragment;
 import com.team11.ditto.habit.Habit;
@@ -46,13 +49,15 @@ import com.team11.ditto.habit.HabitRecyclerAdapter;
 import com.team11.ditto.habit.ViewHabitActivity;
 import com.team11.ditto.interfaces.Days;
 import com.team11.ditto.interfaces.EventFirebase;
-import com.team11.ditto.interfaces.Firebase;
 import com.team11.ditto.interfaces.HabitFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 /**To display the listview of Habits for a user in the "My Habits" tab
  *Allow a user to add a habit, swipe left to delete a habit
@@ -73,6 +78,7 @@ public class MyHabitActivity extends AppCompatActivity implements
     public static String SELECTED_HABIT = "HABIT";
     private TabLayout tabLayout;
 
+
     //Declare variables for the list of habits
     private RecyclerView habitListView;
 
@@ -85,17 +91,19 @@ public class MyHabitActivity extends AppCompatActivity implements
 
     /**
      * Create the Activity instance for the "My Habits" screen, control flow of actions
-     *
      * @param savedInstanceState saved state
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        overridePendingTransition(0,0);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_habit);
         tabLayout = findViewById(R.id.tabs);
         db = FirebaseFirestore.getInstance();
 
         setTitle("My Habits");
+
+        currentUser = new ActiveUser();
 
         habitDataList = new ArrayList<>();
         habitListView = findViewById(R.id.list);
@@ -107,37 +115,15 @@ public class MyHabitActivity extends AppCompatActivity implements
         habitListView.setLayoutManager(manager);
         habitListView.setAdapter(habitRecyclerAdapter);
 
+        adjustScore(db, currentUser);
+
         // Load habits
-        currentUser = new ActiveUser();
-        db.collection(HABIT_KEY)
-            .whereEqualTo("uid", currentUser.getUID())
-            .addSnapshotListener((value, error) -> {
-                habitDataList.clear();
-                if (value != null) {
-                    for (QueryDocumentSnapshot document: value) {
-                        String id = document.getId();
-                        String title = (String) document.getData().get("title");
-                        String reason = (String) document.getData().get("reason");
-                        ArrayList<String> days = new ArrayList<>();
-                        handleDays(days, document.getData());
-                        boolean isPublic;
-                        if (document.getData().get("is_public") == null){
-                            isPublic = true;
-                        }
-                        else{
-                            isPublic = (boolean) document.getData().get("is_public");
-                        }
-                        Habit habit = new Habit(id, title, reason, days, isPublic);
-                        habitDataList.add(habit);
-                    }
-                }
-                habitRecyclerAdapter.notifyDataSetChanged();
-            });
+        queryHabits(db);
 
         currentTab(tabLayout, MY_HABITS_TAB);
         switchTabs(this, tabLayout, MY_HABITS_TAB);
 
-        //add habit button action
+        //add habit button
         final FloatingActionButton addHabitButton = findViewById(R.id.add_habit);
         addHabitButton.setOnClickListener(new View.OnClickListener() {
             /**
@@ -157,16 +143,51 @@ public class MyHabitActivity extends AppCompatActivity implements
         helper.attachToRecyclerView(habitListView);
     }
 
-    /**
-     * Adding a habit to the database and listview as the response to the user clicking the "Add" button from the fragment
-     *
-     * @param newHabit the Habit to be added
-     */
+    public void queryHabits(FirebaseFirestore db) {
+        db.collection(HABIT_KEY)
+                .whereEqualTo(USER_ID, currentUser.getUID())
+                .orderBy("position")
+                .addSnapshotListener((value, error) -> {
+                    habitDataList.clear();
+                    if (value != null) {
+                        for (QueryDocumentSnapshot document : value) {
+                            String id = document.getId();
+                            String title = (String) document.getData().get(TITLE);
+                            String reason = (String) document.getData().get(REASON);
+                            String streaks =  (String) Objects.requireNonNull(document.getData().get("streaks"));
+                            int s = Integer.parseInt(streaks);
+                            ArrayList<String> days = new ArrayList<>();
+                            handleDays(days, document.getData());
+                            boolean isPublic;
+                            if (document.getData().get("is_public") == null) {
+                                isPublic = true;
+                            } else {
+                                isPublic = (boolean) document.getData().get("is_public");
+                            }
+                            Habit habit = new Habit(id, title, reason, days, isPublic, s);
+                            habitDataList.add(habit);
+                        }
+
+                    }
+                    habitRecyclerAdapter.notifyDataSetChanged();
+
+                });
+    }
+
+
+        /**
+         * Adding a habit to the database and listview as the response to the user clicking the "Add" button from the fragment
+         *
+         * @param newHabit the Habit to be added
+         */
     @Override
     public void onOkPressed(Habit newHabit) {
         //when the user clicks the add button, we want to add to the db and display the new entry
         if (newHabit.getTitle().length() > 0) {
             pushHabitData(db, newHabit);
+            habitDataList.add(newHabit);
+
+            habitRecyclerAdapter.notifyDataSetChanged();
         }
     }
 
@@ -179,7 +200,8 @@ public class MyHabitActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
-    ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+    ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN
+            | ItemTouchHelper.START | ItemTouchHelper.END, ItemTouchHelper.LEFT) {
         /**
          * To delete an item from the listview and database when a Habit is swiped to the left
          * @param recyclerView .
@@ -189,6 +211,56 @@ public class MyHabitActivity extends AppCompatActivity implements
          */
         @Override
         public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+
+            //get position of long clicked item
+            int fromPos = viewHolder.getAbsoluteAdapterPosition();
+            //get position of target position
+            int toPos = target.getAbsoluteAdapterPosition();
+            ArrayList<Habit> updateHabits = new ArrayList<Habit>();
+            ArrayList<Habit> decrementHabits = new ArrayList<Habit>();
+
+            Collections.swap(habitDataList, fromPos, toPos);
+            recyclerView.getAdapter().notifyItemMoved(fromPos, toPos);
+
+            //reorder inside firebase by switching the order field
+            Habit movedObject = habitDataList.get(toPos);
+            Habit to = habitDataList.get(toPos);
+
+            int total = habitRecyclerAdapter.getItemCount();
+
+
+            int start = toPos+1;
+            if (total==start) {
+                //empty arraylist
+            }
+            else {
+                //iterate through the habits and add them to the arraylist
+                for (int i=start; i<total; i++) {
+                    updateHabits.add(habitDataList.get(i));
+                }
+            }
+
+            int t = toPos;
+            //get an arraylist of habits after the moved object
+            int s = fromPos;
+            if (t==s) {
+                //empty arraylist
+            }
+            else {
+                //iterate through the habits and add them to the arraylist
+                for (int i=s; i<t; i++) {
+                    decrementHabits.add(habitDataList.get(i));
+                }
+            }
+
+            Log.d(TAG, "FROM POS " + fromPos+" TITLE "+to.getTitle());
+            Log.d(TAG, "TO POS " + toPos);
+            Log.d(TAG, "ARRAY TO UPDATE " + updateHabits);
+
+            reOrderPosition(db, movedObject, fromPos, toPos, updateHabits, decrementHabits);
+
+
+
             return false;
         }
 
@@ -200,10 +272,28 @@ public class MyHabitActivity extends AppCompatActivity implements
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
             Habit oldEntry = (Habit) habitDataList.get(viewHolder.getAbsoluteAdapterPosition());
+
+
+            ArrayList<Habit> dHabits = new ArrayList<Habit>();
+
+            //get an arraylist of habits after the moved object
+            int s = viewHolder.getAbsoluteAdapterPosition()+1;
+            int t = habitRecyclerAdapter.getItemCount();
+            if (t==s) {
+                //empty arraylist
+            }
+            else {
+                //iterate through the habits and add them to the arraylist
+                for (int i=s; i<t; i++) {
+                    dHabits.add(habitDataList.get(i));
+                }
+            }
+
             habitDataList.remove(viewHolder.getAbsoluteAdapterPosition());
             habitRecyclerAdapter.notifyDataSetChanged();
-
-            deleteDataMyHabit(db, oldEntry);
+            Log.d("NAUR", String.valueOf(dHabits));
+            Collections.reverse(dHabits);
+            deleteDataMyHabit(db, oldEntry, s, dHabits);
 
         }
 
@@ -252,6 +342,11 @@ public class MyHabitActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
+    /**
+     * add the days to the dates
+     * @param dates
+     * @param objectMap
+     */
     public void handleDays(ArrayList<String> dates, Map<String, Object> objectMap){
 
         for (int i = 0; i < NUM_DAYS; i++) {
@@ -260,8 +355,12 @@ public class MyHabitActivity extends AppCompatActivity implements
             }
         }
 
-
-
-
     }
+
+    @Override
+    public void onPause(){
+        overridePendingTransition(0,0);
+        super.onPause();
+    }
+
 }

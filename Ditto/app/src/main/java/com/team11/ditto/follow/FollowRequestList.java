@@ -1,4 +1,4 @@
-/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import java.util.ArrayList;
  */
 public class FollowRequestList extends ArrayAdapter<User> {
     //Declarations
-    private ArrayList<User> users;
+    private final ArrayList<User> users;
     private final Context context;
 
     /**

@@ -30,6 +30,7 @@ import java.util.HashMap;
 public interface Firebase {
 
     String TAG = "add";
+    String USER_ID = "uid";
     String ORDER = "order";
 
     /**
@@ -67,21 +68,6 @@ public interface Firebase {
                     });
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

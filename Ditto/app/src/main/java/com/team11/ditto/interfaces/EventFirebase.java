@@ -4,18 +4,24 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
-import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.team11.ditto.habit.Habit;
 import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.habit_event.HabitEventRecyclerAdapter;
+import com.team11.ditto.login.ActiveUser;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -28,6 +34,14 @@ import javax.annotation.Nullable;
 public interface EventFirebase extends Firebase{
 
     String HABIT_EVENT_KEY = "HabitEvent";
+
+    String HABIT_ID = "habitID";
+    String HABIT_TITLE = "habitTitle";
+
+    String EVENT_ID = "habitEventId ";
+    String COMMENT = "comment";
+    String PHOTO = "photo";
+    String LOCATION = "location";
     ArrayList<HabitEvent> hEventsFirebase = new ArrayList<>();
     HashMap<String, Object> eventData = new HashMap<>();
 
@@ -35,13 +49,16 @@ public interface EventFirebase extends Firebase{
     default void logEventData(@Nullable QuerySnapshot queryDocumentSnapshots) {
         if (queryDocumentSnapshots != null) {
             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                 Log.d(TAG, String.valueOf(doc.getData().get("habitID")));
-                 String eHabitId = (String) doc.getData().get("habitID");
-                 String eHabitTitle = (String) doc.getData().get("habitTitle");
-                 String eComment = (String) doc.getData().get("comment");
-                 String ePhoto = (String) doc.getData().get("photo");
-                 String eLocation = (String) doc.getData().get("location");
-                 hEventsFirebase.add(new HabitEvent(eHabitId, eComment, ePhoto, eLocation, eHabitTitle));
+                Log.d(TAG, String.valueOf(doc.getData().get(HABIT_ID)));
+                String eHabitId = (String) doc.getData().get(HABIT_ID);
+                String eHabitTitle = (String) doc.getData().get(HABIT_TITLE);
+                String eComment = (String) doc.getData().get(COMMENT);
+                String ePhoto = (String) doc.getData().get(PHOTO);
+                String eLocation = (String) doc.getData().get(LOCATION);
+                HabitEvent hEvent = new HabitEvent(eHabitId, eComment, ePhoto, eLocation, eHabitTitle);
+                hEvent.setEventID(doc.getId());
+                Log.d(TAG, "EVENT ID IS" + hEvent.getEventID());
+                hEventsFirebase.add(hEvent);
             }
         }
     }
@@ -82,7 +99,7 @@ public interface EventFirebase extends Firebase{
     default void deleteHabitEvents(FirebaseFirestore db, ArrayList<String> habitEventIds) {
         for (int i = 0; i < habitEventIds.size(); i++) {
             //delete the associated habit event in the database
-            Log.d(TAG, "habiteventid " + habitEventIds.get(i));
+            Log.d(TAG, EVENT_ID + habitEventIds.get(i));
             db.collection(HABIT_EVENT_KEY).document(habitEventIds.get(i))
                     .delete();
         }
@@ -102,30 +119,139 @@ public interface EventFirebase extends Firebase{
         spinner.setAdapter(habitAdapter);
     }
 
-
     /**
      * push the HabitEvent document data to the HabitEvent collection
      * @param database firestore cloud
-     * @param newHabitEvent HabitEvent to be added
+     * @param event HabitEvent to be added
      */
-    default void pushHabitEventData(FirebaseFirestore database, HabitEvent newHabitEvent){
-        String habitID = newHabitEvent.getHabitId();
-        String comment = newHabitEvent.getComment();
-        String photo = newHabitEvent.getPhoto();
-        String location = newHabitEvent.getLocation();
-        String habitTitle = newHabitEvent.getHabitTitle();
+    default void pushHabitEventData(FirebaseFirestore database, HabitEvent event){
+        getEventData(event); //Puts the data from event into eventData
+        pushToDB(database, HABIT_EVENT_KEY, "", eventData);
+    }
+
+    /**
+     * push the Habit document data to the Habit class
+     * @param database firebase cloud
+     * @param event Habit to be added
+     */
+    default void pushEditEvent(FirebaseFirestore database, HabitEvent event) {
+        getEventData(event); //Puts the data from event into eventData
+        pushToDB(database, HABIT_EVENT_KEY, event.getEventID(), eventData);
+    }
+
+    /**
+     * Helper function to put the proper data from HabitEvent into eventData
+     * @param event
+     */
+    default void getEventData(HabitEvent event){
+        String habitID = event.getHabitId();
+        String comment = event.getComment();
+        String photo = event.getPhoto();
+        String location = event.getLocation();
+        String habitTitle = event.getHabitTitle();
         //get unique timestamp for ordering our list
         Date currentTime = Calendar.getInstance().getTime();
-        eventData.put("uid", FirebaseAuth.getInstance().getUid());
-        eventData.put("habitID", habitID);
-        eventData.put("comment", comment);
-        eventData.put("photo", photo);
-        eventData.put("location", location);
-        eventData.put("habitTitle", habitTitle);
+        eventData.put(USER_ID, FirebaseAuth.getInstance().getUid());
+        eventData.put(HABIT_ID, habitID);
+        eventData.put(COMMENT, comment);
+        eventData.put(PHOTO, photo);
+        eventData.put(LOCATION, location);
+        eventData.put(HABIT_TITLE, habitTitle);
+        eventData.put(ORDER, currentTime);
         //this field is used to add the current timestamp of the item, to be used to order the items
-        eventData.put("order", currentTime);
+    }
 
-        pushToDB(database, HABIT_EVENT_KEY, "", eventData);
+
+
+    /**
+     * Handle the deletion process for a habit event
+     * @param db firebase cloud
+     * @param oldEntry habit to delete
+     */
+    default void deleteDataMyEvent(FirebaseFirestore db, HabitEvent oldEntry) {
+        db.collection(HABIT_EVENT_KEY).document(oldEntry.getEventID()).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+
+                    deleteHabit(db, oldEntry);
+                }
+            }
+        });
+
+    }
+
+    /**
+     * delete the habit event oldEntry from firestore
+     * @param db firebase cloud
+     * @param oldEntry habit to delete
+     */
+    default void deleteHabit(FirebaseFirestore db, HabitEvent oldEntry){
+        //remove from database
+        db.collection(HABIT_EVENT_KEY).document(oldEntry.getEventID())
+                .delete()
+                .addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully deleted!"))
+                .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
+    }
+
+    /**
+     * Handle resetting the habitDueToday boolean and updating the streak value
+     * according to the number of days they've missed their habit
+     * @param db firebase cloud
+     */
+    default void resetDueToday(FirebaseFirestore db){
+        ActiveUser currentUser = new ActiveUser();
+        db.collection("Habits")
+                .whereEqualTo(USER_ID, currentUser.getUID())
+                .orderBy("position")
+                .addSnapshotListener((value, error) -> {
+                    if (value != null) {
+                        for (QueryDocumentSnapshot document : value) {
+                            //Check if we need to decrement since last time habit was updated
+                            Boolean doneToday = (Boolean) document.getData().get("habitDoneToday");
+                            Date currentDate = Calendar.getInstance().getTime();
+                            Calendar cDate = Calendar.getInstance();
+                            cDate.setTime(currentDate);
+
+                            Date lastDone = document.getDate("Last_Adjusted");
+                            Calendar lDone = Calendar.getInstance();
+                            lDone.setTime(lastDone);
+
+                            String habitID = document.getId();
+
+
+                            //If the current day is not the same anymore, then reset boolean
+                            boolean sameDay = cDate.get(Calendar.DAY_OF_YEAR) == lDone.get(Calendar.DAY_OF_YEAR) &&
+                                    cDate.get(Calendar.YEAR) == lDone.get(Calendar.YEAR);
+
+
+                            if (!sameDay) {
+                                //how many days they missed inbetween currentday and last decremented
+                                DocumentReference movedRef = db.collection("Habit").document(habitID);
+                                //set habitDoneToday to false
+                                movedRef
+                                        .update("habitDoneToday", false)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void unused) {
+                                                Log.d(TAG, "DocumentSnapshot successfully updated!");
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.w(TAG, "Error updating document", e);
+                                            }
+                                        });
+
+                            }
+
+
+                        }
+
+                    }
+                });
+
     }
 
 }

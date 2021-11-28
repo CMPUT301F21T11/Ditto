@@ -1,4 +1,4 @@
-/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ package com.team11.ditto.follow;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 
@@ -47,12 +48,12 @@ public class FollowRequestActivity extends AppCompatActivity
 
     //Declarations
     private TabLayout tabLayout;
-    private ListView frlist;
-    private static FollowRequestList userAdapter;
+    private ListView friendList;
+    private FollowRequestList userAdapter;
     ArrayList<User> userDataList;
     FirebaseFirestore db;
     private ActiveUser currentUser;
-    private ArrayList<String> receivedRequestEmails = new ArrayList<>();
+    private final ArrayList<String> receivedRequestEmails = new ArrayList<>();
 
     /**
      * Instructions of what to do for Activity creation
@@ -65,14 +66,14 @@ public class FollowRequestActivity extends AppCompatActivity
         //Set layouts
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_follow_request);
-        frlist = findViewById(R.id.following_request_custom);
+        friendList = findViewById(R.id.following_request_custom);
         tabLayout = findViewById(R.id.tabs);
         db = FirebaseFirestore.getInstance();   // get db instance
         currentUser = new ActiveUser();
         //Initialize values
         userDataList = new ArrayList<>();
         userAdapter = new FollowRequestList(FollowRequestActivity.this, userDataList);
-        frlist.setAdapter(userAdapter);
+        friendList.setAdapter(userAdapter);
 
         //Enable tab switching
         currentTab(tabLayout, PROFILE_TAB);
@@ -92,15 +93,14 @@ public class FollowRequestActivity extends AppCompatActivity
 
     /**
      * This method will accept a following request when accept icon is pressed
-     * @param view
+     * @param view view selected
      */
     public void onAcceptPress(View view){
 
         String cUserEmail = currentUser.getEmail();
-        int position = frlist.getPositionForView((View) view.getParent());
-        View v = frlist.getChildAt(position);
+        int position = friendList.getPositionForView((View) view.getParent());
 
-        User acceptRequest = (User) frlist.getAdapter().getItem(position);
+        User acceptRequest = (User) friendList.getAdapter().getItem(position);
         String acceptRequestEmail = acceptRequest.getPassword();
         Map<String, Object> docData = new HashMap<>();
         docData.put("followed",cUserEmail);
@@ -118,19 +118,17 @@ public class FollowRequestActivity extends AppCompatActivity
 
     /**
      * This method will reject a following request when reject icon is pressed
-     * @param view
+     * @param view view for item
      */
     public void onRejectPress(View view){
         String cUserEmail = currentUser.getEmail();
-        int position = frlist.getPositionForView((View) view.getParent());
-        View v = frlist.getChildAt(position);
+        int position = friendList.getPositionForView((View) view.getParent());
 
-        User acceptRequest = (User) frlist.getAdapter().getItem(position);
+        User acceptRequest = (User) friendList.getAdapter().getItem(position);
         String acceptRequestEmail = acceptRequest.getPassword();
         Map<String, Object> docData = new HashMap<>();
         docData.put("followed",cUserEmail);
         docData.put("followedBy", acceptRequestEmail);
-
 
         userDataList.remove(position);
         cancel_follow_request(db,cUserEmail,acceptRequestEmail);
@@ -139,4 +137,9 @@ public class FollowRequestActivity extends AppCompatActivity
     }
 
 
+    @Override
+    public void onPause(){
+        overridePendingTransition(0,0);
+        super.onPause();
+    }
 }

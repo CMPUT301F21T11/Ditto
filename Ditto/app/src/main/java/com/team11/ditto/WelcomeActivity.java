@@ -1,4 +1,4 @@
-/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -20,11 +20,10 @@ The Class for MyHabit Activity Screen
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 
-import com.team11.ditto.login.SignUpActivity;
 import com.team11.ditto.login.SignInActivity;
+import com.team11.ditto.login.SignUpActivity;
 
 /**
  * Role: Class for Welcome Activity, onboard a user
@@ -34,11 +33,11 @@ public class WelcomeActivity extends Activity {
 
     private Button getStartedButton;
     private Button loginButton;
-    private Activity activity = this;
+    private final Activity activity = this;
 
     /**
      * Create the Activity instance for the "Welcome" screen, control flow of actions
-     * @param savedInstanceState
+     * @param savedInstanceState state bundle
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,23 +49,17 @@ public class WelcomeActivity extends Activity {
         loginButton = findViewById(R.id.sign_in_button);
 
         // Set on click listener for "Get Started!" button
-        getStartedButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(activity, SignUpActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-            }
+        getStartedButton.setOnClickListener(view -> {
+            Intent intent = new Intent(activity, SignUpActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
         });
 
         // Set on click listener for "Sign In" button
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(activity, SignInActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-            }
+        loginButton.setOnClickListener(view -> {
+            Intent intent = new Intent(activity, SignInActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
         });
     }
 }

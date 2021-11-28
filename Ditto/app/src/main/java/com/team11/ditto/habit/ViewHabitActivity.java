@@ -14,17 +14,20 @@
  */
 package com.team11.ditto.habit;
 
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.team11.ditto.R;
-import com.team11.ditto.interfaces.Firebase;
 import com.team11.ditto.interfaces.HabitFirebase;
 
 import java.util.ArrayList;
@@ -38,7 +41,8 @@ import java.util.ArrayList;
 public class ViewHabitActivity extends AppCompatActivity
         implements EditHabitFragment.OnFragmentInteractionListener, HabitFirebase {
 
-    TextView habitTitle; TextView habitReason; TextView habitDays;
+    TextView habitReason; TextView habitDays; TextView habitTracking;
+    TextView habitReasonTitle;
     ArrayList<String> dates;
     Habit selectedHabit;
     Bundle habitBundle;
@@ -56,6 +60,8 @@ public class ViewHabitActivity extends AppCompatActivity
         setContentView(R.layout.activity_view_habit);
         habitReason = findViewById(R.id.habit_reason);
         habitDays = findViewById(R.id.habit_days);
+        habitTracking = findViewById(R.id.habit_tracking);
+        habitReasonTitle = findViewById(R.id.reason);
         database = FirebaseFirestore.getInstance();
 
         //Getting passed habit
@@ -67,11 +73,13 @@ public class ViewHabitActivity extends AppCompatActivity
         //Setting habit_reason textview as habit reason
         habitReason.setText(selectedHabit.getReason());
 
+
         dates = selectedHabit.getDates();
 
         //Displaying dates in TextView
-        habitDays.setText(listDays());
-        habitTitle = findViewById(R.id.habit_tracking);
+        habitDays.setText(listDays(selectedHabit));
+
+        displayStreakText(selectedHabit);
     }
 
     /**
@@ -125,19 +133,46 @@ public class ViewHabitActivity extends AppCompatActivity
 
         //Updating old text with new habit stuff
         habitReason.setText(habit.getReason());
-        habitDays.setText(listDays());
+        dates.clear();
+        dates = habit.getDates();
+        habitDays.setText(listDays(habit));
     }
 
-    private String listDays(){
+    private String listDays(Habit habit){
         String listDays = "";
-        if(dates != null){
-            if(dates.size() > 0){
-                for(int i = 0; i < dates.size(); i++){
-                    listDays += dates.get(i) + " ";
+        ArrayList<String> currentDates = habit.getDates();
+        if(currentDates != null){
+            if(currentDates.size() > 0){
+                for(int i = 0; i < currentDates.size(); i++){
+                    if(i == currentDates.size() - 1){
+                        listDays += currentDates.get(i);
+                    } else {
+                        listDays += currentDates.get(i) + ", ";
+                    }
                 }
             }
         }
         return listDays;
+    }
+
+    private void displayStreakText(Habit habit){
+        int streak = habit.getStreak();
+        if(streak < -3){
+            habitTracking.setText("Keep trying! Make sure you complete your daily events!");
+            habitTracking.setTextColor(Color.RED);
+        } else if (streak >= -3 && streak < -1){
+            habitTracking.setText("Keep going! You're making progress!");
+            habitTracking.setTextColor(Color.RED);
+        } else if (streak >= -1 && streak < 3){
+            habitTracking.setText("Keep working at it! You'll have a streak going in no time!");
+            habitTracking.setTextColor(Color.parseColor("#c7b70a"));
+        } else if (streak >= 3 && streak < 3){
+            habitTracking.setText("You're making good progress! Keep going!");
+            habitTracking.setTextColor(Color.parseColor("#c7b70a"));
+        } else if (streak >= 5){
+            habitTracking.setText("Good work! You've got a great streak going!");
+            habitTracking.setTextColor(Color.GREEN);
+        }
     }
 
 }

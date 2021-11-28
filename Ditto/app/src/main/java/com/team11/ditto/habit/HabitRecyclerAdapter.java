@@ -15,14 +15,24 @@
 package com.team11.ditto.habit;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.team11.ditto.R;
 
 import java.util.ArrayList;
@@ -34,9 +44,11 @@ import java.util.ArrayList;
  */
 public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdapter.RecyclerViewHolder> {
     //Declarations
-    private ArrayList<Habit> courseDataArrayList;
+    private final ArrayList<Habit> courseDataArrayList;
     private final Context context;
-    private HabitClickListener habitClickListener;
+    private final HabitClickListener habitClickListener;
+    FirebaseFirestore database;
+
 
     /**
      * Constructor
@@ -73,7 +85,35 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
         Habit habit = courseDataArrayList.get(position);
         holder.habitTitle.setText(habit.getTitle());
         holder.habitReason.setText(habit.getReason());
+
+        setIcon(habit.getStreak(), holder);
+
     }
+
+    private void setIcon(int streaks, RecyclerViewHolder holder) {
+        int lB = -3;
+        int uB = 5;
+        if (streaks < lB) {
+            holder.icon.setImageResource(R.drawable.sad);
+            holder.icon.setColorFilter(Color.RED);
+
+
+
+        }
+        else if (streaks >= lB && streaks < uB) {
+            holder.icon.setImageResource(R.drawable.neutral);
+            holder.icon.setColorFilter(Color.rgb(255,191,0));
+
+        }
+        else if (streaks >= uB) {
+            holder.icon.setImageResource(R.drawable.happiness);
+            holder.icon.setColorFilter(Color.rgb(50,205,50));
+
+        }
+
+
+    }
+
 
     /**
      * Returns the size of the recyclerview
@@ -84,13 +124,18 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
         return courseDataArrayList.size();
     }
 
+    public Habit getItemAt(int position){
+        return courseDataArrayList.get(position);
+    }
+
     /**
      * Viewholder class to handle RecyclerView
      */
-    public class RecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class RecyclerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         // creating a variable for our text view.
         private TextView habitTitle;
         private TextView habitReason;
+        private ImageView icon;
         HabitClickListener habitClickListener;
 
         /**
@@ -103,6 +148,7 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
             // initializing our text views.
             habitTitle = itemView.findViewById(R.id.firstLine);
             habitReason = itemView.findViewById(R.id.secondLine);
+            icon = itemView.findViewById(R.id.tracking_icon);
             this.habitClickListener = habitClickListener;
 
             itemView.setOnClickListener(this);

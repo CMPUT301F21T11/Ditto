@@ -16,7 +16,6 @@
 -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/user_profile_constraint_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -30,7 +29,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
         android:backgroundTint="@color/white"
-        android:text="SEARCH FOR USERS"
+        android:text="@string/search_for_users"
         android:textColor="#314CDF"
         app:layout_constraintBottom_toTopOf="@+id/follow_request_sent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -51,6 +50,60 @@
         app:shapeAppearanceOverlay="@style/roundimageview"
         app:strokeColor="#000000" />
 
+    <TextView
+        android:id="@+id/followers"
+        android:clickable="true"
+        android:layout_width="88dp"
+        android:layout_height="21dp"
+        android:layout_marginTop="68dp"
+        android:text="@string/followers"
+        android:textColor="#000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.234"
+        app:layout_constraintStart_toEndOf="@+id/imageView2"
+        app:layout_constraintTop_toTopOf="@+id/imageView2"
+        android:focusable="true" />
+
+    <TextView
+        android:id="@+id/following"
+        android:clickable="true"
+        android:layout_width="88dp"
+        android:layout_height="21dp"
+        android:layout_marginTop="68dp"
+        android:text="@string/following"
+        android:textColor="#000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.349"
+        app:layout_constraintStart_toEndOf="@+id/followers"
+        app:layout_constraintTop_toTopOf="@+id/imageView2"
+        android:focusable="true" />
+
+    <TextView
+        android:id="@+id/no_followers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/none"
+        android:textColor="#000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/followers"
+        app:layout_constraintTop_toBottomOf="@+id/followers"
+        app:layout_constraintVertical_bias="0.001" />
+
+    <TextView
+        android:id="@+id/no_following_1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/none"
+        android:textColor="#000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/following"
+        app:layout_constraintTop_toBottomOf="@+id/following"
+        app:layout_constraintVertical_bias="0.003" />
+
     <Button
         android:id="@+id/follow_request_sent"
         android:layout_width="0dp"
@@ -59,7 +112,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
         android:backgroundTint="@color/white"
-        android:text="FOLLOW REQUEST SENT"
+        android:text="@string/follow_request_sent_button"
         android:textColor="#314CDF"
         app:layout_constraintBottom_toTopOf="@+id/pending_fr"
         app:layout_constraintEnd_toEndOf="parent"
@@ -72,7 +125,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="Name"
+        android:text="@string/userName"
         android:textColor="#000000"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -86,7 +139,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
         android:backgroundTint="@color/white"
-        android:text="See my follow requests"
+        android:text="@string/follow_request_received_button"
         android:textColor="#314CDF"
         app:layout_constraintBottom_toTopOf="@+id/logout_button"
         app:layout_constraintEnd_toEndOf="parent"
@@ -101,7 +154,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:backgroundTint="@color/white"
-        android:text="LOG OUT"
+        android:text="@string/log_out_button"
         android:textColor="#FF1744"
         app:layout_constraintBottom_toTopOf="@+id/tabs"
         app:layout_constraintEnd_toEndOf="parent"
@@ -199,39 +252,39 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent">
 
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:icon="@drawable/ic_action_home"
-            android:text="Home"
-            app:tabSelectedTextColor="@color/black"
-            app:tabTextAppearance="@style/MyCustomTabText"
-            app:tabTextColor="#314CDF" />
+    <com.google.android.material.tabs.TabItem
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/ic_action_home"
+        android:text="@string/home"
+        app:tabSelectedTextColor="@color/black"
+        app:tabTextAppearance="@style/MyCustomTabText"
+        app:tabTextColor="#314CDF" />
 
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:icon="@drawable/ic_action_myhabits"
-            android:text="Habits"
-            app:tabSelectedTextColor="@color/black"
-            app:tabTextAppearance="@style/MyCustomTabText"
-            app:tabTextColor="#314CDF" />
+    <com.google.android.material.tabs.TabItem
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/ic_action_myhabits"
+        android:text="@string/habits"
+        app:tabSelectedTextColor="@color/black"
+        app:tabTextAppearance="@style/MyCustomTabText"
+        app:tabTextColor="#314CDF" />
 
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:icon="@drawable/ic_action_duetoday"
-            android:text="DUE"
-            app:tabSelectedTextColor="@color/black"
-            app:tabTextColor="#314CDF" />
+    <com.google.android.material.tabs.TabItem
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/ic_action_duetoday"
+        android:text="@string/due"
+        app:tabSelectedTextColor="@color/black"
+        app:tabTextColor="#314CDF" />
 
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:icon="@drawable/ic_action_profile"
-            android:text="Profile"
-            app:tabSelectedTextColor="@color/black"
-            app:tabTextColor="#314CDF" />
-    </com.google.android.material.tabs.TabLayout>
+    <com.google.android.material.tabs.TabItem
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:icon="@drawable/ic_action_profile"
+        android:text="@string/profile"
+        app:tabSelectedTextColor="@color/black"
+        app:tabTextColor="#314CDF" />
+</com.google.android.material.tabs.TabLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
