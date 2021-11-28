@@ -46,6 +46,7 @@
     <string name="email">Email</string>
     <string name="pub">Public</string>
     <string name="priv">Private</string>
+    <string name="title_activity_location_picker">LocationPicker</string>
     <string name="search_for_users">SEARCH FOR USERS</string>
     <string name="followers">Followers</string>
     <string name="following">Following</string>

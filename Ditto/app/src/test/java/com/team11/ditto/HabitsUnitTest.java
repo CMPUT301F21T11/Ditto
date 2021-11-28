@@ -34,7 +34,7 @@ public class HabitsUnitTest {
     public void makeHabitWithID(){
         ArrayList<String> dates = new ArrayList<>();
         dates.add("Tuesday");
-        Habit habit = new Habit("testid", "Read a book", "Be Smart", dates, false);
+        //Habit habit = new Habit("testid", "Read a book", "Be Smart", dates, false);
     }
 
 }

@@ -28,6 +28,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -41,10 +42,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.team11.ditto.LocationPicker;
 import com.team11.ditto.R;
 import com.team11.ditto.interfaces.HabitFirebase;
+import com.team11.ditto.interfaces.MapHandler;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,13 +58,15 @@ import java.util.List;
  * TODO: allow user to add photo and location
  * @author Kelly Shih, Aidan Horemans
  */
-public class AddHabitEventFragment extends DialogFragment implements HabitFirebase {
+public class AddHabitEventFragment extends DialogFragment implements HabitFirebase, MapHandler {
     //Declare necessary values
     private EditText hComment;
     private Button acc_photo;
+    private Button locationButton;
     private OnFragmentInteractionListener listener;
     private FirebaseFirestore db;
     final String TAG = "dbs";
+    private @Nullable ArrayList<Double> location = null;
 
     //Declare interface
     public interface OnFragmentInteractionListener {
@@ -90,6 +97,7 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
         View view = LayoutInflater.from(getContext()).inflate(R.layout.add_event_fragment, null);
         hComment = view.findViewById(R.id.comment_editText);
         acc_photo = view.findViewById(R.id.add_photo);
+        locationButton = view.findViewById(R.id.event_add_location_button);
         db = FirebaseFirestore.getInstance();
         Spinner spinner = view.findViewById(R.id.event_spinner);
         final List<String> habits = new ArrayList<>();
@@ -130,6 +138,13 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
         acc_photo.setOnClickListener(view1 -> {
         });
 
+        // Listen for when the location button is pressed
+        locationButton.setOnClickListener(view1 -> {
+            LocationPicker.callback = this;  // Really bad implementation - should be fixed
+            Intent intent = new Intent(getActivity(), LocationPicker.class);
+            startActivity(intent);
+        });
+
         //Builds the Dialog for the user to add a new habit event
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         return builder
@@ -154,7 +169,6 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
 
                         //set photo and location
                         String photo = "";
-                        String location = "";
 
                         listener.onOkPressed(new HabitEvent(IDhabit[0], comment, photo, location, hHabit[0]));
 
@@ -163,5 +177,18 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
                 .setNegativeButton("Cancel", null)
                 .create();
 
+    }
+
+    @Override
+    public void handleLocationChange(@Nullable LatLng location) {
+        if (location == null) {
+            this.location = null;
+            this.locationButton.setText("Add location");
+        } else {
+            this.location = new ArrayList<>();
+            this.location.add(location.latitude);
+            this.location.add(location.longitude);
+            this.locationButton.setText("Update location");
+        }
     }
 }
