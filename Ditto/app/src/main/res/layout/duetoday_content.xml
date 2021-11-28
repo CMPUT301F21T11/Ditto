@@ -68,10 +68,8 @@
         android:clickable="true"
         android:contentDescription="@string/indicator"
         android:padding="20dp"
-        android:src="@drawable/sad"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="#E30202"
         android:focusable="true">
 
     </ImageView>
