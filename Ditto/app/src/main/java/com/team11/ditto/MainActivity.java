@@ -114,8 +114,9 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         currentUser = new ActiveUser();
         habitEventsData = new ArrayList<>();
         idList = new ArrayList<>();
-        idList.add(currentUser.getUID());
         getFollowedByActiveUser(db, currentUser, idList);
+        idList.add(currentUser.getUID());
+
 
         habitEventRecyclerAdapter = new HabitEventRecyclerAdapter(habitEventsData, this);
 
@@ -232,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         db = FirebaseFirestore.getInstance();
 
         db.collection(HABIT_EVENT_KEY)
-                .whereEqualTo(USER_ID, FirebaseAuth.getInstance().getUid()) //userevents
+                .whereEqualTo(USER_ID, new ActiveUser().getUID()) //userevents
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {

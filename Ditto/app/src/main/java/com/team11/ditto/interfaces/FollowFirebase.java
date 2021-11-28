@@ -37,7 +37,6 @@ public interface FollowFirebase extends Firebase{
      * This method gets the ids of all users followed by active user and store them in array
      * @param db Firebase cloud
      * @param currentUser Active User
-     * @param followedByActiveUser Arraylist<String>
      */
     default void getFollowedByActiveUser(FirebaseFirestore db, ActiveUser currentUser, ArrayList<String> followedByActiveUser){
 

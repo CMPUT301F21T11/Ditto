@@ -55,7 +55,7 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
     private ListView followingListView;
     private static ArrayAdapter<User> userAdapter;
     private ArrayList<User> userDataList;
-    private static ArrayList<String> followedByActiveUser = new ArrayList<>();
+    private ArrayList<String> followedByActiveUser;
     private ActiveUser currentUser;
     private FirebaseFirestore db;
 
@@ -78,6 +78,7 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
         //Initialize values
         userDataList = new ArrayList<>();
         userAdapter = new CustomListFollowerFollowing(FollowingActivity.this, userDataList);
+        followedByActiveUser = new ArrayList<>();
 
         followingListView.setAdapter(userAdapter);
 
@@ -86,11 +87,10 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
         switchTabs(this, tabLayout, PROFILE_TAB);
 
         // Get the current user's followers
-        getFollowedByActiveUser(db,currentUser,followedByActiveUser);
         getFollowerList();
+        //getFollowedByActiveUser(db, currentUser, followedByActiveUser);
+        //showData();
 
-        userAdapter.notifyDataSetChanged();
-        
         //View User profile if user in list is clicked
         onProfileClick();
 
@@ -142,7 +142,7 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
                            if (task.isSuccessful()) {
                                for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())) {
                                    userDataList.add(new User(snapshot.get(USERNAME).toString(),
-                                           followedByActiveUser.get(finalI), snapshot.get(USER_ID).toString()));
+                                           snapshot.get(EMAIL).toString(), followedByActiveUser.get(finalI)));
                                    Log.d(FOLLOWED, followedByActiveUser.get(finalI));
                                    Log.d("Iteration no. ", String.valueOf(finalI));
                                    Collections.sort(userDataList, (user, t1) -> user.getUsername().compareTo(t1.getUsername()));
@@ -151,6 +151,9 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
                            }
                        });
            }
+       }
+       else{
+           Log.d("List empty", followedByActiveUser.toString());
        }
     }
 
@@ -166,9 +169,10 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
                 .get().addOnCompleteListener(task -> {
             if(task.isSuccessful() && task.getResult() != null){
                 for(QueryDocumentSnapshot snapshot : task.getResult()){
-                    if(!followedByActiveUser.contains(snapshot.get(FOLLOWED))
+                    if(!followedByActiveUser.contains(snapshot.get(FOLLOWED).toString())
                             && (!snapshot.get(FOLLOWED).toString().equals(currentUser.getUID()) ) ){
-                        followedByActiveUser.add(snapshot.get(FOLLOWED_BY).toString());
+
+                        followedByActiveUser.add(snapshot.get(FOLLOWED).toString());
                     }
                 }
                 showData();
@@ -189,8 +193,6 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
     public void onRemovePress(View view){
         String currentUID = currentUser.getUID();
         int position = followingListView.getPositionForView((View) view.getParent());
-        //View v = followingListView.getChildAt(position);
-
         User removeFollower = (User) followingListView.getAdapter().getItem(position);
         String removeFollowerID = removeFollower.getID();
         removeFollowingFromList(db,removeFollowerID,currentUID);
