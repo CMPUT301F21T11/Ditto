@@ -1,4 +1,4 @@
-/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import com.team11.ditto.habit.Habit;
 
 import java.util.ArrayList;
 
-public class User extends Object{
+public class User {
 
     //User attributes
     private String id;
@@ -53,9 +53,9 @@ public class User extends Object{
 
     public User(String username, String password){
         this.username = username;
-        this.habits = new ArrayList<Habit>();
-        this.iFollow = new ArrayList<User>();
-        this.followMe = new ArrayList<User>();
+        this.habits = new ArrayList<>();
+        this.iFollow = new ArrayList<>();
+        this.followMe = new ArrayList<>();
         this.profilePhoto = Drawable.createFromPath("ic_action_profile.png");
         this.password = password;
     }

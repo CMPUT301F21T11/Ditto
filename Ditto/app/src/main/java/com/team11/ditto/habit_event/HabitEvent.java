@@ -1,4 +1,4 @@
-/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -27,11 +27,14 @@ import java.io.Serializable;
  */
 
 public class HabitEvent implements Serializable {
+    private String eventID;
     private String habitId;
     private final String habitTitle;
     private String comment;
     private String photo;
     private String location;
+    private String uid;
+    private String name;
 
     /**
      * Constructor
@@ -41,12 +44,52 @@ public class HabitEvent implements Serializable {
      * @param location optional location (may be empty string)
      * @param habitTitle Title of the Habit whose HabitEvent this is
      */
+
+    public HabitEvent(String eventID, String habitId, String comment, String photo, String location, String habitTitle, String uid, String name) {
+        this.eventID = eventID;
+        this.habitId = habitId;
+        this.comment = comment;
+        this.photo = photo;
+        this.location = location;
+        this.habitTitle = habitTitle;
+        this.uid = uid;
+        this.name = name;
+    }
+
     public HabitEvent(String habitId, String comment, String photo, String location, String habitTitle) {
         this.habitId = habitId;
         this.comment = comment;
         this.photo = photo;
         this.location = location;
         this.habitTitle = habitTitle;
+    }
+
+    public String getName(){
+        return name;
+    }
+
+    public void setName(String name){
+        this.name = name;
+    }
+
+    public String getUid(){
+        return uid;
+    }
+
+    /**
+     * Getter for the Event's ID
+     * @return  Event's ID
+     */
+    public String getEventID() {
+        return eventID;
+    }
+
+    /**
+     * Setter for the Event's ID
+     * @param eventID the ID
+     */
+    public void setEventID(String eventID) {
+        this.eventID = eventID;
     }
 
     /**

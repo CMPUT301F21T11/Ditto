@@ -1,4 +1,4 @@
-/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ public interface SwitchTabs {
                 if ((tabSelect.getPosition() == HOME_TAB) && (currentTabPos != HOME_TAB)){
                     Intent intent = new Intent(context, MainActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                     context.startActivity(intent);
                 }
 
@@ -57,6 +58,7 @@ public interface SwitchTabs {
                 else if ((tabSelect.getPosition() == MY_HABITS_TAB) && (currentTabPos != MY_HABITS_TAB)){
                     Intent intent = new Intent(context, MyHabitActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                     context.startActivity(intent);
                 }
 
@@ -64,6 +66,7 @@ public interface SwitchTabs {
                 else if ((tabSelect.getPosition() == DUE_TODAY_TAB) && (currentTabPos != DUE_TODAY_TAB)){
                     Intent intent = new Intent(context, DueTodayActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                     context.startActivity(intent);
                 }
 
@@ -71,6 +74,7 @@ public interface SwitchTabs {
                 else if ((tabSelect.getPosition() == PROFILE_TAB) && (currentTabPos != PROFILE_TAB)){
                     Intent intent = new Intent(context, UserProfileActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                     context.startActivity(intent);
                 }
 

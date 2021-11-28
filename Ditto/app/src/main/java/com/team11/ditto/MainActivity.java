@@ -15,22 +15,30 @@
 package com.team11.ditto;
 /*
 Role: Class for Habit Event Activity, be able to see you feed and add a habit event
-Goals:
-    there is repetition between MyHabitActivity and the Homepage when creating fragments and listviews
-    solve by making a more object oriented design
 */
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -41,29 +49,33 @@ import com.team11.ditto.habit_event.AddHabitEventFragment;
 import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.habit_event.HabitEventRecyclerAdapter;
 import com.team11.ditto.habit_event.ViewEventActivity;
-import com.team11.ditto.interfaces.Firebase;
+import com.team11.ditto.interfaces.FollowFirebase;
 import com.team11.ditto.interfaces.HabitFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 
+
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+
 
 /**
  * Role: Class for Habit Event Activity, be able to see you feed and add a habit event
- * TODO:
- *     there is repetition between MyHabitActivity and the Homepage when creating fragments and listviews
- *     solve by making a more object oriented design
  * @author: Kelly Shih, Aidan Horemans, Vivek Malhotra, Matthew Asgari
  */
 
 public class MainActivity extends AppCompatActivity implements SwitchTabs,
         AddHabitEventFragment.OnFragmentInteractionListener, HabitFirebase,
-        HabitEventRecyclerAdapter.EventClickListener {
+        HabitEventRecyclerAdapter.EventClickListener, FollowFirebase {
+
     private static final String TAG = "tab switch";
     private TabLayout tabLayout;
     public static String EXTRA_HABIT_EVENT = "EXTRA_HABIT_EVENT";
     private ArrayList<HabitEvent> habitEventsData;
+
+    private ProgressBar progressBar;
+    private int shortAnimationDuration;
 
     private RecyclerView habitEventList;
     private HabitEventRecyclerAdapter habitEventRecyclerAdapter;
@@ -72,6 +84,9 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     HashMap<String, Object> data = new HashMap<>();
 
     private ActiveUser activeUser;
+    private ArrayList<Habit> habits; //list of habits due today
+    private ActiveUser currentUser;
+
 
     /**
      * Create the Activity instance for the "Homepage" screen, control flow of actions
@@ -79,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        overridePendingTransition(0,0);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -89,7 +105,11 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
             this.startActivity(intent);
         }
 
+        progressBar = findViewById(R.id.progress_bar);
         tabLayout = findViewById(R.id.tabs);
+        habits = new ArrayList<>();
+
+        currentUser = new ActiveUser();
 
         setTitle("My Feed");
 
@@ -98,26 +118,16 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 
         habitEventRecyclerAdapter = new HabitEventRecyclerAdapter(this, habitEventsData, this);
 
+        habitEventList.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+
+        shortAnimationDuration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
+
         // Load the Habit Event data (This will be converted to use the Firebase interface in the future)
-        db = FirebaseFirestore.getInstance();
-        db.collection(HABIT_EVENT_KEY)
-                .whereEqualTo("uid", FirebaseAuth.getInstance().getUid())  // Query only current user events for now
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                        habitEventsData.clear();
-                        for (QueryDocumentSnapshot doc: value) {
-                            // Parse the event data for each document
-                            String eHabitId = (String) doc.getData().get("habitID");
-                            String eHabitTitle = (String) doc.getData().get("habitTitle");
-                            String eComment = (String) doc.getData().get("comment");
-                            String ePhoto = (String) doc.getData().get("photo");
-                            String eLocation = (String) doc.getData().get("location");
-                            habitEventsData.add(new HabitEvent(eHabitId, eComment, ePhoto, eLocation, eHabitTitle));  // Add the event to the event list
-                        }
-                        habitEventRecyclerAdapter.notifyDataSetChanged();  // Refresh the recycler
-                    }
-                });
+        queryList();
+
+        resetDueToday(db); //reset the habitDoneToday boolean in the database
+
 
         LinearLayoutManager manager = new LinearLayoutManager(this);
         habitEventList.setLayoutManager(manager);
@@ -126,8 +136,8 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         currentTab(tabLayout, HOME_TAB);
         switchTabs(this, tabLayout, HOME_TAB);
 
-        db = FirebaseFirestore.getInstance();
         //Get a top level reference to the collection
+        db = FirebaseFirestore.getInstance();
 
         //Notifies if cloud data changes (from Firebase Interface)
         autoHabitEventListener(db, habitEventRecyclerAdapter);
@@ -136,18 +146,61 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 
         addHabitEventButton.setOnClickListener(view -> new AddHabitEventFragment()
                 .show(getSupportFragmentManager(), "ADD_HABIT_EVENT"));
+
+        adjustScore(db, currentUser);
+
+        fadeInView();
+
     }
 
+    /**
+     * Runs a loading animation for the habitEventList while the data is queried, and then fades
+     * out after all info is properly queried
+     */
+    private void fadeInView(){
+        habitEventList.setAlpha(1f);
+        habitEventList.setVisibility(View.VISIBLE);
+
+        habitEventList.animate()
+                .alpha(1f)
+                .setDuration(shortAnimationDuration)
+                .setListener(null);
+
+        progressBar.animate()
+                .alpha(0f)
+                .setDuration(shortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animator){
+                        progressBar.setVisibility(View.GONE);
+                    }
+                });
+    }
 
 
     /**
      * Adds a habitevent to firestore "HabitEvent" and adds the habitevent ID to the list of habitEvents for the habit in "Habit"
      * Adds the habitevent to the listview
+     * updates the habitDoneToday value for the Habit
      * @param newHabitEvent
      */
     @Override
     public void onOkPressed(HabitEvent newHabitEvent) {
+
+        //if today is the same day as one of the dates they picked,
+        //AND in this selected day if there are no other habit events with the same habit
+        //THEN set habitDoneToday to true
+        habitEventList.setVisibility(View.INVISIBLE);
+
+        //handle setting the habitDoneToday field for the Habit
+        isHabitDoneToday(db, todayIs(), newHabitEvent);
+
+        //Adds the item to the database and then immediately retrieves it from the list
         pushHabitEventData(db, newHabitEvent);
+        habitEventRecyclerAdapter.notifyDataSetChanged();
+
+        fadeInView();
+
     }
 
     /**
@@ -157,9 +210,105 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
      */
     @Override
     public void onEventClick(int position) {
-        habitEventsData.get(position);
-        Intent intent = new Intent(this, ViewEventActivity.class);
-        intent.putExtra(EXTRA_HABIT_EVENT, habitEventsData.get(position));
-        startActivity(intent);
+        //If we are clicking on our own event
+        if(habitEventsData.get(position).getUid().equals(FirebaseAuth.getInstance().getUid())){
+            Intent intent = new Intent(this, ViewEventActivity.class);
+            intent.putExtra(EXTRA_HABIT_EVENT, habitEventsData.get(position));
+            startActivity(intent);
+        }
+    }
+
+
+    /**
+     * Get all the user following
+     * Then query their info and the user's
+     */
+    public void queryList(){
+        db = FirebaseFirestore.getInstance();
+
+        db.collection(HABIT_EVENT_KEY)
+                .whereEqualTo("uid", FirebaseAuth.getInstance().getUid()) //userevents
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                        habitEventsData.clear();
+                        for (QueryDocumentSnapshot doc: value) {
+                            // Parse the event data for each document
+                            String eventID = (String) doc.getId();
+                            String eHabitId = (String) doc.getData().get("habitID");
+                            String eHabitTitle = (String) doc.getData().get("habitTitle");
+                            String eComment = (String) doc.getData().get("comment");
+                            String ePhoto = (String) doc.getData().get("photo");
+                            String eLocation = (String) doc.getData().get("location");
+                            String uid = (String) doc.getData().get("uid");
+                            DocumentReference userNameReference = db.collection("User").document(uid);
+
+                            //Query for name then create the habit event
+                            userNameReference.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                    if (task.isSuccessful()) {
+                                        DocumentSnapshot documentSnapshot = task.getResult();
+                                        if (documentSnapshot.exists()) {
+                                            //retrieve the order value
+                                            String name = (String) documentSnapshot.get("name");
+                                            habitEventsData.add(new HabitEvent(eventID, eHabitId, eComment, ePhoto, eLocation, eHabitTitle, uid, name));
+                                            habitEventRecyclerAdapter.notifyDataSetChanged();
+                                        }
+                                        else {
+                                            Log.d("retrieve", "document does not exist!!");
+                                        }
+
+                                    }
+                                    else {
+                                        Log.d("retrieve", task.getException().toString());
+                                    }
+                                }
+
+                            });
+
+                        }
+                    }
+                });
+    }
+
+    /**
+     * return the current day
+     * @return int representing the current day of week (1-7)
+     */
+    private int todayIs() {
+        Calendar calendar = Calendar.getInstance();
+        int day = calendar.get(Calendar.DAY_OF_WEEK);
+
+        switch (day) {
+            case Calendar.SUNDAY:
+                day = 1;
+                break;
+            case Calendar.MONDAY:
+                day = 2;
+                break;
+            case Calendar.TUESDAY:
+                day = 3;
+                break;
+            case Calendar.WEDNESDAY:
+                day = 4;
+                break;
+            case Calendar.THURSDAY:
+                day = 5;
+                break;
+            case Calendar.FRIDAY:
+                day = 6;
+                break;
+            case Calendar.SATURDAY:
+                day = 7;
+                break;
+        }
+        return day;
+    }
+
+    @Override
+    public void onPause(){
+        overridePendingTransition(0,0);
+        super.onPause();
     }
 }

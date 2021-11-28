@@ -14,7 +14,8 @@
  */
 package com.team11.ditto.habit;
 
-import android.widget.Toast;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -23,7 +24,11 @@ import java.util.ArrayList;
  * Purpose: Habit class represents a habit object and holds data for
  * title
  * reason
- * date
+ * dates
+ * habitID
+ * isPublic
+ * position
+ * habitDoneToday
  * Design Rationale: set getters and setters for the data that Habit holds
  * @author Kelly Shih, Aidan Horemans
  */
@@ -37,6 +42,8 @@ public class Habit implements Serializable {
     private ArrayList<String> dates;
     private boolean isPublic;
     private int streak;
+    private int position;
+    private boolean habitDoneToday;
 
     /**
      * Constructor for Habit object
@@ -49,7 +56,7 @@ public class Habit implements Serializable {
         this.reason = reason;
         this.setDate(dates);
         this.isPublic = isPublic;
-        this.streak = 0;
+        this.streak = 0; //Basic habit, not in db yet means it is BRAND NEW
         this.habitID = "";
     }
 
@@ -60,13 +67,13 @@ public class Habit implements Serializable {
      * @param reason Reason for habit
      * @param dates Days of the week for scheduling
      */
-    public Habit(String id, String title, String reason, ArrayList<String> dates, boolean isPublic) {
+    public Habit(String id, String title, String reason, ArrayList<String> dates, boolean isPublic, int streak) {
         this.habitID = id;
         this.title = title;
         this.reason = reason;
         this.setDate(dates);
         this.isPublic = isPublic;
-        this.streak = 0;
+        this.streak = streak;
     }
 
     /**
@@ -79,6 +86,15 @@ public class Habit implements Serializable {
         this.title = title;
         this.reason = reason;
     }
+
+    public int getStreak(){
+        return this.streak;
+    }
+
+    public void setStreak(int streak){
+      this.streak = streak;
+    }
+
 
     /**
      * Getter for Habit title
@@ -155,6 +171,14 @@ public class Habit implements Serializable {
      */
     public boolean isPublic(){ return this.isPublic; }
 
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
     /**
      * Setter for whether Habit is public or not
      * switches isPublic bool to opposite
@@ -164,14 +188,34 @@ public class Habit implements Serializable {
     }
 
     public void completeHabit(boolean complete){
-        if (complete){
+        if (complete && this.streak > 0){
             this.streak ++;
         }
-        else if (this.streak <= 0){
+        else if (complete && this.streak <= 0){
+            this.streak = 1;
+        }
+        else if (!complete && this.streak <= 0){
             this.streak--;
         }
-        else if (this.streak > 0){
+        else if (!complete && this.streak > 0){
             this.streak = 0;
         }
+
+    }
+
+    /**
+     * Getter for whether Habit is done today or not
+     * @return
+     */
+    public boolean isHabitDoneToday() {
+        return habitDoneToday;
+    }
+
+    /**
+     * Setter for whether Habit is done today or not
+     * @param habitDoneToday
+     */
+    public void setHabitDoneToday(boolean habitDoneToday) {
+        this.habitDoneToday = habitDoneToday;
     }
 }
