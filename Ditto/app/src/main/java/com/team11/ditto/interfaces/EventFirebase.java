@@ -4,9 +4,13 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -16,6 +20,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.habit_event.HabitEventRecyclerAdapter;
+import com.team11.ditto.login.ActiveUser;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -42,20 +47,16 @@ public interface EventFirebase extends Firebase{
     default void logEventData(@Nullable QuerySnapshot queryDocumentSnapshots) {
         if (queryDocumentSnapshots != null) {
             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-
                  Log.d(TAG, String.valueOf(doc.getData().get(HABIT_ID)));
                  String eHabitId = (String) doc.getData().get(HABIT_ID);
                  String eHabitTitle = (String) doc.getData().get(HABIT_TITLE);
                  String eComment = (String) doc.getData().get(COMMENT);
                  String ePhoto = (String) doc.getData().get(PHOTO);
                  String eLocation = (String) doc.getData().get(LOCATION);
-                 hEventsFirebase.add(new HabitEvent(eHabitId, eComment, ePhoto, eLocation, eHabitTitle));
-
                  HabitEvent hEvent = new HabitEvent(eHabitId, eComment, ePhoto, eLocation, eHabitTitle);
                  hEvent.setEventID(doc.getId());
                  Log.d(TAG, "EVENT ID IS" + hEvent.getEventID());
                  hEventsFirebase.add(hEvent);
-
             }
         }
     }
@@ -154,12 +155,18 @@ public interface EventFirebase extends Firebase{
         eventData.put(PHOTO, photo);
         eventData.put(LOCATION, location);
         eventData.put(HABIT_TITLE, habitTitle);
-        //this field is used to add the current timestamp of the item, to be used to order the items
         eventData.put(ORDER, currentTime);
+        //this field is used to add the current timestamp of the item, to be used to order the items
     }
 
+
+
+    /**
+     * Handle the deletion process for a habit event
+     * @param db firebase cloud
+     * @param oldEntry habit to delete
+     */
     default void deleteDataMyEvent(FirebaseFirestore db, HabitEvent oldEntry) {
-        //ALSO REMOVE THE ASSOCIATED HABIT EVENTS
         db.collection(HABIT_EVENT_KEY).document(oldEntry.getEventID()).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
@@ -183,6 +190,66 @@ public interface EventFirebase extends Firebase{
                 .delete()
                 .addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully deleted!"))
                 .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
+    }
+
+    /**
+     * Handle resetting the habitDueToday boolean and updating the streak value
+     * according to the number of days they've missed their habit
+     * @param db firebase cloud
+     */
+    default void resetDueToday(FirebaseFirestore db){
+        ActiveUser currentUser = new ActiveUser();
+        db.collection("Habits")
+                .whereEqualTo(USER_ID, currentUser.getUID())
+                .orderBy("position")
+                .addSnapshotListener((value, error) -> {
+                    if (value != null) {
+                        for (QueryDocumentSnapshot document : value) {
+                            //Check if we need to decrement since last time habit was updated
+                            Boolean doneToday = (Boolean) document.getData().get("habitDoneToday");
+                            Date currentDate = Calendar.getInstance().getTime();
+                            Calendar cDate = Calendar.getInstance();
+                            cDate.setTime(currentDate);
+
+                            Date lastDone = document.getDate("Last_Adjusted");
+                            Calendar lDone = Calendar.getInstance();
+                            lDone.setTime(lastDone);
+
+                            String habitID = document.getId();
+
+
+                            //If the current day is not the same anymore, then reset boolean
+                            boolean sameDay = cDate.get(Calendar.DAY_OF_YEAR) == lDone.get(Calendar.DAY_OF_YEAR) &&
+                                    cDate.get(Calendar.YEAR) == lDone.get(Calendar.YEAR);
+
+
+                            if (!sameDay) {
+                                //how many days they missed in between current day and last decremented
+                                DocumentReference movedRef = db.collection("Habit").document(habitID);
+                                //set habitDoneToday to false
+                                movedRef
+                                        .update("habitDoneToday", false)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void unused) {
+                                                Log.d(TAG, "DocumentSnapshot successfully updated!");
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.w(TAG, "Error updating document", e);
+                                            }
+                                        });
+
+                            }
+
+
+                        }
+
+                    }
+                });
+
     }
 
 }

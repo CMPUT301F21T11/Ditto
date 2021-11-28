@@ -1,8 +1,14 @@
 package com.team11.ditto.interfaces;
 
+import android.os.Build;
 import android.util.Log;
 import android.widget.Spinner;
 
+<<<<<<< HEAD
+=======
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+>>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.firebase.firestore.DocumentReference;
@@ -13,16 +19,34 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+<<<<<<< HEAD
+=======
+import com.team11.ditto.MyHabitActivity;
+import com.team11.ditto.habit.CustomListDue;
+>>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 import com.team11.ditto.habit.Habit;
 import com.team11.ditto.habit.HabitRecyclerAdapter;
 import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.login.ActiveUser;
 
+<<<<<<< HEAD
+=======
+import org.w3c.dom.Document;
+
+import java.lang.reflect.Array;
+import java.time.LocalDate;
+import java.time.ZoneId;
+>>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+<<<<<<< HEAD
+=======
+import java.util.Map;
+import java.util.Objects;
+>>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 
 import javax.annotation.Nullable;
 
@@ -107,8 +131,10 @@ public interface HabitFirebase extends EventFirebase, Days{
      * delete the habit and ensure the associated habit events also get deleted
      * @param db firebase cloud
      * @param oldEntry Habit already on cloud to remove
+     * @param s
+     * @param dHabits
      */
-    default void deleteDataMyHabit(FirebaseFirestore db, Habit oldEntry) {
+    default void deleteDataMyHabit(FirebaseFirestore db, Habit oldEntry, int s, ArrayList<Habit> dHabits) {
         //ALSO REMOVE THE ASSOCIATED HABIT EVENTS
         db.collection(HABIT_KEY).document(oldEntry.getHabitID()).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -135,6 +161,31 @@ public interface HabitFirebase extends EventFirebase, Days{
             }
         });
 
+        //decrement all the habit positions after the one that was deleted
+        int c = s;
+        for (int i=0; i<dHabits.size();i++) {
+            DocumentReference docRef = db.collection(HABIT_KEY).document(dHabits.get(i).getHabitID());
+
+            //set position of from habit to toPos
+            docRef.update("position", c)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Log.d(TAG, "DocumentSnapshot successfully updated!");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error updating document", e);
+                        }
+                    });
+            c--;
+
+        }
+
+
+
     }
 
     /**
@@ -146,15 +197,21 @@ public interface HabitFirebase extends EventFirebase, Days{
         //get unique timestamp for ordering our list
         final String habitID = habit.getHabitID();
         Date currentTime = Calendar.getInstance().getTime();
+<<<<<<< HEAD
 
         habitData.put("title", habit.getTitle());
         habitData.put("reason", habit.getReason());
+=======
+        habitData.put(TITLE, habit.getTitle());
+        habitData.put(REASON, habit.getReason());
+>>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 
         for (int i = 0; i<7; i++){
             habitData.put(WEEKDAYS[i], habit.getDates().contains(WEEKDAYS[i]));
         }
-        habitData.put("is_public", habit.isPublic());
+        habitData.put(IS_PUBLIC, habit.isPublic());
         habitData.put("habitDoneToday", false);
+        habitData.put("streaks", Integer.toString(habit.getStreak()));
 
         //this field is used to add the current timestamp of the item, to be used to order the items
         habitData.put("order", currentTime);
@@ -167,11 +224,32 @@ public interface HabitFirebase extends EventFirebase, Days{
         database.collection(HABIT_KEY)
                 .whereEqualTo("uid", currentUser.getUID())
                 .get()
+<<<<<<< HEAD
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         int count = 0;
                         for (DocumentSnapshot ignored : task.getResult()) {
                             count++;
+=======
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            int count = 0;
+                            for (DocumentSnapshot document : task.getResult()) {
+                                count++;
+                                habit.setHabitID(document.getId());
+
+                            }
+                            habit.setPosition(count);
+                            habitData.put("position", count);
+                            habitData.put("Start_Date",currentTime);
+                            habitData.put("Last_Adjusted", currentTime);
+                            pushToDB(database,HABIT_KEY,habitID, habitData);
+                            Log.d(TAG, "SET POSITION " + habit.getPosition());
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+>>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
                         }
                         habit.setPosition(count);
                         habitData.put("position", count);
@@ -236,6 +314,15 @@ public interface HabitFirebase extends EventFirebase, Days{
 
     }
 
+    /**
+     * Handle the manual reordering of Habits in firestore
+     * @param database firebase cloud
+     * @param from the habit object that is moved
+     * @param fromPos the original position of the habit object
+     * @param toPos the new position of the habit object
+     * @param habitsUpdate habits after the new position the habit is placed in
+     * @param habitsDecrement habits after the original position of the habit, up to the new position of the habit
+     */
     default void reOrderPosition(FirebaseFirestore database, Habit from, int fromPos, int toPos, ArrayList<Habit> habitsUpdate, ArrayList<Habit> habitsDecrement) {
         //get the number of documents in collection
         from.setPosition(toPos);
@@ -253,14 +340,29 @@ public interface HabitFirebase extends EventFirebase, Days{
             DocumentReference docRef = database.collection(HABIT_KEY).document(habitsDecrement.get(i).getHabitID());
 
             //set position of from habit to toPos
+<<<<<<< HEAD
             docRef
                     .update("position", c)
                     .addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!"))
                     .addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
+=======
+            docRef.update("position", c)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Log.d(TAG, "DocumentSnapshot successfully updated!");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error updating document", e);
+                        }
+                    });
+>>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
             c--;
 
         }
-
 
         //increment all habit positions after the "toPos"
         int counter = toPos+1;
@@ -279,10 +381,18 @@ public interface HabitFirebase extends EventFirebase, Days{
 
     }
 
-
+    /** Handle updating habitDoneToday field for a habit when an event is added
+     * if today is the same day as one of the dates they picked,
+     * AND in this selected day if there are no other habit events with the same habit
+     * THEN set habitDoneToday to true
+     * @param db firebase cloud
+     * @param today integer representation the current day
+     * @param newHabitEvent the new habit event added
+     */
     default void isHabitDoneToday(FirebaseFirestore db, int today, HabitEvent newHabitEvent) {
         //get days ...
         final Integer[] daysOfWeek = new Integer[7];
+<<<<<<< HEAD
         DocumentReference document = db.collection(HABIT_KEY).document(newHabitEvent.getHabitId());
         document.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -296,6 +406,30 @@ public interface HabitFirebase extends EventFirebase, Days{
                         isDay = documentSnapshot.getBoolean(day);
                         if (isDay) { daysOfWeek[i] = i+1; }
                         else { daysOfWeek[i] = 0; }
+=======
+        DocumentReference document = db.collection(HABIT_KEY).document(newHabitEvent.getHabitId()); //get the associated habit
+        document.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot documentSnapshot = task.getResult();
+                    if (documentSnapshot.exists()) {
+                        //retrieve the order value
+                        int numDays = 7;
+                        for (int i=0;i<numDays;i++) {
+                            Boolean isDay; //is the day "true" in for this Habit
+                            String day = daysForHabit(i);
+                            isDay = documentSnapshot.getBoolean(day);
+                            if (isDay==true) { daysOfWeek[i] = i+1; }
+                            else { daysOfWeek[i] = 0; }
+                        }
+                        //if today is in the set of days chosen, update habitDoneToday to true
+                        int StreakScore = Integer.parseInt(documentSnapshot.get("streaks").toString());
+                        setHabitDoneToday(document, daysOfWeek, today,StreakScore);
+                    }
+                    else {
+                        Log.d(TAG, "document does not exist!!");
+>>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
                     }
                     //if today is in the set of days chosen, update habitDoneToday to true
                     setHabitDoneToday(document, daysOfWeek, today);
@@ -310,6 +444,7 @@ public interface HabitFirebase extends EventFirebase, Days{
         });
     }
 
+<<<<<<< HEAD
     default void setHabitDoneToday(DocumentReference document, Integer[] daysOfWeek, int today) {
         for (Integer integer : daysOfWeek) {
             if (today == integer) {
@@ -317,12 +452,50 @@ public interface HabitFirebase extends EventFirebase, Days{
                 document.update("habitDoneToday", true)
                         .addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!"))
                         .addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
+=======
+    /**
+     * Handle setting the habitDoneToday boolean field in firestore after an event has been posted.
+     * @param document firebase cloud
+     * @param daysOfWeek a list of the days of the week that the Habit is to be done
+     * @param today the current day as an int (1-7)
+     */
+    default void setHabitDoneToday(DocumentReference document, Integer[] daysOfWeek, int today, int StreakScore) {
+        int newStreak = (int) (StreakScore + 2);
+        newStreak = Math.min(8,newStreak);
+        String newStreakStr = String.valueOf(newStreak);
+
+
+        for (int i=0; i<daysOfWeek.length;i++) {
+            if (today == daysOfWeek[i]) {
+                //then we set ishabitDone to true
+                document.update("habitDoneToday", true,
+                                    "streaks",newStreakStr)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                Log.d(TAG, "DocumentSnapshot successfully updated!");
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w(TAG, "Error updating document", e);
+                            }
+                        });
+>>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 
             }
         }
 
     }
 
+
+
+    /**
+     * Retrieve the day of the week
+     * @param i index of day in firestore
+     * @return String form of the day of week
+     */
     default String daysForHabit(int i) {
         String day = null;
         switch (i) {
@@ -351,7 +524,85 @@ public interface HabitFirebase extends EventFirebase, Days{
         return day;
     }
 
+    /**
+     * This method will update the streak score of a habit in db, accounts for days since the last opening of the app
+     * @param db FirebaseFirestore
+     * @param currentUser ActiveUser
+     */
+    default void adjustScore(FirebaseFirestore db, ActiveUser currentUser){
+        Date present_date =  Calendar.getInstance().getTime();
+        //Date today = present_date.getTime();
+        db.collection("Habit")
+                .whereEqualTo("uid",currentUser.getUID())
+                .get()
+                .addOnCompleteListener(task -> {
+                    if(task.isSuccessful()){
+                        for (QueryDocumentSnapshot snapshot: Objects.requireNonNull(task.getResult())){
+                            if(snapshot.get("Last_Adjusted") != null){
+
+                                Date LastAdjusted =  snapshot.getTimestamp("Last_Adjusted").toDate();
+
+                                boolean Monday = snapshot.getBoolean("Monday");
+                                boolean Tuesday = snapshot.getBoolean("Tuesday");
+                                boolean Wednesday = snapshot.getBoolean("Wednesday");
+                                boolean Thursday = snapshot.getBoolean("Thursday");
+                                boolean Friday = snapshot.getBoolean("Friday");
+                                boolean Saturday = snapshot.getBoolean("Saturday");
+                                boolean Sunday = snapshot.getBoolean("Sunday");
+
+                                LocalDate date = null;
+                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                    date = LastAdjusted.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
 
+                                    int sum = 0;
 
+                                    for (LocalDate dateLoop = date.plusDays(1); dateLoop.isBefore(LocalDate.now()); dateLoop = dateLoop.plusDays(1)) {
+                                        //Check for every day between date.plusDays(1) and current day
+                                        Log.d("DATE", dateLoop.toString());
+                                        Log.d("DATE", dateLoop.getDayOfWeek().toString());
+                                        if ((Sunday) && dateLoop.getDayOfWeek().toString().equals("SUNDAY")) {
+                                            sum = sum + 1;
+                                        }
+                                        if ((Monday) && dateLoop.getDayOfWeek().toString().equals("MONDAY")) {
+                                            sum = sum + 1;
+                                        }
+                                        if ((Tuesday) && dateLoop.getDayOfWeek().toString().equals("TUESDAY")) {
+                                            sum = sum + 1;
+                                        }
+                                        if ((Wednesday) && dateLoop.getDayOfWeek().toString().equals("WEDNESDAY")) {
+                                            sum = sum + 1;
+                                        }
+                                        if ((Thursday) && dateLoop.getDayOfWeek().toString().equals("THURSDAY")) {
+                                            sum = sum + 1;
+                                        }
+                                        if ((Friday) && dateLoop.getDayOfWeek().toString().equals("FRIDAY")) {
+                                            sum = sum + 1;
+                                        }
+                                        if ((Saturday) && dateLoop.getDayOfWeek().toString().equals("SATURDAY")) {
+                                            sum = sum + 1;
+                                        }
+                                    }
+
+
+                                    int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
+
+                                    int streak = StreakScore - sum;
+
+                                    streak = Math.max(-5, streak);
+                                    String streakString = String.valueOf(streak);
+
+                                    // adjust score for all missed days
+                                    db.collection("Habit")
+                                            .document(snapshot.getId())
+                                            .update("streaks", streakString,
+                                                    "Last_Adjusted", present_date
+                                            );
+                                }
+
+                            }
+                        }
+                    }
+                });
+    }
 }

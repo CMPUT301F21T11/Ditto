@@ -34,6 +34,7 @@ public class HabitEvent implements Serializable {
     private String photo;
     private String location;
     private String uid;
+    private String name;
 
     /**
      * Constructor
@@ -44,7 +45,7 @@ public class HabitEvent implements Serializable {
      * @param habitTitle Title of the Habit whose HabitEvent this is
      */
 
-    public HabitEvent(String eventID, String habitId, String comment, String photo, String location, String habitTitle, String uid) {
+    public HabitEvent(String eventID, String habitId, String comment, String photo, String location, String habitTitle, String uid, String name) {
         this.eventID = eventID;
         this.habitId = habitId;
         this.comment = comment;
@@ -52,6 +53,7 @@ public class HabitEvent implements Serializable {
         this.location = location;
         this.habitTitle = habitTitle;
         this.uid = uid;
+        this.name = name;
     }
 
     public HabitEvent(String habitId, String comment, String photo, String location, String habitTitle) {
@@ -60,6 +62,14 @@ public class HabitEvent implements Serializable {
         this.photo = photo;
         this.location = location;
         this.habitTitle = habitTitle;
+    }
+
+    public String getName(){
+        return name;
+    }
+
+    public void setName(String name){
+        this.name = name;
     }
 
     public String getUid(){

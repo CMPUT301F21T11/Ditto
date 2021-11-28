@@ -23,6 +23,7 @@ public interface FollowFirebase extends Firebase{
 
     String USER_KEY = "User";
     String FOLLOWING_KEY = "Following";
+
     String USERNAME = "name";
     String EMAIL = "email";
 
@@ -45,11 +46,10 @@ public interface FollowFirebase extends Firebase{
                 .get().addOnCompleteListener( task -> {
             if(task.isSuccessful()){
                 for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
-
                     if(! followedByActiveUser.contains(Objects.requireNonNull(snapshot.get(FOLLOWED)).toString())){
+                        Log.d("User following ", snapshot.get(FOLLOWED).toString());
                         followedByActiveUser.add(Objects.requireNonNull(snapshot.get(FOLLOWED)).toString());
                     }
-
                 }
                 Log.d(FOLLOWED,followedByActiveUser.toString());
                 Log.d("Size followed ", String.valueOf(followedByActiveUser.size()));
@@ -78,16 +78,16 @@ public interface FollowFirebase extends Firebase{
             if (value != null && value.exists()) {
                 List<String> listReceived = (List<String>) value.get(RECEIVED);
                 if (listReceived != null && !listReceived.isEmpty()){
-                for (int i = 0; i < listReceived.size(); i++) {
-                    if (!re.contains(listReceived.get(i))) {
-                        re.add(listReceived.get(i));
-                    }
-                    if(! receivedRequestIDs.contains(listReceived.get(i))){
-                        receivedRequestIDs.add(receivedRequestIDs.size(), listReceived.get(i));
+                    for (int i = 0; i < listReceived.size(); i++) {
+                        if (!re.contains(listReceived.get(i))) {
+                            re.add(listReceived.get(i));
+                        }
+                        if(! receivedRequestIDs.contains(listReceived.get(i))){
+                            receivedRequestIDs.add(receivedRequestIDs.size(), listReceived.get(i));
 
-                        Log.d(ORDER, listReceived.get(i));
+                            Log.d(ORDER, listReceived.get(i));
+                        }
                     }
-                }
                 }
             }
 
@@ -107,18 +107,16 @@ public interface FollowFirebase extends Firebase{
                         .get()
                         .addOnCompleteListener(task2 -> {
                             if (task2.isSuccessful() && !receivedRequestIDs.isEmpty()) {
-                                if (Objects.equals(Objects.requireNonNull(task2.getResult())
-                                        .getDocuments().get(0).getString(USER_ID), receivedID)) {
+                                if (Objects.requireNonNull(task2.getResult())
+                                        .getDocuments().get(0).getString(USER_ID).equals(receivedID)) {
                                     String name = task2.getResult()
                                             .getDocuments().get(0).getString(USERNAME);
                                     userDataList.add(new User(name, receivedID));
                                 }
-
                                 userAdapter.notifyDataSetChanged();
                             }
                         });
             }
-
         });
     }
 
@@ -154,11 +152,12 @@ public interface FollowFirebase extends Firebase{
                         .get()
                         .addOnCompleteListener(task2 -> {
                             if(task2.isSuccessful()){
-                                if(Objects.equals(Objects.requireNonNull(task2.getResult())
-                                        .getDocuments().get(0).getString(USER_ID), sentID)){
+                                if(Objects.requireNonNull(task2.getResult())
+                                        .getDocuments().get(0).getString(USER_ID).equals(sentID)){
                                     String name = task2.getResult()
                                             .getDocuments().get(0).getString(USERNAME);
-                                    userDataList.add(new User(name, sentID));
+                                    String email = task2.getResult().getDocuments().get(0).getString(EMAIL);
+                                    userDataList.add(new User(name, email, sentID));
                                     Log.d("Sent request", sentID);
                                     userAdapter.notifyDataSetChanged();
                                 }

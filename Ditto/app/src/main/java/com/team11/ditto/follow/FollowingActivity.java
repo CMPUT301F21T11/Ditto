@@ -21,12 +21,16 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.team11.ditto.R;
 import com.team11.ditto.UserProfileActivity;
 import com.team11.ditto.interfaces.Firebase;
@@ -37,6 +41,7 @@ import com.team11.ditto.profile_details.User;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -139,6 +144,7 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
                                    userDataList.add(new User(snapshot.get(USERNAME).toString(),
                                            followedByActiveUser.get(finalI), snapshot.get(USER_ID).toString()));
                                    Log.d(FOLLOWED, followedByActiveUser.get(finalI));
+                                   Log.d("Iteration no. ", String.valueOf(finalI));
                                    Collections.sort(userDataList, (user, t1) -> user.getUsername().compareTo(t1.getUsername()));
                                }
                                userAdapter.notifyDataSetChanged();

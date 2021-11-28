@@ -53,6 +53,11 @@ import com.team11.ditto.login.ActiveUser;
 
 import java.util.ArrayList;
 import java.util.Collections;
+<<<<<<< HEAD
+=======
+import java.util.Map;
+import java.util.Objects;
+>>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 
 /**To display the listview of Habits for a user in the "My Habits" tab
  *Allow a user to add a habit, swipe left to delete a habit
@@ -83,7 +88,6 @@ public class MyHabitActivity extends AppCompatActivity implements
 
     /**
      * Create the Activity instance for the "My Habits" screen, control flow of actions
-     *
      * @param savedInstanceState saved state
      */
     @Override
@@ -96,6 +100,8 @@ public class MyHabitActivity extends AppCompatActivity implements
 
         setTitle("My Habits");
 
+        currentUser = new ActiveUser();
+
         habitDataList = new ArrayList<>();
         habitListView = findViewById(R.id.list);
         tabLayout = findViewById(R.id.tabs);
@@ -105,7 +111,10 @@ public class MyHabitActivity extends AppCompatActivity implements
         habitListView.setLayoutManager(manager);
         habitListView.setAdapter(habitRecyclerAdapter);
 
+        adjustScore(db, currentUser);
+
         // Load habits
+<<<<<<< HEAD
         currentUser = new ActiveUser();
         db.collection(HABIT_KEY)
                 .whereEqualTo("uid", currentUser.getUID())
@@ -131,6 +140,9 @@ public class MyHabitActivity extends AppCompatActivity implements
                     }
                     habitRecyclerAdapter.notifyDataSetChanged();
                 });
+=======
+        queryHabits(db);
+>>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 
         currentTab(tabLayout, MY_HABITS_TAB);
         switchTabs(this, tabLayout, MY_HABITS_TAB);
@@ -155,11 +167,43 @@ public class MyHabitActivity extends AppCompatActivity implements
         helper.attachToRecyclerView(habitListView);
     }
 
-    /**
-     * Adding a habit to the database and listview as the response to the user clicking the "Add" button from the fragment
-     *
-     * @param newHabit the Habit to be added
-     */
+    public void queryHabits(FirebaseFirestore db) {
+        db.collection(HABIT_KEY)
+                .whereEqualTo(USER_ID, currentUser.getUID())
+                .orderBy("position")
+                .addSnapshotListener((value, error) -> {
+                    habitDataList.clear();
+                    if (value != null) {
+                        for (QueryDocumentSnapshot document : value) {
+                            String id = document.getId();
+                            String title = (String) document.getData().get(TITLE);
+                            String reason = (String) document.getData().get(REASON);
+                            String streaks =  (String) Objects.requireNonNull(document.getData().get("streaks"));
+                            int s = Integer.parseInt(streaks);
+                            ArrayList<String> days = new ArrayList<>();
+                            handleDays(days, document.getData());
+                            boolean isPublic;
+                            if (document.getData().get("is_public") == null) {
+                                isPublic = true;
+                            } else {
+                                isPublic = (boolean) document.getData().get("is_public");
+                            }
+                            Habit habit = new Habit(id, title, reason, days, isPublic, s);
+                            habitDataList.add(habit);
+                        }
+
+                    }
+                    habitRecyclerAdapter.notifyDataSetChanged();
+
+                });
+    }
+
+
+        /**
+         * Adding a habit to the database and listview as the response to the user clicking the "Add" button from the fragment
+         *
+         * @param newHabit the Habit to be added
+         */
     @Override
     public void onOkPressed(Habit newHabit) {
         //when the user clicks the add button, we want to add to the db and display the new entry
@@ -250,10 +294,28 @@ public class MyHabitActivity extends AppCompatActivity implements
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
             Habit oldEntry = (Habit) habitDataList.get(viewHolder.getAbsoluteAdapterPosition());
+
+
+            ArrayList<Habit> dHabits = new ArrayList<Habit>();
+
+            //get an arraylist of habits after the moved object
+            int s = viewHolder.getAbsoluteAdapterPosition()+1;
+            int t = habitRecyclerAdapter.getItemCount();
+            if (t==s) {
+                //empty arraylist
+            }
+            else {
+                //iterate through the habits and add them to the arraylist
+                for (int i=s; i<t; i++) {
+                    dHabits.add(habitDataList.get(i));
+                }
+            }
+
             habitDataList.remove(viewHolder.getAbsoluteAdapterPosition());
             habitRecyclerAdapter.notifyDataSetChanged();
-
-            deleteDataMyHabit(db, oldEntry);
+            Log.d("NAUR", String.valueOf(dHabits));
+            Collections.reverse(dHabits);
+            deleteDataMyHabit(db, oldEntry, s, dHabits);
 
         }
 
@@ -302,6 +364,15 @@ public class MyHabitActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * add the days to the dates
+     * @param dates
+     * @param objectMap
+     */
+    public void handleDays(ArrayList<String> dates, Map<String, Object> objectMap){
+>>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 
 
     @Override

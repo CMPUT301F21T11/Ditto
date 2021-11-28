@@ -1,4 +1,4 @@
-/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -18,16 +18,32 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+<<<<<<< HEAD
+=======
+import android.widget.TextView;
+>>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.team11.ditto.MainActivity;
 import com.team11.ditto.R;
+import com.team11.ditto.UserProfileActivity;
 import com.team11.ditto.WelcomeActivity;
+import com.team11.ditto.follow.FollowRequestActivity;
 
 /**
  * Activity to login a User so they can access the application
@@ -42,6 +58,7 @@ public class SignInActivity extends AppCompatActivity {
     Context context = this;
 
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     /**
      * Instructions for creating Activity
@@ -67,7 +84,7 @@ public class SignInActivity extends AppCompatActivity {
             String email = emailField.getText().toString();
             String password = passwordField.getText().toString();
 
-            Log.d(TAG, "SIGNING IN");
+                Log.d(TAG, "SIGNING IN");
 
             mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(SignInActivity.this, task -> {
@@ -82,7 +99,10 @@ public class SignInActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(),"Wrong username/password.",Toast.LENGTH_LONG).show();
                     }
                 });
+<<<<<<< HEAD
 
+=======
+>>>>>>> b97d383fe628a7f02a93a1b08ebcbe0eee52d8c5
         });
     }
 
