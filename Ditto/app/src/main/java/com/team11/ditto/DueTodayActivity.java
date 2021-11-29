@@ -40,7 +40,7 @@ import java.util.Calendar;
 import java.util.Objects;
 
 /**
- * Activity to display a list of the ActiveUser's Habits that are scheduled to be done today
+ * Activity to display a list of the ActiveUser's Habits that are scheduled to be done today, and its status
  * @author Aidan Horemans, Kelly Shih, Vivek Malhotra, Matthew Asgari
  */
 public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, Firebase, Days, HabitFirebase {
@@ -56,7 +56,6 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
      * Simple listview, bottom tabs
      * @param savedInstanceState current app state
      */
-
     @Override
     @RequiresApi(api = Build.VERSION_CODES.O)
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,12 +95,13 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
                                 boolean isPublic = (boolean) snapshot.getData().get("is_public");
                                 String streaks =  (String) Objects.requireNonNull(snapshot.getData().get("streaks"));
                                 int s = Integer.parseInt(streaks);
+                                boolean isDoneToday = (boolean) snapshot.getData().get("habitDoneToday");
 
-                                Habit habit = new Habit(id, title, reason, days, isPublic, s);
+                                Habit habit = new Habit(id, title, reason, days, isPublic, s, isDoneToday);
                                 habit.setHabitID(habitID);
-                                habits.add(habit);
+                                habits.add(habit); // Add to the habit list
 
-                            }// Add to the habit list
+                            }
 
                         }
 
@@ -112,8 +112,6 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
 
         currentTab(tabLayout, DUE_TODAY_TAB);
         switchTabs(this, tabLayout, DUE_TODAY_TAB);
-
-
     }
 
     /**
@@ -165,6 +163,9 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
         return s.substring(0, 1).toUpperCase() + s.substring(1).toLowerCase();
     }
 
+    /**
+     * handle transition between activities
+     */
     @Override
     public void onPause(){
         overridePendingTransition(0,0);

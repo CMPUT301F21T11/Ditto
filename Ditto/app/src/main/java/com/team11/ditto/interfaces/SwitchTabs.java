@@ -44,6 +44,10 @@ public interface SwitchTabs {
     default void switchTabs(Context context, TabLayout tabLayout, int currentTabPos){
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            /**
+             * Handles the selection and switching of tabs and activities
+             * @param tabSelect tab currently selected
+             */
             @Override
             public void onTabSelected(TabLayout.Tab tabSelect) {
                 // position 0 is for home

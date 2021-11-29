@@ -31,7 +31,7 @@ public class MyHabitActivityTest {
     public void addHabitButton(){
         // Test if the add button display the add habit fragment
         Espresso.onView(ViewMatchers.withId(R.id.add_habit)).perform(click());
-        onView(withId(R.id.addHabitFragment)).check(matches(isDisplayed()));
+        onView(withId(R.id.title_editText)).check(matches(isDisplayed()));
 
     }
 

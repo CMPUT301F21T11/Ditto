@@ -13,9 +13,6 @@
  limitations under the License.
  */
 package com.team11.ditto;
-/*
-Role: Class for Habit Event Activity, be able to see you feed and add a habit event
-*/
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -59,6 +56,7 @@ import com.team11.ditto.login.ActiveUser;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -291,13 +289,6 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     }
 
 
-    @Override
-    public void onPause(){
-        overridePendingTransition(0,0);
-        super.onPause();
-    }
-
-
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void sortFeed(){
         Log.d("Sorting", "chosen events");
@@ -359,11 +350,8 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     @Override
     public void onOkPressed(HabitEvent newHabitEvent) {
 
-        //if today is the same day as one of the dates they picked,
-        //AND in this selected day if there are no other habit events with the same habit
-        //THEN set habitDoneToday to true
         habitEventList.setVisibility(View.INVISIBLE);
-
+        adjustScore(db, currentUser); //Called here in case app is open during change of days
         //handle setting the habitDoneToday field for the Habit
         isHabitDoneToday(db, todayIs(), newHabitEvent);
 
@@ -371,7 +359,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         hEvents.add(newHabitEvent);
         sortFeed();
         habitEventRecyclerAdapter.notifyDataSetChanged();
-        pushHabitEventData(db, newHabitEvent);
+        pushHabitEventData(db, newHabitEvent, false);
 
         fadeInView();
 
@@ -418,4 +406,12 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                 });
     }
 
+    /**
+     * Handle transitions between activities
+     */
+    @Override
+    public void onPause(){
+        overridePendingTransition(0,0);
+        super.onPause();
+    }
 }

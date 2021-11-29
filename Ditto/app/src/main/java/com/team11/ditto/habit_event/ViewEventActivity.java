@@ -33,7 +33,7 @@ import com.team11.ditto.R;
 import com.team11.ditto.interfaces.HabitFirebase;
 
 /**
- * Activity to view a Habit Event
+ * Activity to view a Habit Event, delete and edit the habit event
  * @author Kelly Shih, Aidan Horemans, Matthew Asgari
  */
 public class ViewEventActivity extends AppCompatActivity implements EditEventFragment.OnFragmentInteractionListener, HabitFirebase, OnMapReadyCallback {
@@ -118,6 +118,7 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
             dialogFragment.show(getSupportFragmentManager(), "EDIT_EVENT");
         }
 
+        //When we delete the event, finish the activity and remove it from the database
         if (id == R.id.delete_event){
 
             deleteDataMyEvent(database, habitEvent);
@@ -130,10 +131,13 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
     }
 
 
+    /**
+     * handle calling functions to update event data in firebase, and the textview
+     * @param event
+     */
     @Override
     public void onOkPressed(HabitEvent event) {
         //Update old habit event data with new habit event data
-
         pushEditEvent(database, event);
 
         //Updating old text with new habit stuff
@@ -141,9 +145,12 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
 
     }
 
+    /**
+     * Called when the map is ready to be used
+     * @param googleMap
+     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
         if (habitEvent.getLocation() != null && habitEvent.getLocation().size() == 2) {
             LatLng location = new LatLng(habitEvent.getLocation().get(0), habitEvent.getLocation().get(1));
             googleMap.addMarker(new MarkerOptions()

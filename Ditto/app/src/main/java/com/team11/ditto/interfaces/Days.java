@@ -15,6 +15,7 @@ import java.util.Map;
 
 //Specifically for dealing with Dates
 public interface Days {
+    //String keys for the respective dates
     String MON = "Monday";
     String TUES = "Tuesday";
     String WED = "Wednesday";
@@ -29,6 +30,11 @@ public interface Days {
 
     SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEE MMM dd hh:mm:ss zzz yyyy", Locale.CANADA);
 
+    /**
+     * Gets the checked dates from the checkboxes and puts them into the dates list
+     * @param dates ArrayList of string date values that are being set
+     * @param checkboxes checkboxes that determine day values
+     */
     default void updateDayList(ArrayList<String> dates, ArrayList<CheckBox> checkboxes) {
         dates.clear();
         for (int i = 0; i < NUM_DAYS; i++) {
@@ -38,6 +44,11 @@ public interface Days {
         }
     }
 
+    /**
+     * Checks the respective checkboxes for the dates string passed through
+     * @param dates pre-selected string dates in ArrayList
+     * @param checkBoxes checkboxes to be checked or unchecked depending on dates
+     */
     default void initializeCheckBoxes(ArrayList<String> dates, ArrayList<CheckBox> checkBoxes){
 
         for (int i = 0; i < NUM_DAYS; i++){
@@ -49,6 +60,11 @@ public interface Days {
 
     }
 
+    /**
+     * Initializes the date checkboxes for a respective view
+     * @param view current view being worked in
+     * @return ArrayList of checkboxes with their set view ids
+     */
     default ArrayList<CheckBox> setCheckBoxLayouts(@NonNull View view){
 
         ArrayList<CheckBox> checkBoxes = new ArrayList<>();
@@ -63,6 +79,11 @@ public interface Days {
         return checkBoxes;
     }
 
+    /**
+     * Update a map to be passed into the database using the arraylist of date strings
+     * @param dates dates to be passed through map
+     * @param data map to be passed through to the database
+     */
     default void updateDaysFromData(ArrayList<String> dates, Map<String, Object> data){
 
         dates.clear();

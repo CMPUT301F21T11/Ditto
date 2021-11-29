@@ -139,6 +139,7 @@ public class FollowRequestActivity extends AppCompatActivity
 
     @Override
     public void onPause(){
+        //Generic onPause function
         overridePendingTransition(0,0);
         super.onPause();
     }

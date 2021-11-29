@@ -14,9 +14,18 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 
+/**
+ * Role: Update the respective media values from firebase
+ * This includes setting, getting and updating the user profile picture
+ * @author Matthew Asgari
+ */
 public interface FirebaseMedia {
 
-    // Finds and downloads the profile photo for a uid and stores it in an ImageView
+    /**
+     * Sets the user profile picture
+     * @param uid user id
+     * @param imageView imageview to set
+     */
     default void setProfilePhoto(String uid, ImageView imageView) {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReference();
@@ -37,7 +46,10 @@ public interface FirebaseMedia {
         });
     }
 
-    // Sets the default profile photo when a user does not have a custom photo
+    /**
+     * Sets the user's profile photo to a default value when none is set
+     * @param imageView imageview to set
+     */
     default void setDefaultProfilePhoto(ImageView imageView) {
 
         FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -53,7 +65,11 @@ public interface FirebaseMedia {
         });
     }
 
-    // Uploads a profile photo for a given uid
+    /**
+     * Uploads a profile photo for a given uid
+     * @param uid user id
+     * @param imgBitmap bitmap value to store the passed image by the user
+     */
     default void uploadProfilePhoto(String uid, Bitmap imgBitmap) {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReference();

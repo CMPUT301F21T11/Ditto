@@ -13,13 +13,6 @@
  limitations under the License.
  */
 package com.team11.ditto;
-/*
-Role: To display the listview of Habits for a user in the "My Habits" tab
-Allow a user to add a habit, swipe left to delete a habit
-Goals:
-    -Implement occurrence tracking
-    -Visually make it better
- */
 
 import android.content.Intent;
 import android.graphics.Canvas;
@@ -61,13 +54,8 @@ import java.util.Objects;
 
 /**To display the listview of Habits for a user in the "My Habits" tab
  *Allow a user to add a habit, swipe left to delete a habit
- * TODO:
- *     -A user can add a habit to the database, but cannot delete a habit from the db yet
- *     -Add the days of week to db
- *     -Allow user to edit an existing habit
- *     -Visually make it better
- *     -Get the happy faces for the level of completion for each habit
- *     -WHEN YOU DELETE A HABIT, ALSO DELETE THE HABIT EVENT ITS ASSOCIATED WITH
+ * reorder a habit one spot at a time
+ * view the status of a habit
  * @author Kelly Shih, Aidan Horemans
  */
 
@@ -143,6 +131,10 @@ public class MyHabitActivity extends AppCompatActivity implements
         helper.attachToRecyclerView(habitListView);
     }
 
+    /**
+     * retrieve the habits from firestore to populate the habitDataList
+     * @param db firestore cloud
+     */
     public void queryHabits(FirebaseFirestore db) {
         db.collection(HABIT_KEY)
                 .whereEqualTo(USER_ID, currentUser.getUID())
@@ -164,7 +156,9 @@ public class MyHabitActivity extends AppCompatActivity implements
                             } else {
                                 isPublic = (boolean) document.getData().get("is_public");
                             }
-                            Habit habit = new Habit(id, title, reason, days, isPublic, s);
+                            boolean isDoneToday = (boolean) document.getData().get("habitDoneToday");
+
+                            Habit habit = new Habit(id, title, reason, days, isPublic, s, isDoneToday);
                             habitDataList.add(habit);
                         }
 
@@ -175,11 +169,11 @@ public class MyHabitActivity extends AppCompatActivity implements
     }
 
 
-        /**
-         * Adding a habit to the database and listview as the response to the user clicking the "Add" button from the fragment
-         *
-         * @param newHabit the Habit to be added
-         */
+    /**
+     * Adding a habit to the database and listview as the response to the user clicking the "Add" button from the fragment
+     *
+     * @param newHabit the Habit to be added
+     */
     @Override
     public void onOkPressed(Habit newHabit) {
         //when the user clicks the add button, we want to add to the db and display the new entry
@@ -228,7 +222,7 @@ public class MyHabitActivity extends AppCompatActivity implements
 
             int total = habitRecyclerAdapter.getItemCount();
 
-
+            //get habits after the new position of the moved habit
             int start = toPos+1;
             if (total==start) {
                 //empty arraylist
@@ -240,6 +234,7 @@ public class MyHabitActivity extends AppCompatActivity implements
                 }
             }
 
+            //get the habits before the habit that was moved
             int t = toPos;
             //get an arraylist of habits after the moved object
             int s = fromPos;
@@ -253,14 +248,7 @@ public class MyHabitActivity extends AppCompatActivity implements
                 }
             }
 
-            Log.d(TAG, "FROM POS " + fromPos+" TITLE "+to.getTitle());
-            Log.d(TAG, "TO POS " + toPos);
-            Log.d(TAG, "ARRAY TO UPDATE " + updateHabits);
-
             reOrderPosition(db, movedObject, fromPos, toPos, updateHabits, decrementHabits);
-
-
-
             return false;
         }
 
@@ -291,7 +279,6 @@ public class MyHabitActivity extends AppCompatActivity implements
 
             habitDataList.remove(viewHolder.getAbsoluteAdapterPosition());
             habitRecyclerAdapter.notifyDataSetChanged();
-            Log.d("NAUR", String.valueOf(dHabits));
             Collections.reverse(dHabits);
             deleteDataMyHabit(db, oldEntry, s, dHabits);
 
@@ -357,6 +344,9 @@ public class MyHabitActivity extends AppCompatActivity implements
 
     }
 
+    /**
+     * handle the transitions between activities
+     */
     @Override
     public void onPause(){
         overridePendingTransition(0,0);

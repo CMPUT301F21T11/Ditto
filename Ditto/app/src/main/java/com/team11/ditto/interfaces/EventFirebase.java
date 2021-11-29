@@ -10,8 +10,10 @@ import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -36,8 +38,11 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+/**
+ * Role: Implement default methods that deal with habit events in firestore
+ * @author Courtenay Laing-Kobe, Kelly Shih, Aidan Horemans
+ */
 public interface EventFirebase extends Firebase, Days{
-
     String HABIT_EVENT_KEY = "HabitEvent";
 
     String HABIT_ID = "habitID";
@@ -48,7 +53,63 @@ public interface EventFirebase extends Firebase, Days{
     String PHOTO = "photo";
     String LOCATION = "location";
     String DATE = "date";
+    ArrayList<HabitEvent> hEventsFirebase = new ArrayList<>();
     HashMap<String, Object> eventData = new HashMap<>();
+
+
+    /**
+     * Retrieve the events from firestore, called when making activity changes
+     * @param queryDocumentSnapshots the event data
+     */
+    default void logEventData(@Nullable QuerySnapshot queryDocumentSnapshots) {
+        if (queryDocumentSnapshots != null) {
+            for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                String eHabitId = (String) doc.getData().get(HABIT_ID);
+                String eHabitTitle = (String) doc.getData().get(HABIT_TITLE);
+                String eComment = (String) doc.getData().get(COMMENT);
+                String ePhoto = (String) doc.getData().get(PHOTO);
+
+                Map<String, Object> data = doc.getData();
+                @Nullable ArrayList<Double> eLocation = null;
+
+                if (doc.getData().get(LOCATION) != "") {
+                    eLocation = (ArrayList) data.get(LOCATION);
+                }
+
+                HabitEvent hEvent = new HabitEvent(eHabitId, eComment, ePhoto, eLocation, eHabitTitle);
+                hEvent.setEventID(doc.getId());
+                hEventsFirebase.add(hEvent);
+            }
+        }
+    }
+
+    /**
+     * initializing query for RecyclerAdapter
+     * @param database firebase cloud
+     * @param adapter adapter between datalist and database
+     */
+    default void autoHabitEventListener(FirebaseFirestore database, HabitEventRecyclerAdapter adapter){
+        Query query = database.collection(HABIT_EVENT_KEY).orderBy(ORDER, Query.Direction.DESCENDING);
+        query.addSnapshotListener(new EventListener<QuerySnapshot>() {
+            /**Maintain listview after each activity switch, login, logout
+             *
+             * @param queryDocumentSnapshots
+             *          event data
+             * @param error
+             *          error data
+             */
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable
+                    FirebaseFirestoreException error) {
+                // Clear the old list
+                hEventsFirebase.clear();
+                logEventData(queryDocumentSnapshots);
+                adapter.notifyDataSetChanged();
+                // Notifying the adapter to render any new data fetched from the cloud
+
+            }
+        });
+    }
 
     /**
      * If the array is not null, go to this function to delete the habit event
@@ -58,7 +119,6 @@ public interface EventFirebase extends Firebase, Days{
     default void deleteHabitEvents(FirebaseFirestore db, ArrayList<String> habitEventIds) {
         for (int i = 0; i < habitEventIds.size(); i++) {
             //delete the associated habit event in the database
-            Log.d(TAG, EVENT_ID + habitEventIds.get(i));
             db.collection(HABIT_EVENT_KEY).document(habitEventIds.get(i))
                     .delete();
         }
@@ -82,9 +142,29 @@ public interface EventFirebase extends Firebase, Days{
      * @param database firestore cloud
      * @param event HabitEvent to be added
      */
-    default void pushHabitEventData(FirebaseFirestore database, HabitEvent event){
-        getEventData(event); //Puts the data from event into eventData
+    default void pushHabitEventData(FirebaseFirestore database, HabitEvent event, boolean automatic){
+        Date currentTime = Calendar.getInstance().getTime();
+        getEventData(event, currentTime); //Puts the data from event into eventData
         pushToDB(database, HABIT_EVENT_KEY, "", eventData);
+
+        //For a new habitevent, reference habit and update last_created only if not an automatic
+        //missed habit event
+        if(!automatic) {
+            DocumentReference document = database.collection("Habit").document(event.getHabitId());
+            document.update("Last_Created", currentTime)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Log.d(TAG, "DocumentSnapshot successfully updated!");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error updating document", e);
+                        }
+                    });
+        }
     }
 
     /**
@@ -93,25 +173,27 @@ public interface EventFirebase extends Firebase, Days{
      * @param event Habit to be added
      */
     default void pushEditEvent(FirebaseFirestore database, HabitEvent event) {
-        getEventData(event); //Puts the data from event into eventData
+        Date currentTime = Calendar.getInstance().getTime();
+        getEventData(event, currentTime); //Puts the data from event into eventData
         pushToDB(database, HABIT_EVENT_KEY, event.getEventID(), eventData);
     }
 
     /**
      * Helper function to put the proper data from HabitEvent into eventData
-     * @param event
+     * @param event habit event to retrieve data from
      */
-    default void getEventData(HabitEvent event){
-        eventData.clear();
+    //default void getEventData(HabitEvent event){
+    //    eventData.clear();
+    default void getEventData(HabitEvent event, Date currentTime){
         String habitID = event.getHabitId();
         String comment = event.getComment();
         String photo = event.getPhoto();
         String habitTitle = event.getHabitTitle();
         List<Double> location = event.getLocation();
 
-
         String date = DATE_FORMAT.format(event.getDate());
 
+        //get unique timestamp for ordering our list
         eventData.put(USER_ID, FirebaseAuth.getInstance().getUid());
         eventData.put(HABIT_ID, habitID);
         eventData.put(COMMENT, comment);
@@ -119,10 +201,11 @@ public interface EventFirebase extends Firebase, Days{
         eventData.put(LOCATION, location);
         eventData.put(HABIT_TITLE, habitTitle);
         eventData.put(DATE, date);
+
         //this field is used to add the current timestamp of the item, to be used to order the items
+        eventData.put(ORDER, currentTime);
+
     }
-
-
 
     /**
      * Handle the deletion process for a habit event

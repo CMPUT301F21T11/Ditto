@@ -61,6 +61,11 @@ import com.team11.ditto.profile_details.SearchUserActivity;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+/**
+ * Class for the user profile tab
+ * Allows user to search, follow, look at follow requests, look at followers, following, and logout
+ * @author Vivek Malhotra, Matthew Asgari
+ */
 public class UserProfileActivity extends AppCompatActivity implements SwitchTabs, Firebase, FirebaseMedia {
 
     private ImageView profilePhoto;
@@ -146,6 +151,7 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         onFollowerNumberTap();
         onProfilePhotoTap();
 
+        //handle logout button being pressed
         logout.setOnClickListener(view -> {
             new ActiveUser().logout();
             Intent intent = new Intent(UserProfileActivity.this, WelcomeActivity.class);
@@ -154,6 +160,9 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         });
     }
 
+    /**
+     * Handle actions for the back button
+     */
     @Override
     public void onBackPressed() {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
@@ -161,6 +170,9 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         startActivity(intent);
     }
 
+    /**
+     * Set the listener for when the user taps on "Following"
+     */
     public void onFollowingTap(){
         following.setOnClickListener(view -> {
             Intent intent = new Intent(UserProfileActivity.this, FollowingActivity.class);
@@ -169,6 +181,9 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
 
     }
 
+    /**
+     * Set the listener for when user taps on the number of following
+     */
     public void onFollowNumberTap(){
         no_following.setOnClickListener(view -> {
             Intent intent = new Intent(UserProfileActivity.this,FollowingActivity.class);
@@ -176,6 +191,9 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         });
     }
 
+    /**
+     * Set the listener  for when user taps on "Search"
+     */
     public void onSearchTap(){
         search.setOnClickListener(view -> {
             Intent intent = new Intent(UserProfileActivity.this, SearchUserActivity.class);
@@ -183,6 +201,9 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         });
     }
 
+    /**
+     * Set the listener for when user taps of "Follow Requests"
+     */
     public void onFollowRequestTab(){
         fr_pending.setOnClickListener(view -> {
             Intent intent = new Intent(UserProfileActivity.this, FollowRequestActivity.class);
@@ -190,6 +211,9 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         });
     }
 
+    /**
+     * Set the listener for when user clicks on "Followers"
+     */
     public void onFollowerTap() {
         followers.setOnClickListener(view -> {
             Intent intent = new Intent(UserProfileActivity.this, FollowerActivity.class);
@@ -197,6 +221,9 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         });
     }
 
+    /**
+     * Handle actions when user taps on "Followers" to see the number of followers
+     */
     public void onFollowerNumberTap(){
         no_followers.setOnClickListener(view -> {
             Intent intent = new Intent(UserProfileActivity.this, FollowerActivity.class);
@@ -204,6 +231,9 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         });
     }
 
+    /**
+     * Handle actions when user taps on "Follow requests sent"
+     */
     public void onSentRequestTap(){
         frSent.setOnClickListener(view -> {
             Intent intent = new Intent(UserProfileActivity.this, SentRequestActivity.class);
@@ -211,18 +241,27 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         });
     }
 
+    /**
+     * Handle the transition between tabs
+     */
     @Override
     public void onPause(){
         overridePendingTransition(0,0);
         super.onPause();
     }
 
+    /**
+     * Set the listener for tapping on the profile picture
+     */
     public void onProfilePhotoTap() {
         profilePhoto.setOnClickListener(view -> {
             displayMediaOptions();
         });
     }
 
+    /**
+     * Set the dialog for photo or media options
+     */
     private void displayMediaOptions() {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(UserProfileActivity.this)
                 .setTitle("Load photo from camera or media")
@@ -237,6 +276,9 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         builder.show();
     }
 
+    /**
+     * Handling permissions for camera permissions
+     */
     private void loadCamera() {
         // Check if app has permission
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
@@ -249,6 +291,9 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         }
     }
 
+    /**
+     * Handling permissions for photo media access
+     */
     private void loadPhotos() {
         // Check if app has permission
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
@@ -261,6 +306,12 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         }
     }
 
+    /**
+     * contract for receiving the results for permission requests.
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -289,6 +340,11 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         }
     }
 
+    /**
+     * Handle loading from uri based on android version the device is on
+     * @param photoUri
+     * @return
+     */
     private Bitmap loadFromUri(Uri photoUri) {
         Bitmap image = null;
         try {
@@ -307,6 +363,12 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         return image;
     }
 
+    /**
+     * Handle uploading a profile photo
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

@@ -47,12 +47,24 @@ public class CustomListDue extends ArrayAdapter<Habit> {
     FirebaseFirestore database;
 
 
+    /**
+     * Constructor for the an item in the due today listview
+     * @param context
+     * @param habits
+     */
     public CustomListDue(Context context, ArrayList<Habit> habits) {
         super(context,0, habits);
         this.habits = habits;
         this.context = context;
     }
 
+    /**
+     * set the fields of the habit item in the listview
+     * @param position position of habit in the listview
+     * @param convertView
+     * @param parent
+     * @return
+     */
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @Nullable ViewGroup parent) {
@@ -72,65 +84,25 @@ public class CustomListDue extends ArrayAdapter<Habit> {
         habitDescription.setText(habit.getReason());
         setIcon(habit.getStreak(), progress);
 
-        //get the streak value from database
-        /*database = FirebaseFirestore.getInstance();
-        DocumentReference docRef = database.collection("Habit").document(habit.getHabitID());
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot documentSnapshot = task.getResult();
-                    if (documentSnapshot.exists()) {
-                        //retrieve the habitDoneToday value
-                        if( documentSnapshot.getString("streaks") != null ){
-                            int streaks = Integer.parseInt(documentSnapshot.getString("streaks")) ;
-                            Log.d("Streak score ",String.valueOf(streaks)) ;
-
-                            //if streaks is less than -3 -> sad face
-                            //if streaks between -3 and 5 -> neutral
-                            //if streaks greater than 5 -> happy face
-                            setIcon(streaks, progress);
-                        }
-
-
-
-
-
-
-
-                    } else {
-                        Log.d("YK", "document does not exist!!");
-                    }
-
-                } else {
-                    Log.d("YK", task.getException().toString());
-                }
-
-
-            }
-        });*/
-
-
         return view;
     }
 
+    /**
+     * set the streak icon for the habit
+     * @param streaks the streak value for the habit
+     * @param icon the indicator icon for progress
+     */
     private void setIcon(int streaks, ImageView icon) {
         int lB = -3;
         int uB = 5;
         if (streaks < lB) {
             icon.setImageResource(R.drawable.sad);
-
         }
         else if (streaks >= lB && streaks < uB) {
             icon.setImageResource(R.drawable.neutral);
-
-
         }
         else if (streaks >= uB) {
             icon.setImageResource(R.drawable.happiness);
-            //icon.setColorFilter(Color.rgb(50,205,50));
-
-
         }
     }
 }
