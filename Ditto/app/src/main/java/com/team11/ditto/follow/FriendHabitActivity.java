@@ -109,6 +109,7 @@ public class FriendHabitActivity extends AppCompatActivity implements SwitchTabs
 
     @Override
     public void onPause(){
+        //Generic onPause function
         overridePendingTransition(0,0);
         super.onPause();
     }

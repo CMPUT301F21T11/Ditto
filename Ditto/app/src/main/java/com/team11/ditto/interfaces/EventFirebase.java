@@ -194,9 +194,8 @@ public interface EventFirebase extends Firebase{
         eventData.put(PHOTO, photo);
         eventData.put(LOCATION, location);
         eventData.put(HABIT_TITLE, habitTitle);
-        eventData.put(ORDER, currentTime);
         //this field is used to add the current timestamp of the item, to be used to order the items
-        //put current time into habit Last_Created
+        eventData.put(ORDER, currentTime);
 
     }
 

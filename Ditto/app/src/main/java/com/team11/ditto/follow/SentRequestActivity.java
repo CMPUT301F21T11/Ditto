@@ -16,6 +16,7 @@ package com.team11.ditto.follow;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -92,14 +93,14 @@ public class SentRequestActivity extends AppCompatActivity
     }
 
 
+    /**
+     * Called when the user clicks on a follow request to cancel it
+     * @param view passes the current view
+     */
     public void removeFromFollowRequestSent(View view){
         String cUserEmail = currentUser.getEmail();
 
         int position  = sentRequestListView.getPositionForView((View) view.getParent());
-        View v = sentRequestListView.getChildAt(position);
-        ImageView sr = (ImageView) v.findViewById(R.id.cancel_sent_request);
-
-
 
         // user that I want to follow
         User wantToRemove = (User) sentRequestListView.getAdapter().getItem(position);

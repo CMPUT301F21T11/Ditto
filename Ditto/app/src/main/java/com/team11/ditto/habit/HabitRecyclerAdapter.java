@@ -46,7 +46,6 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
     private final ArrayList<Habit> courseDataArrayList;
     private final Context context;
     private final HabitClickListener habitClickListener;
-    FirebaseFirestore database;
 
 
     /**

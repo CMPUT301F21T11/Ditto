@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -30,21 +31,24 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.team11.ditto.R;
+import com.team11.ditto.interfaces.FirebaseMedia;
 import com.team11.ditto.interfaces.HabitFirebase;
 
 /**
  * Activity to view a Habit Event, delete and edit the habit event
  * @author Kelly Shih, Aidan Horemans, Matthew Asgari
  */
-public class ViewEventActivity extends AppCompatActivity implements EditEventFragment.OnFragmentInteractionListener, HabitFirebase, OnMapReadyCallback {
+public class ViewEventActivity extends AppCompatActivity implements EditEventFragment.OnFragmentInteractionListener, HabitFirebase, OnMapReadyCallback, FirebaseMedia {
 
     //Declarations
     HabitEvent habitEvent;
     TextView habitTitle;
     TextView habitComment;
+    ImageView eventImage;
     String title;
     String comment;
     Bundle eventBundle;
+    GoogleMap map;
     private FirebaseFirestore database;
 
 
@@ -59,6 +63,7 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
         setContentView(R.layout.activity_view_event);
         habitTitle = findViewById(R.id.habit_title);
         habitComment = findViewById(R.id.habit_comment);
+        eventImage = findViewById(R.id.event_image_view);
 
         //get the passed habit event
         habitEvent = (HabitEvent) getIntent().getSerializableExtra("EXTRA_HABIT_EVENT");
@@ -72,6 +77,11 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
         //set comment
         comment = habitEvent.getComment();
         habitComment.setText(comment);
+
+        //set image
+        if (!habitEvent.getPhoto().equals("")) {
+            setImage(habitEvent.getPhoto(), eventImage);
+        }
 
         //setup map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -118,6 +128,7 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
             dialogFragment.show(getSupportFragmentManager(), "EDIT_EVENT");
         }
 
+        //When we delete the event, finish the activity and remove it from the database
         if (id == R.id.delete_event){
 
             deleteDataMyEvent(database, habitEvent);
@@ -142,6 +153,25 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
         //Updating old text with new habit stuff
         habitComment.setText(event.getComment());
 
+        //update image
+        if (!event.getPhoto().equals("")) {
+            setImage(event.getPhoto(), eventImage);
+        } else {
+            eventImage.setImageBitmap(null);
+        }
+
+        //update map
+        if (event.getLocation() == null || event.getLocation().size() != 2) {
+            findViewById(R.id.map_event).setVisibility(View.GONE);
+        } else {
+            findViewById(R.id.map_event).setVisibility(View.VISIBLE);
+            LatLng location = new LatLng(event.getLocation().get(0), event.getLocation().get(1));
+            map.clear();
+            map.addMarker(new MarkerOptions()
+                    .position(location)
+                    .title(habitEvent.getHabitTitle()));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
+        }
     }
 
     /**
@@ -150,6 +180,7 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
         if (habitEvent.getLocation() != null && habitEvent.getLocation().size() == 2) {
             LatLng location = new LatLng(habitEvent.getLocation().get(0), habitEvent.getLocation().get(1));
             googleMap.addMarker(new MarkerOptions()

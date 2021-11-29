@@ -122,8 +122,6 @@ public class ViewHabitActivity extends AppCompatActivity
     @Override
     public void onOkPressed(Habit habit) {
 
-        //UPDATE THE OLD HABIT WITH THE NEW DATA
-
         //when the user clicks the add button, we want to add to the db and display the new entry
         pushEditData(database, habit);
 
@@ -134,6 +132,12 @@ public class ViewHabitActivity extends AppCompatActivity
         habitDays.setText(listDays(habit));
     }
 
+
+    /**
+     * Creates a string of comma separated days depending on what the habit has selected
+     * @param habit habit from which we want to display the days of
+     * @return returns a string of comma separated days
+     */
     private String listDays(Habit habit){
         String listDays = "";
         ArrayList<String> currentDates = habit.getDates();
@@ -151,6 +155,10 @@ public class ViewHabitActivity extends AppCompatActivity
         return listDays;
     }
 
+    /**
+     * Displays variations of motivating text, telling the user what their streak score is like
+     * @param habit the habit of the streak value we want to check
+     */
     private void displayStreakText(Habit habit){
         int streak = habit.getStreak();
         if(streak < -3){
