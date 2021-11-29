@@ -3,16 +3,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/switchFeedView"
-        android:title="Show:" />
+        android:id="@+id/showAll"
+        android:title="Show All"/>
     <item
         android:id="@+id/myEvents"
-        android:checkable="true"
-        android:checked="true"
         android:title="My Events"/>
     <item
         android:id="@+id/theirEvents"
-        android:checkable="true"
-        android:checked="true"
         android:title="Followed Events"/>
+
 </menu>
