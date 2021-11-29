@@ -384,5 +384,4 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
             uploadProfilePhoto(FirebaseAuth.getInstance().getUid(), photo);
         }
     }
-
 }

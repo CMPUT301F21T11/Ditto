@@ -16,10 +16,12 @@
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/editHabitFragment"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="10dp">
+    android:padding="16dp">
 
     <TextView
         android:layout_width="match_parent"
@@ -55,24 +57,47 @@
         android:inputType="textPersonName"
         android:maxLength="20" />
 
-    <Button
-        android:id="@+id/edit_photo_btn"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="EDIT PHOTO" />
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/edit_photo_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/add_photo" />
+
+        <ImageButton
+            android:id="@+id/edit_event_delete_photo_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:backgroundTint="#00FFFFFF"
+            app:srcCompat="@drawable/ic_round_delete_24"
+            tools:ignore="SpeakableTextPresentCheck" />
+    </LinearLayout>
 
 
-    <Button
-        android:id="@+id/edit_loc_btn"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="EDIT LOCATION" />
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/update_event_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="UPDATE EVENT" />
+        <Button
+            android:id="@+id/edit_loc_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/add_location" />
 
+        <ImageButton
+            android:id="@+id/edit_event_delete_location_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:backgroundTint="#00FFFFFF"
+            app:srcCompat="@drawable/ic_round_delete_24"
+            tools:ignore="SpeakableTextPresentCheck" />
+    </LinearLayout>
 
 </LinearLayout>
