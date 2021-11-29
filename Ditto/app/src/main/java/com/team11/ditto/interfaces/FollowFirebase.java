@@ -36,19 +36,6 @@ public interface FollowFirebase extends Firebase{
     String FOLLOWED = "followed";
     String SENT = "sent_requests";
     String RECEIVED = "follow_requests";
-    ArrayList<User> usersFirebase = new ArrayList<>();
-
-
-    default void logUserData(@Nullable QuerySnapshot queryDocumentSnapshots) {
-        if (queryDocumentSnapshots != null) {
-            for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                Log.d(TAG, String.valueOf(doc.getData().get(USERNAME)));
-                String uUsername = (String) doc.getData().get(USERNAME);
-                String uPassword = (String) doc.getData().get(PASSWORD);
-                usersFirebase.add(new User(uUsername, uPassword));
-            }
-        }
-    }
 
     /**
      * This method gets the email ids of all users followed by active user and store them in array

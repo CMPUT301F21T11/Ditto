@@ -169,7 +169,6 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
 
                         //set photo and location
                         String photo = "";
-
                         listener.onOkPressed(new HabitEvent(IDhabit[0], comment, photo, location, hHabit[0]));
 
                     }

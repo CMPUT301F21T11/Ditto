@@ -7,7 +7,10 @@ import androidx.annotation.NonNull;
 
 import com.team11.ditto.R;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
 import java.util.Map;
 
 //Specifically for dealing with Dates
@@ -23,6 +26,8 @@ public interface Days {
     String[] WEEKDAYS = {MON, TUES, WED, THURS, FRI, SAT, SUN};
 
     int NUM_DAYS = 7;
+
+    SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("EEE MMM dd hh:mm:ss zzz yyyy", Locale.CANADA);
 
     default void updateDayList(ArrayList<String> dates, ArrayList<CheckBox> checkboxes) {
         dates.clear();
@@ -67,5 +72,39 @@ public interface Days {
                 dates.add(WEEKDAYS[i]);
             }
         }
+    }
+
+    /**
+     * return the current day
+     * @return int representing the current day of week (1-7)
+     */
+    default int todayIs() {
+        Calendar calendar = Calendar.getInstance();
+        int day = calendar.get(Calendar.DAY_OF_WEEK);
+
+        switch (day) {
+            case Calendar.SUNDAY:
+                day = 1;
+                break;
+            case Calendar.MONDAY:
+                day = 2;
+                break;
+            case Calendar.TUESDAY:
+                day = 3;
+                break;
+            case Calendar.WEDNESDAY:
+                day = 4;
+                break;
+            case Calendar.THURSDAY:
+                day = 5;
+                break;
+            case Calendar.FRIDAY:
+                day = 6;
+                break;
+            case Calendar.SATURDAY:
+                day = 7;
+                break;
+        }
+        return day;
     }
 }

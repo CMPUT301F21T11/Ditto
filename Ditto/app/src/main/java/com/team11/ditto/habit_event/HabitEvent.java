@@ -17,6 +17,7 @@ package com.team11.ditto.habit_event;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -31,7 +32,7 @@ import javax.annotation.Nullable;
  * @author Kelly Shih, Aidan Horemans
  */
 
-public class HabitEvent implements Serializable {
+public class HabitEvent implements Serializable, Comparable {
     private String eventID;
     private String habitId;
     private final String habitTitle;
@@ -40,6 +41,7 @@ public class HabitEvent implements Serializable {
     private String uid;
     private String name;
     private List<Double> location;
+    private Date date;
 
     /**
      * Constructor
@@ -50,7 +52,8 @@ public class HabitEvent implements Serializable {
      * @param habitTitle Title of the Habit whose HabitEvent this is
      */
 
-    public HabitEvent(String eventID, String habitId, String comment, String photo, @Nullable List<Double> location, String habitTitle, String uid, String name) {
+    public HabitEvent(String eventID, String habitId, String comment, String photo,
+                      @Nullable List<Double> location, String habitTitle, String uid, String name, Date date) {
         this.eventID = eventID;
         this.habitId = habitId;
         this.comment = comment;
@@ -59,6 +62,7 @@ public class HabitEvent implements Serializable {
         this.habitTitle = habitTitle;
         this.uid = uid;
         this.name = name;
+        this.date = date;
     }
 
     public HabitEvent(String habitId, String comment, String photo, @Nullable List<Double> location, String habitTitle) {
@@ -67,6 +71,7 @@ public class HabitEvent implements Serializable {
         this.photo = photo;
         this.location = location;
         this.habitTitle = habitTitle;
+        setDate();
     }
 
     public String getName(){
@@ -167,5 +172,30 @@ public class HabitEvent implements Serializable {
      */
     public String getHabitTitle() {
         return habitTitle;
+    }
+
+
+    /**
+     *Sets the timestamp for the HabitEvent post
+     */
+    private void setDate(){
+        this.date = new Date();
+    }
+
+    /**
+     *Sets the timestamp for the HabitEvent post
+     */
+    public Date getDate(){
+        return this.date;
+    }
+
+    /**
+     *
+     * @param o Other event object
+     * @return comparison of their timestamps
+     */
+    @Override
+    public int compareTo(Object o) {
+        return (date).compareTo(((HabitEvent) o).date);
     }
 }

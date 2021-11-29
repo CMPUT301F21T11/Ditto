@@ -104,4 +104,13 @@ public class ActiveUser extends User {
             return NONE;
         }
     }
+
+    public String getName(){
+        if(fbUser != null){
+            return fbUser.getDisplayName();
+        }
+        else{
+            return NONE;
+        }
+    }
 }
