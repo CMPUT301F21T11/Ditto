@@ -301,9 +301,9 @@ public interface HabitFirebase extends EventFirebase, Days{
 
     /**
      * increment all habit positions after the "toPos" in firebase
-     * @param database
-     * @param toPos
-     * @param habitsUpdate
+     * @param database current database instance
+     * @param toPos current item position
+     * @param habitsUpdate habits of which we want to re-update position
      */
     default void incPosition(FirebaseFirestore database, int toPos, ArrayList<Habit> habitsUpdate) {
         int counter = toPos+1;
@@ -393,7 +393,7 @@ public interface HabitFirebase extends EventFirebase, Days{
      * @param newHabitEvent the new habit event added
      */
     default void isHabitDoneToday(FirebaseFirestore db, int today, HabitEvent newHabitEvent) {
-        //get days ...
+        //get days
         final Integer[] daysOfWeek = new Integer[7];
         DocumentReference document = db.collection(HABIT_KEY).document(newHabitEvent.getHabitId()); //get the associated habit
         document.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {

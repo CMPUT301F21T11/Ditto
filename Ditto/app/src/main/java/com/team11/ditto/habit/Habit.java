@@ -94,14 +94,13 @@ public class Habit implements Serializable {
         this.position = position;
     }
 
+    /**
+     * Returns the current streak value of the habit
+     * @return integer value of streak
+     */
     public int getStreak(){
         return this.streak;
     }
-
-    public void setStreak(int streak){
-      this.streak = streak;
-    }
-
 
     /**
      * Getter for Habit title
@@ -178,6 +177,10 @@ public class Habit implements Serializable {
      */
     public boolean isPublic(){ return this.isPublic; }
 
+    /**
+     * Returns the list position that the user has defined
+     * @return position as an integer
+     */
     public int getPosition() {
         return position;
     }
@@ -192,22 +195,6 @@ public class Habit implements Serializable {
      */
     public void changePrivacy(){
         this.isPublic = !this.isPublic;
-    }
-
-    public void completeHabit(boolean complete){
-        if (complete && this.streak > 0){
-            this.streak ++;
-        }
-        else if (complete && this.streak <= 0){
-            this.streak = 1;
-        }
-        else if (!complete && this.streak <= 0){
-            this.streak--;
-        }
-        else if (!complete && this.streak > 0){
-            this.streak = 0;
-        }
-
     }
 
     /**

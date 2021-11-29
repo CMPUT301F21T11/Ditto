@@ -38,7 +38,10 @@ public interface FollowFirebase extends Firebase{
     String RECEIVED = "follow_requests";
     ArrayList<User> usersFirebase = new ArrayList<>();
 
-
+    /**
+     * Logs the user data
+     * @param queryDocumentSnapshots a passed query snapshot from which to log the data of
+     */
     default void logUserData(@Nullable QuerySnapshot queryDocumentSnapshots) {
         if (queryDocumentSnapshots != null) {
             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
@@ -63,7 +66,6 @@ public interface FollowFirebase extends Firebase{
                 .get().addOnCompleteListener( task -> {
             if(task.isSuccessful()){
                 for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(task.getResult())){
-
                     if(! followedByActiveUser.contains(snapshot.get(FOLLOWED).toString())){
                         Log.d("User following ", snapshot.get(FOLLOWED).toString());
                         followedByActiveUser.add(snapshot.get(FOLLOWED).toString());
@@ -210,8 +212,6 @@ public interface FollowFirebase extends Firebase{
                         sentRequest.addAll(listSent);
                     }
                 }
-
-                Log.d("THIS IS THE DATA ",sentRequest.toString() );
             }
 
         });
@@ -412,9 +412,6 @@ public interface FollowFirebase extends Firebase{
                                                         catch (Exception e){
                                                             Log.w("null streak", e);
                                                         }
-
-
-
 
                                                         friendHabitAdapter.notifyDataSetChanged();
                                                     }

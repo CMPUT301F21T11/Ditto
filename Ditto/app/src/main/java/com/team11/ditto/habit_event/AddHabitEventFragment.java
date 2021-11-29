@@ -83,10 +83,13 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         //Inflate the layout for this fragment
         View view = LayoutInflater.from(getContext()).inflate(R.layout.add_event_fragment, null);
+
         hComment = view.findViewById(R.id.comment_editText);
         acc_photo = view.findViewById(R.id.add_photo);
         locationButton = view.findViewById(R.id.event_add_location_button);
+
         db = FirebaseFirestore.getInstance();
+
         Spinner spinner = view.findViewById(R.id.event_spinner);
         final List<String> habits = new ArrayList<>();
         final List<String> habitIDs = new ArrayList<>();

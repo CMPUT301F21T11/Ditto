@@ -52,8 +52,11 @@ public class AddHabitFragment extends DialogFragment implements Days {
     private SwitchMaterial privacySwitch;
     private ArrayList<CheckBox> checkBoxes;
 
-    //Declare interface
+    /**
+     * Interaction listener that runs onOkPressed in MyHabitActivity
+     */
     public interface OnFragmentInteractionListener {
+        //onOkPressed is defined in MyHabitActivity
         void onOkPressed(Habit newHabit);
     }
 
@@ -83,8 +86,6 @@ public class AddHabitFragment extends DialogFragment implements Days {
         privacySwitch = view.findViewById(R.id.privacySwitch);
         privacySwitch.setChecked(true);
         checkBoxes = setCheckBoxLayouts(view);
-
-        //hDate = view.findViewById(R.id.date_editText);
 
         //Builds the dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
