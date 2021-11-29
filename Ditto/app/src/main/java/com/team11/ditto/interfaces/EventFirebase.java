@@ -1,10 +1,12 @@
 package com.team11.ditto.interfaces;
 
+import android.os.Build;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -28,6 +30,7 @@ import com.team11.ditto.login.ActiveUser;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -39,8 +42,7 @@ import javax.annotation.Nullable;
  * Role: Implement default methods that deal with habit events in firestore
  * @author Courtenay Laing-Kobe, Kelly Shih, Aidan Horemans
  */
-public interface EventFirebase extends Firebase{
-
+public interface EventFirebase extends Firebase, Days{
     String HABIT_EVENT_KEY = "HabitEvent";
 
     String HABIT_ID = "habitID";
@@ -50,6 +52,7 @@ public interface EventFirebase extends Firebase{
     String COMMENT = "comment";
     String PHOTO = "photo";
     String LOCATION = "location";
+    String DATE = "date";
     ArrayList<HabitEvent> hEventsFirebase = new ArrayList<>();
     HashMap<String, Object> eventData = new HashMap<>();
 
@@ -121,7 +124,6 @@ public interface EventFirebase extends Firebase{
         }
     }
 
-
     /**
      * initialize the spinner with the options from the database
      * @param spinner spinner to populate
@@ -180,12 +182,16 @@ public interface EventFirebase extends Firebase{
      * Helper function to put the proper data from HabitEvent into eventData
      * @param event habit event to retrieve data from
      */
+    //default void getEventData(HabitEvent event){
+    //    eventData.clear();
     default void getEventData(HabitEvent event, Date currentTime){
         String habitID = event.getHabitId();
         String comment = event.getComment();
         String photo = event.getPhoto();
         String habitTitle = event.getHabitTitle();
         List<Double> location = event.getLocation();
+
+        String date = DATE_FORMAT.format(event.getDate());
 
         //get unique timestamp for ordering our list
         eventData.put(USER_ID, FirebaseAuth.getInstance().getUid());
@@ -194,6 +200,8 @@ public interface EventFirebase extends Firebase{
         eventData.put(PHOTO, photo);
         eventData.put(LOCATION, location);
         eventData.put(HABIT_TITLE, habitTitle);
+        eventData.put(DATE, date);
+
         //this field is used to add the current timestamp of the item, to be used to order the items
         eventData.put(ORDER, currentTime);
 
@@ -237,7 +245,7 @@ public interface EventFirebase extends Firebase{
      */
     default void resetDueToday(FirebaseFirestore db){
         ActiveUser currentUser = new ActiveUser();
-        db.collection("Habits")
+        db.collection("Habit")
                 .whereEqualTo(USER_ID, currentUser.getUID())
                 .orderBy("position")
                 .addSnapshotListener((value, error) -> {
@@ -289,5 +297,7 @@ public interface EventFirebase extends Firebase{
                 });
 
     }
+
+
 
 }

@@ -1,4 +1,4 @@
-/** Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
+/* Copyright [2021] [Reham Albakouni, Matt Asgari Motlagh, Aidan Horemans, Courtenay Laing-Kobe, Vivek Malhotra, Kelly Shih]
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -20,29 +20,31 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Pair;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.team11.ditto.habit.Habit;
 import com.team11.ditto.habit_event.AddHabitEventFragment;
 import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.habit_event.HabitEventRecyclerAdapter;
@@ -52,11 +54,13 @@ import com.team11.ditto.interfaces.HabitFirebase;
 import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 
-
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -67,90 +71,319 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements SwitchTabs,
         AddHabitEventFragment.OnFragmentInteractionListener, HabitFirebase,
         HabitEventRecyclerAdapter.EventClickListener, FollowFirebase {
-
-    private static final String TAG = "tab switch";
-    private TabLayout tabLayout;
+//MACROS
     public static String EXTRA_HABIT_EVENT = "EXTRA_HABIT_EVENT";
-    private ArrayList<HabitEvent> habitEventsData;
 
-    private ProgressBar progressBar;
+//ACTIVITY WIDE VARIABLES
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final ActiveUser currentUser = new ActiveUser();
+    private ArrayList<Pair<String,String>> userDataList;
+    private ArrayList<String> emailList;
+    private ArrayList<HabitEvent> hEvents;
     private int shortAnimationDuration;
+    private Boolean mine = true;
+    private Boolean others = true;
 
+//LAYOUTS & HELPERS
+    private TabLayout tabLayout;
+    private ProgressBar progressBar;
     private RecyclerView habitEventList;
     private HabitEventRecyclerAdapter habitEventRecyclerAdapter;
 
-    private FirebaseFirestore db;
-    HashMap<String, Object> data = new HashMap<>();
-
-    private ActiveUser activeUser;
-    private ArrayList<Habit> habits; //list of habits due today
-    private ActiveUser currentUser;
-
-
     /**
-     * Create the Activity instance for the "Homepage" screen, control flow of actions
-     * @param savedInstanceState
+     * Create the Activity instance for the "Home Page" screen, default screen when back pressed
+     * Shows the Feed of a the logged in User, including events posted by the people they follow
+     * and themselves
+     * @param savedInstanceState saved state to start from
      */
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         overridePendingTransition(0,0);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        // If device has userID, go to app - else, go to login
-        if (new ActiveUser().getUID().equals("")) {
+    // If device has userID, go to app - else, go to login
+        if (new ActiveUser().getUID().equals(ActiveUser.NONE)) {
             Intent intent = new Intent(this, WelcomeActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |  Intent.FLAG_ACTIVITY_CLEAR_TASK);
             this.startActivity(intent);
         }
 
+    //Set layouts
+        setContentView(R.layout.activity_main);
         progressBar = findViewById(R.id.progress_bar);
         tabLayout = findViewById(R.id.tabs);
-        habits = new ArrayList<>();
-
-        currentUser = new ActiveUser();
-
         setTitle("My Feed");
+        final FloatingActionButton addHabitEventButton = findViewById(R.id.add_habit_event);
+        addHabitEventButton.setOnClickListener(view -> new AddHabitEventFragment()
+                .show(getSupportFragmentManager(), "ADD_HABIT_EVENT"));
 
-        habitEventList = findViewById(R.id.list_habit_event);
-        habitEventsData = new ArrayList<>();
-
-        habitEventRecyclerAdapter = new HabitEventRecyclerAdapter(this, habitEventsData, this);
-
-        habitEventList.setVisibility(View.INVISIBLE);
-        progressBar.setVisibility(View.VISIBLE);
-
+    //Initialize non-final variables
+        emailList = new ArrayList<>();
+        userDataList = new ArrayList<>();
+        hEvents = new ArrayList<>();
         shortAnimationDuration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
-
-        // Load the Habit Event data (This will be converted to use the Firebase interface in the future)
-        queryList();
-
-        resetDueToday(db); //reset the habitDoneToday boolean in the database
-
-
+        habitEventList = findViewById(R.id.list_habit_event);
+        habitEventRecyclerAdapter = new HabitEventRecyclerAdapter(this, hEvents, this);
         LinearLayoutManager manager = new LinearLayoutManager(this);
         habitEventList.setLayoutManager(manager);
         habitEventList.setAdapter(habitEventRecyclerAdapter);
 
+    //Show loading page
+        habitEventList.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
+
+    //Enable tab navigation
         currentTab(tabLayout, HOME_TAB);
         switchTabs(this, tabLayout, HOME_TAB);
 
-        //Get a top level reference to the collection
-        db = FirebaseFirestore.getInstance();
+    //Load the Habit Event data
+        generateFollowEventList();
 
-        //Notifies if cloud data changes (from Firebase Interface)
-        autoHabitEventListener(db, habitEventRecyclerAdapter);
-
-        final FloatingActionButton addHabitEventButton = findViewById(R.id.add_habit_event);
-
-        addHabitEventButton.setOnClickListener(view -> new AddHabitEventFragment()
-                .show(getSupportFragmentManager(), "ADD_HABIT_EVENT"));
-
-        //Check if we need to reset due today
+    //Update the habitDoneToday boolean in the database
+        resetDueToday(db);
         adjustScore(db, currentUser);
+
+    //Show feed
+        fadeInView();
+
+    }
+
+    /**
+     * Starts building the even list by finding who we follow
+     * and whose events we want to see
+     */
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void generateFollowEventList(){
+        //Start with empty lists
+        userDataList.clear();
+        hEvents.clear();
+
+        //If we want to see our data, add it to the list
+        Pair<String,String> currentUserData = new Pair<>(currentUser.getName(), currentUser.getUID());
+        if (!userDataList.contains(currentUserData) && mine){
+            userDataList.add(currentUserData);}
+
+        //If we want to see others' data, continue to query their information
+        if(others) {
+            db.collection(FOLLOWING_KEY)
+                    .whereEqualTo(FOLLOWED_BY, currentUser.getEmail())
+                    .get()
+                    //If query successful, and email not already in list, add email of followed user
+                    .addOnCompleteListener(task -> task.addOnSuccessListener(success -> {
+                        for (DocumentSnapshot snapshot : Objects.requireNonNull(success.getDocuments())) {
+                            String email = snapshot.get(FOLLOWED).toString();
+                            if (!emailList.contains(email)){
+                            emailList.add(email);}
+                        }
+                        //Populate user data list for emails listed
+                        getNameID();
+                    }));
+        }
+
+        //If not, and we want to see our data only
+        //Query the userdata list with just our data in it
+        else if (mine){
+            queryEvents();
+        }
+
+    }
+
+    /**
+     *Populate the activity user data list with the data of the users the current user follows
+     *
+     */
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void getNameID() {
+        try {
+            Log.d("Starting", "ID Queries");
+            db.collection(USER_KEY)
+              .whereIn(EMAIL, emailList)//check for where the User Document's email = query email
+              .get()
+              .addOnCompleteListener(Task -> {
+                  if (Task.isSuccessful()) {
+                      for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(Task.getResult())) {
+                          String id = snapshot.getId();
+                          String name = snapshot.getData().get(NAME).toString();
+                          Pair<String, String> userData = new Pair<>(name, id);
+                          //Only add if user data exists and not already in the list
+                          if ((userData.first != null && userData.second != null) && (!userDataList.contains(userData))) {
+                              userDataList.add(userData);
+                              Log.d("Added", name + "'s data " + id);
+                          }
+                          else {
+                              Log.d("ID query", "unsuccessful");
+                          }
+                      }
+                      //Query when user data is all added
+                      queryEvents();
+                  }
+              });
+        }
+        //In case emails empty, etc
+        catch (Exception e){
+            Log.d("Exception", e.toString());
+        }
+
+    }
+
+    /**
+     * Get all the user following
+     * Then query their info and the user's
+     */
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void queryEvents() {
+        for (int i = 0; i < userDataList.size(); i++) {
+            final int fi = i;
+            Log.d("Starting", "Event Query for " + userDataList.get(i).first);
+            db.collection(HABIT_EVENT_KEY)
+                    .whereEqualTo(USER_ID, userDataList.get(i).second)
+                    .get()
+                    .addOnCompleteListener(getEventFromDB -> {
+                        // Parse the event data for each event associated with selected user
+                        for (DocumentSnapshot eventDoc : getEventFromDB.getResult()) {
+                            String eventID = eventDoc.getId();
+                            String eHabitId = (String) eventDoc.getData().get(HABIT_ID);
+
+                            //Check if public before loading all event data
+                            db.collection(HABIT_KEY).document(eHabitId).get().addOnCompleteListener(getHabitForEvent -> {
+                                if (getHabitForEvent.isSuccessful()) {
+                                    Object publicValue = getHabitForEvent.getResult().get(IS_PUBLIC);
+                                    if ((publicValue != null && (boolean) publicValue)
+                                            || (((String) eventDoc.getData().get(USER_ID)).equals(currentUser.getUID()))) {
+                                        String eHabitTitle = (String) eventDoc.getData().get(HABIT_TITLE);
+                                        String eComment = (String) eventDoc.getData().get(COMMENT);
+                                        String ePhoto = (String) eventDoc.getData().get(PHOTO);
+                                        String name = userDataList.get(fi).first;
+                                        String userID = userDataList.get(fi).second;
+                                        @Nullable List<Double> eLocation = null;
+                                        if (eventDoc.getData().get(LOCATION) != "") {
+                                            eLocation = (List<Double>) eventDoc.getData().get("location");
+                                        }
+                                        List<Double> locFinal = eLocation;
+                                        String date = (String) eventDoc.getData().get(DATE);
+                                        if (date != null) {
+                                            try {
+                                                Date eDate = DATE_FORMAT.parse(date);
+                                                HabitEvent event = new HabitEvent(eventID, eHabitId, eComment, ePhoto,
+                                                        locFinal, eHabitTitle, userID, name, eDate);
+                                                //Only add if an event with that id isnt already in the list
+                                                if (!hEvents.contains(event)){
+                                                    hEvents.add(event);
+                                                    habitEventRecyclerAdapter.notifyItemInserted(hEvents.indexOf(event));
+                                                    Log.d("Added", event.toString());
+                                                }
+                                            } catch (ParseException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    }
+                                    //Sort as things are loaded, since otherwise tries to sort before events loaded
+                                    sortFeed();
+                                    habitEventRecyclerAdapter.notifyDataSetChanged();
+                                }
+                            });
+                        }
+                    });
+        }
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void sortFeed(){
+        Log.d("Sorting", "chosen events");
+        hEvents.sort(new Comparator<HabitEvent>() {
+            @Override
+            public int compare(HabitEvent habitEvent, HabitEvent t1) {
+                return habitEvent.getDate().compareTo(t1.getDate());
+            }
+        }.reversed());
+    }
+
+
+    /**
+     * Inflate the menu for the options menu
+     * @param menu options menu
+     * @return true when menu displayed, false otherwise
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.view_feed, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    /**
+     * Listener for the edit button
+     * @param item selected item
+     * @return true if displayed, false otherwise
+     */
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        if (item.getItemId() == R.id.myEvents){
+            mine = true;
+            others = false;
+            String myEventsTitle = "My Events";
+            setTitle(myEventsTitle);
+        }
+        if (item.getItemId() == R.id.theirEvents){
+            others = true;
+            mine = false;
+            String theirEvents = "Followed Users";
+            setTitle(theirEvents);
+        }
+        if (item.getItemId() == R.id.myEvents){
+            mine = true;
+            others = true;
+            setTitle("My Feed");
+        }
+        hEvents.clear();
+        generateFollowEventList();
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Adds a habitevent to firestore "HabitEvent" and adds the habitevent ID to the list of habitEvents for the habit in "Habit"
+     * Adds the habitevent to the listview
+     * updates the habitDoneToday value for the Habit
+     * @param newHabitEvent
+     */
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    public void onOkPressed(HabitEvent newHabitEvent) {
+
+        habitEventList.setVisibility(View.INVISIBLE);
+        adjustScore(db, currentUser); //Called here in case app is open during change of days
+        //handle setting the habitDoneToday field for the Habit
+        isHabitDoneToday(db, todayIs(), newHabitEvent);
+
+        //Adds the item to the database and then immediately retrieves it from the list
+        newHabitEvent.setName(currentUser.getName());
+        hEvents.add(newHabitEvent);
+        sortFeed();
+        habitEventRecyclerAdapter.notifyDataSetChanged();
+        pushHabitEventData(db, newHabitEvent, false);
 
         fadeInView();
 
+    }
+
+
+    /**
+     * Handles the view Habit event activity
+     * starts a new activity to view the clicked habit event
+     * @param position of the clicked habit event
+     */
+    @Override
+    public void onEventClick(int position) {
+        //If we are clicking on our own event
+        if(hEvents.get(position).getUid()
+                .equals(FirebaseAuth.getInstance().getUid())){
+            Intent intent = new Intent(this, ViewEventActivity.class);
+            intent.putExtra(EXTRA_HABIT_EVENT, hEvents.get(position));
+            startActivity(intent);
+        }
     }
 
     /**
@@ -175,138 +408,6 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                         progressBar.setVisibility(View.GONE);
                     }
                 });
-    }
-
-
-    /**
-     * Adds a habitevent to firestore "HabitEvent" and adds the habitevent ID to the list of habitEvents for the habit in "Habit"
-     * Adds the habitevent to the listview
-     * updates the habitDoneToday value for the Habit
-     * @param newHabitEvent
-     */
-    @Override
-    public void onOkPressed(HabitEvent newHabitEvent) {
-
-        habitEventList.setVisibility(View.INVISIBLE);
-        adjustScore(db, currentUser); //Called here in case app is open during change of days
-        //handle setting the habitDoneToday field for the Habit
-        isHabitDoneToday(db, todayIs(), newHabitEvent);
-
-        //Adds the item to the database and then immediately retrieves it from the list
-        pushHabitEventData(db, newHabitEvent, false);
-        habitEventRecyclerAdapter.notifyDataSetChanged();
-
-        fadeInView();
-
-    }
-
-    /**
-     * Handles the view Habit event activity
-     * starts a new activity to view the clicked habit event
-     * @param position of the clicked habit event
-     */
-    @Override
-    public void onEventClick(int position) {
-        //If we are clicking on our own event
-        if(habitEventsData.get(position).getUid().equals(FirebaseAuth.getInstance().getUid())){
-            Intent intent = new Intent(this, ViewEventActivity.class);
-            intent.putExtra(EXTRA_HABIT_EVENT, habitEventsData.get(position));
-            startActivity(intent);
-        }
-    }
-
-
-    /**
-     * Get all the user following
-     * Then query their info and the user's
-     */
-    public void queryList(){
-        db = FirebaseFirestore.getInstance();
-
-        db.collection(HABIT_EVENT_KEY)
-                .whereEqualTo("uid", FirebaseAuth.getInstance().getUid()) //userevents
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                        habitEventsData.clear();
-                        for (QueryDocumentSnapshot doc: value) {
-                            // Parse the event data for each document
-                            String eventID = (String) doc.getId();
-                            String eHabitId = (String) doc.getData().get("habitID");
-                            String eHabitTitle = (String) doc.getData().get("habitTitle");
-                            String eComment = (String) doc.getData().get("comment");
-                            String ePhoto = (String) doc.getData().get("photo");
-
-                            @Nullable List<Double> eLocation = null;
-                            if (doc.getData().get(LOCATION) != "") {
-                                eLocation = (List<Double>) doc.getData().get("location");
-                            }
-                            List<Double> locFinal = eLocation;
-
-                            String uid = (String) doc.getData().get("uid");
-                            DocumentReference userNameReference = db.collection("User").document(uid);
-
-                            //Query for name then create the habit event
-                            userNameReference.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                @Override
-                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                    if (task.isSuccessful()) {
-                                        DocumentSnapshot documentSnapshot = task.getResult();
-                                        if (documentSnapshot.exists()) {
-                                            //retrieve the order value
-                                            String name = (String) documentSnapshot.get("name");
-                                            habitEventsData.add(new HabitEvent(eventID, eHabitId, eComment, ePhoto, locFinal, eHabitTitle, uid, name));
-                                            habitEventRecyclerAdapter.notifyDataSetChanged();
-                                        }
-                                        else {
-                                            Log.d("retrieve", "document does not exist!!");
-                                        }
-
-                                    }
-                                    else {
-                                        Log.d("retrieve", task.getException().toString());
-                                    }
-                                }
-
-                            });
-
-                        }
-                    }
-                });
-    }
-
-    /**
-     * return the current day
-     * @return int representing the current day of week (1-7)
-     */
-    private int todayIs() {
-        Calendar calendar = Calendar.getInstance();
-        int day = calendar.get(Calendar.DAY_OF_WEEK);
-
-        switch (day) {
-            case Calendar.SUNDAY:
-                day = 1;
-                break;
-            case Calendar.MONDAY:
-                day = 2;
-                break;
-            case Calendar.TUESDAY:
-                day = 3;
-                break;
-            case Calendar.WEDNESDAY:
-                day = 4;
-                break;
-            case Calendar.THURSDAY:
-                day = 5;
-                break;
-            case Calendar.FRIDAY:
-                day = 6;
-                break;
-            case Calendar.SATURDAY:
-                day = 7;
-                break;
-        }
-        return day;
     }
 
     /**

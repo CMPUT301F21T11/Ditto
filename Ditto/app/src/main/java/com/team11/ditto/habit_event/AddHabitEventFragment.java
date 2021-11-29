@@ -188,6 +188,7 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String comment = hComment.getText().toString();
+
                         String photoURL = currentPhotoURL;
 
                         listener.onOkPressed(new HabitEvent(IDhabit[0], comment, photoURL, location, hHabit[0]));

@@ -17,9 +17,11 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.swipeLeft;
 import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.hasDescendant;
+import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
@@ -38,20 +40,25 @@ public class DueTodayTest {
         // Add the details of the habit
         onView(withId(R.id.title_editText)).perform(typeText("Testing my app"));
         onView(withId(R.id.reason_editText)).perform(typeText("To make it professional"));
-        onView(withId(R.id.monday_select)).perform(click());
-        onView(withId(R.id.tuesday_select)).perform(click());
-        onView(withId(R.id.wednesday_select)).perform(click());
-        onView(withId(R.id.thursday_select)).perform(click());
-        onView(withId(R.id.friday_select)).perform(click());
-        onView(withId(R.id.saturday_select)).perform(click());
-        onView(withId(R.id.sunday_select)).perform(click());
         onView(withText("ADD")).perform(click()); // Click add
         SystemClock.sleep(3000);
+        onView(withText("Testing my app")).perform(click());
+        onView(withId(R.id.edit_habit)).perform(click());
+        onView(withId(R.id.monday_box)).perform(click());
+        onView(withId(R.id.tuesday_box)).perform(click());
+        onView(withId(R.id.wedensday_box)).perform(click());
+        onView(withId(R.id.thursday_box)).perform(click());
+        onView(withId(R.id.friday_box)).perform(click());
+        onView(withId(R.id.saturday_box)).perform(click());
+        onView(withId(R.id.sunday_box)).perform(click());
+        onView(withText("UPDATE")).perform(click());
+
         // Check if the habit was added to due today habits
-        ActivityScenario<MyHabitActivity> activityScenario1 = ActivityScenario.launch(MyHabitActivity.class);
-        onView(withId(R.id.list)).check(matches(hasDescendant(withText("Testing my app"))));
-
-
+        ActivityScenario<DueTodayActivity> activityScenario1 = ActivityScenario.launch(DueTodayActivity.class);
+        onView(withText("Testing my app")).check(matches(isDisplayed()));
+        // delete the habit
+        ActivityScenario<MyHabitActivity> activityScenario2 = ActivityScenario.launch(MyHabitActivity.class);
+        onView(withText("Testing my app")).perform(swipeLeft());
 
     }
 }

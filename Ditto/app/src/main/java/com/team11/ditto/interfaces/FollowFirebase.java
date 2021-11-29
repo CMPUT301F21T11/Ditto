@@ -36,6 +36,7 @@ public interface FollowFirebase extends Firebase{
     String FOLLOWED = "followed";
     String SENT = "sent_requests";
     String RECEIVED = "follow_requests";
+
     ArrayList<User> usersFirebase = new ArrayList<>();
 
     /**
@@ -126,15 +127,19 @@ public interface FollowFirebase extends Firebase{
                         .get()
                         .addOnCompleteListener(task2 -> {
                             if (task2.isSuccessful()) {
-                                for (int k = 0; k < 1; k++) {
-                                    if ((Objects.requireNonNull(task2.getResult()).getDocuments().get(k).getString(EMAIL)).equals(receivedEmail)) {
+                                //for (int k = 0; k < 1; k++) {
+                                try {
+                                    if ((Objects.requireNonNull(task2.getResult()).getDocuments().get(0).getString(EMAIL)).equals(receivedEmail)) {
                                         String name = task2.getResult()
-                                                .getDocuments().get(k).getString(NAME);
+                                                .getDocuments().get(0).getString(NAME);
                                         userDataList.add(new User(name, receivedEmail));
 
                                     }
+                                    userAdapter.notifyDataSetChanged();
                                 }
-                                userAdapter.notifyDataSetChanged();
+                                catch (Exception noRequests){
+                                    Log.d("No received requests", currentUser.getEmail());
+                                }
                             }
                         });
             }
@@ -166,27 +171,37 @@ public interface FollowFirebase extends Firebase{
                     }
                 }
             }
-            for(int i = 0;  i< sentRequestEmails.size();i++){
+            try{
+            for (int i = 0; i < sentRequestEmails.size(); i++) {
                 String sentEmail = sentRequestEmails.get(i);
                 Log.d("Looping over", String.valueOf(sentRequestEmails.size()));
-                db.collection(USER_KEY).whereEqualTo(EMAIL,sentRequestEmails.get(i))
+                db.collection(USER_KEY).whereEqualTo(EMAIL, sentRequestEmails.get(i))
                         .get()
                         .addOnCompleteListener(task2 -> {
-                            if(task2.isSuccessful()){
-                                for (int k =0; k < 1;k++){
-                                    if((Objects.requireNonNull(task2.getResult())
-                                            .getDocuments().get(k).getString(EMAIL))
-                                            .equals(sentEmail)){
-                                        String name = task2.getResult()
-                                                .getDocuments().get(k).getString(NAME);
-                                        userDataList.add(new User(name, sentEmail));
-                                        Log.d("Sent request", sentEmail);
-                                        userAdapter.notifyDataSetChanged();
+                            if (task2.isSuccessful()) {
+                                for (int k = 0; k < 1; k++) {
+                                    try {
+                                        if ((Objects.requireNonNull(task2.getResult())
+                                                .getDocuments().get(k).getString(EMAIL))
+                                                .equals(sentEmail)) {
+                                            String name = task2.getResult()
+                                                    .getDocuments().get(k).getString(NAME);
+                                            userDataList.add(new User(name, sentEmail));
+                                            Log.d("Sent request", sentEmail);
+                                            userAdapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                    catch (Exception noRequests){
+                                        Log.d("No sent requests: ", currentUser.getEmail());
                                     }
                                 }
                             }
                         });
-            }
+                }}
+                catch (Exception none){
+                    Log.d("Exception", none.toString());
+                }
+
 
         });
 
@@ -426,6 +441,7 @@ public interface FollowFirebase extends Firebase{
                     }
                 });
     }
+
 
 
 }

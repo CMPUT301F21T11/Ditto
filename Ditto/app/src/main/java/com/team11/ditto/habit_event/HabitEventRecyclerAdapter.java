@@ -112,6 +112,14 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
     }
 
     /**
+     * Changes inner list
+     */
+    public void setList(ArrayList<HabitEvent> events){
+        eventArrayList.clear();
+        eventArrayList = new ArrayList<>(events);
+    }
+
+    /**
      * Viewholder class to handle RecyclerView
      */
     public static class ViewHolderEvent extends RecyclerView.ViewHolder implements View.OnClickListener{
