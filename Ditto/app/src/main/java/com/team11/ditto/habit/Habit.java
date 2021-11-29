@@ -67,13 +67,14 @@ public class Habit implements Serializable {
      * @param reason Reason for habit
      * @param dates Days of the week for scheduling
      */
-    public Habit(String id, String title, String reason, ArrayList<String> dates, boolean isPublic, int streak) {
+    public Habit(String id, String title, String reason, ArrayList<String> dates, boolean isPublic, int streak, boolean habitDoneToday) {
         this.habitID = id;
         this.title = title;
         this.reason = reason;
         this.setDate(dates);
         this.isPublic = isPublic;
         this.streak = streak;
+        this.habitDoneToday = habitDoneToday;
     }
 
     /**

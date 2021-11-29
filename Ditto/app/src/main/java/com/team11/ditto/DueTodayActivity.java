@@ -96,8 +96,9 @@ public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, F
                                 boolean isPublic = (boolean) snapshot.getData().get("is_public");
                                 String streaks =  (String) Objects.requireNonNull(snapshot.getData().get("streaks"));
                                 int s = Integer.parseInt(streaks);
+                                boolean isDoneToday = (boolean) snapshot.getData().get("habitDoneToday");
 
-                                Habit habit = new Habit(id, title, reason, days, isPublic, s);
+                                Habit habit = new Habit(id, title, reason, days, isPublic, s, isDoneToday);
                                 habit.setHabitID(habitID);
                                 habits.add(habit);
 

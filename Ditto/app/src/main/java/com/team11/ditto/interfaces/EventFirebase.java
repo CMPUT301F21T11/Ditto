@@ -8,8 +8,10 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -133,9 +135,29 @@ public interface EventFirebase extends Firebase{
      * @param database firestore cloud
      * @param event HabitEvent to be added
      */
-    default void pushHabitEventData(FirebaseFirestore database, HabitEvent event){
-        getEventData(event); //Puts the data from event into eventData
+    default void pushHabitEventData(FirebaseFirestore database, HabitEvent event, boolean automatic){
+        Date currentTime = Calendar.getInstance().getTime();
+        getEventData(event, currentTime); //Puts the data from event into eventData
         pushToDB(database, HABIT_EVENT_KEY, "", eventData);
+
+        //For a new habitevent, reference habit and update last_created only if not an automatic
+        //missed habit event
+        if(!automatic) {
+            DocumentReference document = database.collection("Habit").document(event.getHabitId());
+            document.update("Last_Created", currentTime)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Log.d(TAG, "DocumentSnapshot successfully updated!");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error updating document", e);
+                        }
+                    });
+        }
     }
 
     /**
@@ -144,7 +166,8 @@ public interface EventFirebase extends Firebase{
      * @param event Habit to be added
      */
     default void pushEditEvent(FirebaseFirestore database, HabitEvent event) {
-        getEventData(event); //Puts the data from event into eventData
+        Date currentTime = Calendar.getInstance().getTime();
+        getEventData(event, currentTime); //Puts the data from event into eventData
         pushToDB(database, HABIT_EVENT_KEY, event.getEventID(), eventData);
     }
 
@@ -152,16 +175,14 @@ public interface EventFirebase extends Firebase{
      * Helper function to put the proper data from HabitEvent into eventData
      * @param event
      */
-    default void getEventData(HabitEvent event){
+    default void getEventData(HabitEvent event, Date currentTime){
         String habitID = event.getHabitId();
         String comment = event.getComment();
         String photo = event.getPhoto();
         String habitTitle = event.getHabitTitle();
         List<Double> location = event.getLocation();
 
-
         //get unique timestamp for ordering our list
-        Date currentTime = Calendar.getInstance().getTime();
         eventData.put(USER_ID, FirebaseAuth.getInstance().getUid());
         eventData.put(HABIT_ID, habitID);
         eventData.put(COMMENT, comment);
@@ -170,9 +191,9 @@ public interface EventFirebase extends Firebase{
         eventData.put(HABIT_TITLE, habitTitle);
         eventData.put(ORDER, currentTime);
         //this field is used to add the current timestamp of the item, to be used to order the items
+        //put current time into habit Last_Created
+
     }
-
-
 
     /**
      * Handle the deletion process for a habit event

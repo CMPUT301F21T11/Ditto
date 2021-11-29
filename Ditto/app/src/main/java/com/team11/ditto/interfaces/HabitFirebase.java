@@ -196,7 +196,7 @@ public interface HabitFirebase extends EventFirebase, Days{
             habitData.put(WEEKDAYS[i], habit.getDates().contains(WEEKDAYS[i]));
         }
         habitData.put(IS_PUBLIC, habit.isPublic());
-        habitData.put("habitDoneToday", false);
+        habitData.put("habitDoneToday", habit.isHabitDoneToday());
         habitData.put("streaks", Integer.toString(habit.getStreak()));
 
         //this field is used to add the current timestamp of the item, to be used to order the items
@@ -224,6 +224,7 @@ public interface HabitFirebase extends EventFirebase, Days{
                             habitData.put("position", count);
                             habitData.put("Start_Date",currentTime);
                             habitData.put("Last_Adjusted", currentTime);
+                            habitData.put("Last_Created", currentTime);
                             pushToDB(database,HABIT_KEY,habitID, habitData);
                             Log.d(TAG, "SET POSITION " + habit.getPosition());
                         } else {
@@ -385,17 +386,25 @@ public interface HabitFirebase extends EventFirebase, Days{
                     DocumentSnapshot documentSnapshot = task.getResult();
                     if (documentSnapshot.exists()) {
                         //retrieve the order value
+
                         int numDays = 7;
                         for (int i=0;i<numDays;i++) {
                             Boolean isDay; //is the day "true" in for this Habit
                             String day = daysForHabit(i);
                             isDay = documentSnapshot.getBoolean(day);
-                            if (isDay==true) { daysOfWeek[i] = i+1; }
-                            else { daysOfWeek[i] = 0; }
+                            if (isDay) {
+                                daysOfWeek[i] = i+1;
+                            } else {
+                                daysOfWeek[i] = 0;
+                            }
                         }
                         //if today is in the set of days chosen, update habitDoneToday to true
+                        boolean doneToday = (Boolean) documentSnapshot.get("habitDoneToday");
                         int StreakScore = Integer.parseInt(documentSnapshot.get("streaks").toString());
-                        setHabitDoneToday(document, daysOfWeek, today,StreakScore);
+                        if(!doneToday){
+                            setHabitDoneToday(document, daysOfWeek, today, StreakScore);
+                        }
+
                     }
                     else {
                         Log.d(TAG, "document does not exist!!");
@@ -415,10 +424,10 @@ public interface HabitFirebase extends EventFirebase, Days{
      * @param today the current day as an int (1-7)
      */
     default void setHabitDoneToday(DocumentReference document, Integer[] daysOfWeek, int today, int StreakScore) {
-        int newStreak = (int) (StreakScore + 2);
+        document.get();
+        int newStreak = (int) (StreakScore + 3);
         newStreak = Math.min(8,newStreak);
         String newStreakStr = String.valueOf(newStreak);
-
 
         for (int i=0; i<daysOfWeek.length;i++) {
             if (today == daysOfWeek[i]) {
@@ -437,13 +446,9 @@ public interface HabitFirebase extends EventFirebase, Days{
                                 Log.w(TAG, "Error updating document", e);
                             }
                         });
-
             }
         }
-
     }
-
-
 
     /**
      * Retrieve the day of the week
@@ -479,7 +484,8 @@ public interface HabitFirebase extends EventFirebase, Days{
     }
 
     /**
-     * This method will update the streak score of a habit in db, accounts for days since the last opening of the app
+     * This method will update the streak score of a habit in db, accounts for days since the last opening of the app,
+     * as well as the last created habit event
      * @param db FirebaseFirestore
      * @param currentUser ActiveUser
      */
@@ -493,7 +499,6 @@ public interface HabitFirebase extends EventFirebase, Days{
                     if(task.isSuccessful()){
                         for (QueryDocumentSnapshot snapshot: Objects.requireNonNull(task.getResult())){
                             if(snapshot.get("Last_Adjusted") != null){
-
                                 Date LastAdjusted =  snapshot.getTimestamp("Last_Adjusted").toDate();
 
                                 boolean Monday = snapshot.getBoolean("Monday");
@@ -504,17 +509,31 @@ public interface HabitFirebase extends EventFirebase, Days{
                                 boolean Saturday = snapshot.getBoolean("Saturday");
                                 boolean Sunday = snapshot.getBoolean("Sunday");
 
-                                LocalDate date = null;
                                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                    date = LastAdjusted.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                                    Date LastCreated =  snapshot.getTimestamp("Last_Created").toDate();
 
+                                    LocalDate dateCreated = LastCreated.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                                    LocalDate dateAdjusted = LastAdjusted.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+                                    LocalDate currentDate = LocalDate.now();
 
                                     int sum = 0;
+                                    LocalDate dateLoop;
 
-                                    for (LocalDate dateLoop = date.plusDays(1); dateLoop.isBefore(LocalDate.now()); dateLoop = dateLoop.plusDays(1)) {
-                                        //Check for every day between date.plusDays(1) and current day
-                                        Log.d("DATE", dateLoop.toString());
-                                        Log.d("DATE", dateLoop.getDayOfWeek().toString());
+                                    //if the dates are equal, it means a habit event was created on
+                                    //the datecreated day, but nothing afterwards
+                                    //if they arent equal, then no habit events have been created since
+                                    //dateAdjusted
+                                    if(dateCreated.isEqual(dateAdjusted)){
+                                        //If they created a habit event last login, ignore that day
+                                        dateLoop = dateCreated.plusDays(1);
+                                    } else {
+                                        //If they DIDNT create a habit event last login, include that day
+                                        dateLoop = dateAdjusted;
+                                    }
+
+                                    //Loop through and add 1 to sum for every missed day
+                                    for (; dateLoop.isBefore(LocalDate.now()); dateLoop = dateLoop.plusDays(1)) {
                                         if ((Sunday) && dateLoop.getDayOfWeek().toString().equals("SUNDAY")) {
                                             sum = sum + 1;
                                         }
@@ -538,11 +557,33 @@ public interface HabitFirebase extends EventFirebase, Days{
                                         }
                                     }
 
+                                    //If there were days missed, then create a public event about it
+                                    if(sum > 0){
+                                        String habitID = snapshot.getId();
+                                        String comment = "Missed " + sum + " days";
+                                        String photo = "";
+                                        List<Double> location = new ArrayList<>();
+                                        String habitTitle = snapshot.get("title").toString();
+
+                                        HabitEvent newHabitEvent = new HabitEvent(habitID, comment, photo, location, habitTitle);
+
+                                        //Make habit event now
+                                        pushHabitEventData(db, newHabitEvent, true);
+                                    }
+
+                                    //If it is a new day, we reset the habitDoneToday boolean
+                                    //to allow new habit event credit
+                                    if(!dateAdjusted.equals(currentDate)){
+                                        db.collection("Habit")
+                                                .document(snapshot.getId())
+                                                .update("habitDoneToday", false);
+                                    }
 
                                     int StreakScore = Integer.parseInt(snapshot.get("streaks").toString());
 
                                     int streak = StreakScore - sum;
 
+                                    //User cannot go below a score of -5
                                     streak = Math.max(-5, streak);
                                     String streakString = String.valueOf(streak);
 
@@ -559,4 +600,5 @@ public interface HabitFirebase extends EventFirebase, Days{
                     }
                 });
     }
+
 }

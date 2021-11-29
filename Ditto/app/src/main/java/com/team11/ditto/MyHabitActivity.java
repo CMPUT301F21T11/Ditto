@@ -164,7 +164,9 @@ public class MyHabitActivity extends AppCompatActivity implements
                             } else {
                                 isPublic = (boolean) document.getData().get("is_public");
                             }
-                            Habit habit = new Habit(id, title, reason, days, isPublic, s);
+                            boolean isDoneToday = (boolean) document.getData().get("habitDoneToday");
+
+                            Habit habit = new Habit(id, title, reason, days, isPublic, s, isDoneToday);
                             habitDataList.add(habit);
                         }
 
