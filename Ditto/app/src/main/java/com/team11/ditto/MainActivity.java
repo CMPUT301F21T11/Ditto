@@ -303,10 +303,12 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                                                     List<Double> locFinal = eLocation;
                                                     HabitEvent event = new HabitEvent(eventID, eHabitId, eComment, ePhoto,
                                                             locFinal, eHabitTitle, userID, name, eDate);
-                                                    if (mine && userID.equals(currentUser.getUID()) && !hEvents.contains(event)) {
+                                                    //Only add if an event with that id isnt already in the list
+                                                    if (hEvents.stream()
+                                                            .filter(existing -> eHabitId.equals(existing.getEventID()))
+                                                            .findAny().orElse(null) == null){
                                                         hEvents.add(event);
-                                                    } else if (others && !hEvents.contains(event)){
-                                                        hEvents.add(event);
+                                                        Log.d("Added", event.toString());
                                                     }
                                                 } catch (ParseException e) {
                                                     e.printStackTrace();
@@ -335,16 +337,24 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void generateFollowEventList(){
         Log.d("Current user", currentUser.getName()+" "+currentUser.getUID());
-        userDataList.add(new Pair<>(currentUser.getName(), currentUser.getUID()));
-        db.collection(FOLLOWING_KEY)
-                .whereEqualTo(FOLLOWED_BY, currentUser.getEmail())
-                .get()
-                .addOnCompleteListener(task -> task.addOnSuccessListener(success -> {
-                    for (DocumentSnapshot snapshot : Objects.requireNonNull(success.getDocuments())) {
-                        String email = snapshot.get(FOLLOWED).toString();
-                        getNameID(email);
-                    }
-                }));
+        userDataList.clear();
+        Pair<String,String> newUserData = new Pair<>(currentUser.getName(), currentUser.getUID());
+        if (!userDataList.contains(newUserData) && mine){
+            userDataList.add(newUserData);}
+        if(others) {
+            db.collection(FOLLOWING_KEY)
+                    .whereEqualTo(FOLLOWED_BY, currentUser.getEmail())
+                    .get()
+                    .addOnCompleteListener(task -> task.addOnSuccessListener(success -> {
+                        for (DocumentSnapshot snapshot : Objects.requireNonNull(success.getDocuments())) {
+                            String email = snapshot.get(FOLLOWED).toString();
+                            getNameID(email);
+                        }
+                    }));
+        }
+        else if (mine){
+            queryEventsForID();
+        }
 
     }
 
@@ -392,7 +402,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void sortFeed(){
-        Log.d("Sorting", "their events");
+        Log.d("Sorting", "chosen events");
         hEvents.sort(new Comparator<HabitEvent>() {
             @Override
             public int compare(HabitEvent habitEvent, HabitEvent t1) {
@@ -418,6 +428,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
      * @param item selected item
      * @return true if displayed, false otherwise
      */
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
         MenuItem iMine = findViewById(R.id.myEvents);
@@ -428,7 +439,10 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         else if (others && !mine){setTitle(theirEvents);}
         else if (mine && others){setTitle("My Feed");}
         else{ setTitle("Select what to show ->");}
+        hEvents.clear();
+        generateFollowEventList();
         return super.onOptionsItemSelected(item);
+
     }
 
 }
