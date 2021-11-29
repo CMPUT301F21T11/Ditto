@@ -78,9 +78,4 @@ public class SearchList extends ArrayAdapter<User> implements FirebaseMedia {
 
         return view;
     }
-
-
-
-
-
 }

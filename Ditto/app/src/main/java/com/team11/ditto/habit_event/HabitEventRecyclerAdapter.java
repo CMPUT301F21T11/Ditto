@@ -15,6 +15,7 @@
 package com.team11.ditto.habit_event;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;

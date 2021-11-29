@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -30,18 +31,20 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.team11.ditto.R;
+import com.team11.ditto.interfaces.FirebaseMedia;
 import com.team11.ditto.interfaces.HabitFirebase;
 
 /**
  * Activity to view a Habit Event, delete and edit the habit event
  * @author Kelly Shih, Aidan Horemans, Matthew Asgari
  */
-public class ViewEventActivity extends AppCompatActivity implements EditEventFragment.OnFragmentInteractionListener, HabitFirebase, OnMapReadyCallback {
+public class ViewEventActivity extends AppCompatActivity implements EditEventFragment.OnFragmentInteractionListener, HabitFirebase, OnMapReadyCallback, FirebaseMedia {
 
     //Declarations
     HabitEvent habitEvent;
     TextView habitTitle;
     TextView habitComment;
+    ImageView eventImage;
     String title;
     String comment;
     Bundle eventBundle;
@@ -59,6 +62,7 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
         setContentView(R.layout.activity_view_event);
         habitTitle = findViewById(R.id.habit_title);
         habitComment = findViewById(R.id.habit_comment);
+        eventImage = findViewById(R.id.event_image_view);
 
         //get the passed habit event
         habitEvent = (HabitEvent) getIntent().getSerializableExtra("EXTRA_HABIT_EVENT");
@@ -72,6 +76,11 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
         //set comment
         comment = habitEvent.getComment();
         habitComment.setText(comment);
+
+        //set image
+        if (!habitEvent.getPhoto().equals("")) {
+            setImage(habitEvent.getPhoto(), eventImage);
+        }
 
         //setup map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
