@@ -13,9 +13,6 @@
  limitations under the License.
  */
 package com.team11.ditto;
-/*
-The Class for MyHabit Activity Screen
- */
 
 import android.app.Activity;
 import android.content.Intent;

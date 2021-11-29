@@ -15,6 +15,7 @@
         limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/editHabitFragment"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -98,6 +99,5 @@
             app:srcCompat="@drawable/ic_round_delete_24"
             tools:ignore="SpeakableTextPresentCheck" />
     </LinearLayout>
-
 
 </LinearLayout>

@@ -28,6 +28,10 @@ import com.team11.ditto.interfaces.MapHandler;
 
 import java.util.List;
 
+/**
+ * Class for the Location picking fragment
+ * Matthew Asgari
+ */
 public class LocationPicker extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
@@ -129,11 +133,11 @@ public class LocationPicker extends FragmentActivity implements OnMapReadyCallba
     }
 
 
+    /**
+     * Get the best and most recent location of the device, which may be null in rare
+     * cases when a location is not available.
+     */
     private void getDeviceLocation() {
-        /*
-         * Get the best and most recent location of the device, which may be null in rare
-         * cases when a location is not available.
-         */
         try {
             if (mLocationPermissionGranted) {
                 Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
@@ -162,6 +166,9 @@ public class LocationPicker extends FragmentActivity implements OnMapReadyCallba
         }
     }
 
+    /**
+     * Handle user picking the current location
+     */
     private void pickCurrentPlace() {
         if (mMap == null) {
             return;

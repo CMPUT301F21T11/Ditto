@@ -128,6 +128,7 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
             dialogFragment.show(getSupportFragmentManager(), "EDIT_EVENT");
         }
 
+        //When we delete the event, finish the activity and remove it from the database
         if (id == R.id.delete_event){
 
             deleteDataMyEvent(database, habitEvent);

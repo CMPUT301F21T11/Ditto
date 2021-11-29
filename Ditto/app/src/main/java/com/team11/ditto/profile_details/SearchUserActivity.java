@@ -216,6 +216,9 @@ public class SearchUserActivity extends AppCompatActivity implements SwitchTabs,
     }
 
 
+    /**
+     * Handle transition between activities
+     */
     @Override
     public void onPause(){
         overridePendingTransition(0,0);

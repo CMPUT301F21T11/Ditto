@@ -154,7 +154,7 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
     }
 
     /**
-     * Listener interface
+     * Listener interface for on click
      */
     public interface EventClickListener{
         void onEventClick(int position);

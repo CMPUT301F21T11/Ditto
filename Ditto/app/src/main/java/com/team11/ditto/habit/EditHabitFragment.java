@@ -51,6 +51,9 @@ public class EditHabitFragment extends DialogFragment implements Days {
     private SwitchMaterial privacySwitch;
     private ArrayList<CheckBox> checkBoxes;
 
+    /**
+     * Interaction listener that runs onOkPressed in ViewHabitActivity
+     */
     public interface OnFragmentInteractionListener {
         void onOkPressed(Habit habit);
     }

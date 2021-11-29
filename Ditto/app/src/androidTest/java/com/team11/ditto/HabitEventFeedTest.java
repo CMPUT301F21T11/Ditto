@@ -30,7 +30,7 @@ import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.not;
+//import static org.hamcrest.Matchers.not;
 
 import android.os.SystemClock;
 

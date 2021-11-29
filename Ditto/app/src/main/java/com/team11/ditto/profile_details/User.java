@@ -20,6 +20,15 @@ import com.team11.ditto.habit.Habit;
 
 import java.util.ArrayList;
 
+/**
+ * User object that holds
+ * id
+ * name
+ * habits, following, followers
+ * profile photo
+ * password
+ * age
+ */
 public class User {
 
     //User attributes
@@ -51,6 +60,11 @@ public class User {
         this.age = age;
     }
 
+    /**
+     * constructor for User object
+     * @param username
+     * @param password
+     */
     public User(String username, String password){
         this.username = username;
         this.habits = new ArrayList<>();

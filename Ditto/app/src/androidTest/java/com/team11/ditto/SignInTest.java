@@ -42,7 +42,7 @@ public class SignInTest {
         //test if the user able to login with correct information
         onView(withId(R.id.login_email_field)).perform(typeText(email), closeSoftKeyboard());
         onView(withId(R.id.login_password_field)).perform(typeText(password), closeSoftKeyboard());
-        onView(withId(R.id.register_button)).perform(click());
+        onView(withId(R.id.login_button)).perform(click());
         Espresso.onView(withId(R.id.list_habit_event));
     }
 
