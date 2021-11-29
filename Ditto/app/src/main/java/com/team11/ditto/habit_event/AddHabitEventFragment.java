@@ -14,31 +14,49 @@
  */
 package com.team11.ditto.habit_event;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.ImageDecoder;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.team11.ditto.LocationPicker;
 import com.team11.ditto.R;
+import com.team11.ditto.UserProfileActivity;
+import com.team11.ditto.interfaces.FirebaseMedia;
+import com.team11.ditto.interfaces.FirebaseMediaUploadCallback;
 import com.team11.ditto.interfaces.HabitFirebase;
 import com.team11.ditto.interfaces.MapHandler;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,20 +65,25 @@ import java.util.List;
  * Send input back to MainActivity and Firestore Database collection "HabitEvent", as well as update "Habit" collection
  * @author Kelly Shih, Aidan Horemans, Matt Asgari
  */
-public class AddHabitEventFragment extends DialogFragment implements HabitFirebase, MapHandler {
+public class AddHabitEventFragment extends DialogFragment implements HabitFirebase, MapHandler, FirebaseMedia {
     //Declare necessary values
     private EditText hComment;
     private Button acc_photo;
     private Button locationButton;
+    private ImageButton deletePhotoButton;
+    private ImageButton deleteLocationButton;
     private OnFragmentInteractionListener listener;
     private FirebaseFirestore db;
     final String TAG = "dbs";
     private @Nullable ArrayList<Double> location = null;
+    private String currentPhotoURL = "";
+
+    private static final int MEDIA_REQUEST_CODE = 0;
+    private static final int CAMERA_REQUEST_CODE = 1;
 
     //Declare interface
     public interface OnFragmentInteractionListener {
         void onOkPressed(HabitEvent newHabitEvent);
-
     }
 
     /**
@@ -87,6 +110,8 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
         hComment = view.findViewById(R.id.comment_editText);
         acc_photo = view.findViewById(R.id.add_photo);
         locationButton = view.findViewById(R.id.event_add_location_button);
+        deletePhotoButton = view.findViewById(R.id.add_event_delete_photo);
+        deleteLocationButton = view.findViewById(R.id.add_event_delete_location);
 
         db = FirebaseFirestore.getInstance();
 
@@ -127,6 +152,7 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
 
         //Get camera permission for photo
         acc_photo.setOnClickListener(view1 -> {
+            displayMediaOptions();
         });
 
         // Listen for when the location button is pressed
@@ -134,6 +160,18 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
             LocationPicker.callback = this;  // Really bad implementation - should be fixed
             Intent intent = new Intent(getActivity(), LocationPicker.class);
             startActivity(intent);
+        });
+
+        // Listen for when the delete photo button is pressed
+        deletePhotoButton.setOnClickListener(view1 -> {
+            currentPhotoURL = "";
+            acc_photo.setText(R.string.add_photo);
+        });
+
+        // Listen for when the delete location button is pressed
+        deleteLocationButton.setOnClickListener(view1 -> {
+            location = null;
+            locationButton.setText(R.string.add_location);
         });
 
         //Builds the Dialog for the user to add a new habit event
@@ -150,9 +188,9 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String comment = hComment.getText().toString();
-                        String photo = "";
+                        String photoURL = currentPhotoURL;
 
-                        listener.onOkPressed(new HabitEvent(IDhabit[0], comment, photo, location, hHabit[0]));
+                        listener.onOkPressed(new HabitEvent(IDhabit[0], comment, photoURL, location, hHabit[0]));
 
                     }
                 })
@@ -169,12 +207,122 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
     public void handleLocationChange(@Nullable LatLng location) {
         if (location == null) {
             this.location = null;
-            this.locationButton.setText("Add location");
+            this.locationButton.setText(R.string.add_location);
         } else {
             this.location = new ArrayList<>();
             this.location.add(location.latitude);
             this.location.add(location.longitude);
-            this.locationButton.setText("Update location");
+            this.locationButton.setText(R.string.update_location);
+        }
+    }
+
+    private void displayMediaOptions() {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity())
+                .setTitle("Load photo from camera or media")
+                .setMessage("Please select where you will load the photo from")
+                .setNeutralButton("Cancel", null)
+                .setNegativeButton("Media", (dialogInterface, i) -> {
+                    loadPhotos();
+                })
+                .setPositiveButton("Camera", (dialogInterface, i) -> {
+                    loadCamera();
+                });
+        builder.show();
+    }
+
+    private void loadCamera() {
+        // Check if app has permission
+        if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            // Display camera
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivityForResult(intent, CAMERA_REQUEST_CODE);
+        } else {
+            // Display permission request
+            ActivityCompat.requestPermissions(getActivity(), new String[] {Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
+        }
+    }
+
+    private void loadPhotos() {
+        // Check if app has permission
+        if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            // Show media library
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent, MEDIA_REQUEST_CODE);
+        } else {
+            // Display permission request
+            ActivityCompat.requestPermissions(getActivity(), new String[] {Manifest.permission.READ_EXTERNAL_STORAGE}, MEDIA_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Determine which request code was granted or denied
+        switch (requestCode) {
+            case CAMERA_REQUEST_CODE:
+                if (grantResults.length >= 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission is granted
+                    loadCamera();
+                } else {
+                    // Display error
+                    Snackbar.make(getView(), "Ditto does not have camera access", Snackbar.LENGTH_SHORT).setBackgroundTint(getResources().getColor(R.color.error)).show();
+                }
+                break;
+
+            case MEDIA_REQUEST_CODE:
+                if (grantResults.length >= 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission is granted
+                    loadPhotos();
+                } else {
+                    // Display error
+                    Snackbar.make(getView(), "Ditto does not have photo access", Snackbar.LENGTH_SHORT).setBackgroundTint(getResources().getColor(R.color.error)).show();
+                }
+                break;
+        }
+    }
+
+    private Bitmap loadFromUri(Uri photoUri) {
+        Bitmap image = null;
+        try {
+            // check version of Android on device
+            if(Build.VERSION.SDK_INT > 27){
+                // on newer versions of Android, use the new decodeBitmap method
+                ImageDecoder.Source source = ImageDecoder.createSource(this.getActivity().getContentResolver(), photoUri);
+                image = ImageDecoder.decodeBitmap(source);
+            } else {
+                // support older versions of Android by using getBitmap
+                image = MediaStore.Images.Media.getBitmap(this.getActivity().getContentResolver(), photoUri);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return image;
+    }
+
+    @Override
+     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == CAMERA_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            Bitmap photo = (Bitmap) data.getExtras().get("data");
+            uploadEventPhoto(photo, new FirebaseMediaUploadCallback() {
+                @Override
+                public void imageURIChanged(Uri uri) {
+                    currentPhotoURL = uri.toString();
+                    acc_photo.setText(R.string.update_photo);
+                }
+            });
+        } else if (requestCode == MEDIA_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            Uri photoUri = data.getData();
+            Bitmap photo = loadFromUri(photoUri);
+            uploadEventPhoto(photo, new FirebaseMediaUploadCallback() {
+                @Override
+                public void imageURIChanged(Uri uri) {
+                    currentPhotoURL = uri.toString();
+                    acc_photo.setText(R.string.update_photo);
+                }
+            });
         }
     }
 }

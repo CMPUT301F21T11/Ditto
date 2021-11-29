@@ -2,6 +2,7 @@ package com.team11.ditto.interfaces;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -13,6 +14,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.util.UUID;
 
 /**
  * Role: Update the respective media values from firebase
@@ -42,6 +44,19 @@ public interface FirebaseMedia {
             public void onFailure(@NonNull Exception e) {
                 // Photo does not exist, download default
                 setDefaultProfilePhoto(imageView);
+            }
+        });
+    }
+
+    default void setImage(String url, ImageView imageView) {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReferenceFromUrl(url);
+
+        // Get the profile photo
+        storageRef.getBytes(1024*1024).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                imageView.setImageBitmap(BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
             }
         });
     }
@@ -81,6 +96,28 @@ public interface FirebaseMedia {
         byte[] data = baos.toByteArray();
 
         UploadTask uploadTask = imgRef.putBytes(data);
+    }
+
+    // Uploads an image for a habit event and returns the url
+    default void uploadEventPhoto(Bitmap imgBitmap, FirebaseMediaUploadCallback callback) {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference();
+        StorageReference imgRef = storageRef.child("event_photos/"+ UUID.randomUUID().toString() +".jpg");
+
+        // Upload photo
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        imgBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+        imgRef.putBytes(data).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                task.getResult().getStorage().getDownloadUrl().addOnCompleteListener(task1 -> {
+                    if (task1.isSuccessful()) {
+                        callback.imageURIChanged(task1.getResult());
+                    }
+                });
+            }
+        });
     }
 
 
