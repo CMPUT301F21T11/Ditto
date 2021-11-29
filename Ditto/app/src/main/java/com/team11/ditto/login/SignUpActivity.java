@@ -37,6 +37,9 @@ import com.team11.ditto.WelcomeActivity;
 
 import java.util.HashMap;
 
+/**
+ * Activity for user sign up
+ */
 public class SignUpActivity extends AppCompatActivity {
     private EditText nameField;
     private EditText emailField;
@@ -104,7 +107,12 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
 
-    // Attempt to register a user on Firebase
+    /**
+     * Register a new user on Firebase
+     * @param email
+     * @param password
+     * @param userData
+     */
     private void registerUser(String email, String password, HashMap<String, String> userData) {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(SignUpActivity.this, task -> {
