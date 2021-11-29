@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final ActiveUser currentUser = new ActiveUser();
     private final ArrayList<String> emailList = new ArrayList<>();
+    private final ArrayList<Pair<String,String>> userDataList = new ArrayList<>();
     private int shortAnimationDuration;
     private static int numProcessed = 0;
     Boolean updated;
@@ -137,10 +138,6 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     //Show feed
         fadeInView();
 
-        Log.d("Entering", "loop");
-        while(!updated){
-            loadingCompleteListener();
-        }
     }
 
     /**
@@ -213,69 +210,63 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     }
 
     /**
-     *
-     */
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    public void loadingCompleteListener(){
-        if (emailList.size() == numProcessed) {
-            sortFeed();
-            updated = true;
-            Log.d("Exiting", "loop");
-        }
-    }
-
-    /**
      * Get all the user following
      * Then query their info and the user's
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void queryEventsForID(Pair<String, String> userData){
-            Log.d("Starting", "Event Query for " + userData.first);
+    public void queryEventsForID(){
+        for (int i=0; i < userDataList.size(); i++) {
+            final int fi = i;
+            Log.d("Starting", "Event Query for " + userDataList.get(i).first);
             db.collection(HABIT_EVENT_KEY)
-                    .whereEqualTo("uid", userData.second)
+                    .whereEqualTo("uid", userDataList.get(i).second)
                     .orderBy(DATE)//userevents
                     .addSnapshotListener((value, error) -> {
                         for (QueryDocumentSnapshot doc : value) {
                             // Parse the event data for each document
                             String eventID = doc.getId();
                             String eHabitId = (String) doc.getData().get("habitID");
-                            db.collection(HABIT_KEY).document(eHabitId).get().addOnCompleteListener(task-> {
+                            db.collection(HABIT_KEY).document(eHabitId).get().addOnCompleteListener(task -> {
                                 Object publicValue = task.getResult().get(IS_PUBLIC);
                                 //clearUserEvents(userData.second);
 
-                            if ( (publicValue != null && (boolean) publicValue) || ((String)doc.getData().get(USER_ID)).equals(userData.second)){
-                                String eHabitTitle = (String) doc.getData().get("habitTitle");
-                                String eComment = (String) doc.getData().get("comment");
-                                String ePhoto = (String) doc.getData().get("photo");
-                                String date = null;
-                                Date eDate = new Date();
-                                if (date != null){
-                                    try {
-                                        eDate = DATE_FORMAT.parse(date);
-                                    } catch (ParseException e) {
-                                        e.printStackTrace();
-                                    }}
-                                String name = userData.first;
-                                String userID = userData.second;
-                                @Nullable List<Double> eLocation = null;
-                                if (doc.getData().get(LOCATION) != "") {
-                                    eLocation = (List<Double>) doc.getData().get("location");
-                                }
-                                List<Double> locFinal = eLocation;
-                                HabitEvent event = new HabitEvent(eventID, eHabitId, eComment, ePhoto,
-                                        locFinal, eHabitTitle, userID, name, eDate);
-                                if (!hEventsFirebase.contains(event)) {
-                                    hEventsFirebase.add(event);
-                                    hEventsFirebase.sort(Comparator.reverseOrder());
-                                    numProcessed++;
+                                if ( (publicValue != null && (boolean) publicValue)
+                                        || ( ((String) doc.getData().get(USER_ID)).equals(currentUser.getUID())) ) {
+                                    String eHabitTitle = (String) doc.getData().get("habitTitle");
+                                    String eComment = (String) doc.getData().get("comment");
+                                    String ePhoto = (String) doc.getData().get("photo");
+                                    String date = null;
+                                    Date eDate = new Date();
+                                    if (date != null) {
+                                        try {
+                                            eDate = DATE_FORMAT.parse(date);
+                                        } catch (ParseException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                    String name = userDataList.get(fi).first;
+                                    String userID = userDataList.get(fi).second;
+                                    @Nullable List<Double> eLocation = null;
+                                    if (doc.getData().get(LOCATION) != "") {
+                                        eLocation = (List<Double>) doc.getData().get("location");
+                                    }
+                                    List<Double> locFinal = eLocation;
+                                    HabitEvent event = new HabitEvent(eventID, eHabitId, eComment, ePhoto,
+                                            locFinal, eHabitTitle, userID, name, eDate);
+                                    if (!hEventsFirebase.contains(event)) {
+                                        hEventsFirebase.add(event);
+                                    }
                                     habitEventRecyclerAdapter.notifyDataSetChanged();
+
                                 }
 
-                            }
                             });
                         }
+                        sortFeed();
+                        habitEventRecyclerAdapter.notifyDataSetChanged();
 
                     });
+        }
     }
 
 
@@ -290,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     public void generateFollowEventList(){
         hEventsFirebase.clear();
         Log.d("Current user", currentUser.getName()+" "+currentUser.getUID());
-        queryEventsForID(new Pair<>(currentUser.getName(), currentUser.getUID()));
+        userDataList.add(new Pair<>(currentUser.getName(), currentUser.getUID()));
         db.collection("Following")
                 .whereEqualTo("followedBy", currentUser.getEmail())
                 .get()
@@ -322,9 +313,10 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                         Pair<String, String> userData = new Pair<>(name, id);
                         Log.d("Added", name+"'s id "+id+" and email "+email);
                         if (userData.first != null && userData.second != null) {
-                            queryEventsForID(userData);
+                            userDataList.add(userData);
                         }
                   }
+                  queryEventsForID();
               } else {
                     Log.d("ID query", "unsuccessful");
               }
@@ -343,10 +335,11 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void sortFeed(){
+        Log.d("Sorting", "all events");
         hEventsFirebase.sort(new Comparator<HabitEvent>() {
             @Override
             public int compare(HabitEvent habitEvent, HabitEvent t1) {
-                return habitEvent.compareTo(t1);
+                return habitEvent.getDate().compareTo(t1.getDate());
             }
         });
     }
