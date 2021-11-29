@@ -49,6 +49,7 @@ public class LocationPicker extends FragmentActivity implements OnMapReadyCallba
     private boolean mLocationPermissionGranted;
 
     private Button saveButton;
+    private Button cancelButton;
     public static MapHandler callback = null;
 
     @Override
@@ -65,11 +66,16 @@ public class LocationPicker extends FragmentActivity implements OnMapReadyCallba
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         saveButton = findViewById(R.id.map_save_button);
+        cancelButton = findViewById(R.id.location_cancel_button);
 
         saveButton.setOnClickListener(view -> {
             if (callback != null) {
                 callback.handleLocationChange(mLocation);
             }
+            onBackPressed();
+        });
+
+        cancelButton.setOnClickListener(view -> {
             onBackPressed();
         });
     }
@@ -90,6 +96,12 @@ public class LocationPicker extends FragmentActivity implements OnMapReadyCallba
 
         // Prompt the user for permission.
         getLocationPermission();
+
+        mMap.setOnMapClickListener(latLng -> {
+            mMap.clear();
+            mMap.addMarker(new MarkerOptions().position(latLng));
+            mLocation = latLng;
+        });
     }
 
     /**
