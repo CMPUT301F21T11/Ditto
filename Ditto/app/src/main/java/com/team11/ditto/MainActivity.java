@@ -24,8 +24,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -37,8 +43,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.team11.ditto.habit_event.AddHabitEventFragment;
 import com.team11.ditto.habit_event.HabitEvent;
 import com.team11.ditto.habit_event.HabitEventRecyclerAdapter;
@@ -53,7 +62,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 
@@ -71,18 +79,22 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 //ACTIVITY WIDE VARIABLES
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final ActiveUser currentUser = new ActiveUser();
-    private final ArrayList<String> emailList = new ArrayList<>();
+    private final ArrayList<HabitEvent> myEvents = new ArrayList<>();
     private final ArrayList<Pair<String,String>> userDataList = new ArrayList<>();
     ArrayList<HabitEvent> hEvents = new ArrayList<>();
     private int shortAnimationDuration;
-    private static int numProcessed = 0;
-    Boolean updated;
+    final String myEventsTitle = "My Events";
+    final String theirEvents = "Followed Users";
+    Boolean mine = true;
+    Boolean others = true;
 
 //LAYOUTS & HELPERS
     private TabLayout tabLayout;
     private ProgressBar progressBar;
     private RecyclerView habitEventList;
     private HabitEventRecyclerAdapter habitEventRecyclerAdapter;
+    //private Spinner feedMenu;
+    //private ArrayAdapter<String> spinnerAdapter;
 
     /**
      * Create the Activity instance for the "Home Page" screen, default screen when back pressed
@@ -112,6 +124,43 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         final FloatingActionButton addHabitEventButton = findViewById(R.id.add_habit_event);
         addHabitEventButton.setOnClickListener(view -> new AddHabitEventFragment()
                 .show(getSupportFragmentManager(), "ADD_HABIT_EVENT"));
+        /*feedMenu = findViewById(R.id.spinner);
+
+        ArrayList <String> spinnerList = new ArrayList<>();
+        spinnerList.add(myEventsTitle);
+        spinnerList.add(theirEvents);
+        spinnerAdapter = new ArrayAdapter<>(this,android.R.layout.simple_spinner_item, spinnerList);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        feedMenu.setAdapter(spinnerAdapter);
+        feedMenu.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            /**
+             }
+             * to retrieve the habit and habit ID from the selected spinner choice
+             * @param parent the adapter for the spinner
+             * @param view the view selected
+             * @param position the position of the view in the list
+             * @param l view Id
+             *
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long l) {
+                String selectedItem = parent.getItemAtPosition(position).toString();
+                Toast.makeText(parent.getContext(), "selected" + selectedItem, Toast.LENGTH_LONG).show();
+                if (selectedItem.equals(myEventsTitle)){
+                    habitEventRecyclerAdapter.setList(myEvents);
+                    habitEventRecyclerAdapter.notifyDataSetChanged();
+                }
+                else if (selectedItem.equals(theirEvents)){
+                    habitEventRecyclerAdapter.setList(hEvents);
+                    habitEventRecyclerAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                habitEventRecyclerAdapter.setList(hEvents);
+                habitEventRecyclerAdapter.notifyDataSetChanged();
+            }
+        });*/
 
     //Initialize non-final variables
         shortAnimationDuration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
@@ -120,7 +169,6 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         LinearLayoutManager manager = new LinearLayoutManager(this);
         habitEventList.setLayoutManager(manager);
         habitEventList.setAdapter(habitEventRecyclerAdapter);
-        updated = false;
 
     //Show loading page
         habitEventList.setVisibility(View.INVISIBLE);
@@ -188,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         //Adds the item to the database and then immediately retrieves it from the list
         //clearUserEvents(currentUser.getUID());
         pushHabitEventData(db, newHabitEvent);
-        sortFeed();
+        //sortFeed();
         habitEventRecyclerAdapter.notifyDataSetChanged();
 
         fadeInView();
@@ -216,23 +264,25 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
      * Then query their info and the user's
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void queryEventsForID(){
-        for (int i=0; i < userDataList.size(); i++) {
+    public void queryEventsForID() {
+        for (int i = 0; i < userDataList.size(); i++) {
             final int fi = i;
             Log.d("Starting", "Event Query for " + userDataList.get(i).first);
             db.collection(HABIT_EVENT_KEY)
-                    .whereEqualTo("uid", userDataList.get(i).second)
-                    .get()
-                    .addOnCompleteListener(task-> {
-                        if (task.isSuccessful()){
-                            for (QueryDocumentSnapshot doc : Objects.requireNonNull(task.getResult())) {
+                    .whereEqualTo(USER_ID, userDataList.get(i).second)
+                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                        @Override
+                        public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                            for (QueryDocumentSnapshot doc : value) {
                                 // Parse the event data for each document
                                 String eventID = doc.getId();
                                 String eHabitId = (String) doc.getData().get("habitID");
+
                                 db.collection(HABIT_KEY).document(eHabitId).get().addOnCompleteListener(task2 -> {
                                     if (task2.isSuccessful()) {
+                                        //myEvents.clear();
                                         Object publicValue = task2.getResult().get(IS_PUBLIC);
-                                        //clearUserEvents(userData.second);
+                                        //clearUserEvents(userDataList.get(fi).second);
                                         if ((publicValue != null && (boolean) publicValue)
                                                 || (((String) doc.getData().get(USER_ID)).equals(currentUser.getUID()))) {
                                             String eHabitTitle = (String) doc.getData().get("habitTitle");
@@ -253,7 +303,9 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                                                     List<Double> locFinal = eLocation;
                                                     HabitEvent event = new HabitEvent(eventID, eHabitId, eComment, ePhoto,
                                                             locFinal, eHabitTitle, userID, name, eDate);
-                                                    if (!hEvents.contains(event)) {
+                                                    if (mine && userID.equals(currentUser.getUID()) && !hEvents.contains(event)) {
+                                                        hEvents.add(event);
+                                                    } else if (others && !hEvents.contains(event)){
                                                         hEvents.add(event);
                                                     }
                                                 } catch (ParseException e) {
@@ -263,15 +315,15 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                                         }
                                         sortFeed();
                                         habitEventRecyclerAdapter.notifyDataSetChanged();
+
                                     }
                                 });
                             }
                         }
+
                     });
         }
-
     }
-
 
 
     @Override
@@ -282,16 +334,14 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void generateFollowEventList(){
-        hEvents.clear();
         Log.d("Current user", currentUser.getName()+" "+currentUser.getUID());
         userDataList.add(new Pair<>(currentUser.getName(), currentUser.getUID()));
-        db.collection("Following")
-                .whereEqualTo("followedBy", currentUser.getEmail())
+        db.collection(FOLLOWING_KEY)
+                .whereEqualTo(FOLLOWED_BY, currentUser.getEmail())
                 .get()
                 .addOnCompleteListener(task -> task.addOnSuccessListener(success -> {
                     for (DocumentSnapshot snapshot : Objects.requireNonNull(success.getDocuments())) {
                         String email = snapshot.get(FOLLOWED).toString();
-                        emailList.add(email);
                         getNameID(email);
                     }
                 }));
@@ -311,13 +361,17 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
           .addOnCompleteListener(Task -> {
               if (Task.isSuccessful()) {
                   for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(Task.getResult())) {
-                        String id = snapshot.getData().get(USER_ID).toString();
-                        String name = snapshot.getData().get(NAME).toString();
-                        Pair<String, String> userData = new Pair<>(name, id);
-                        Log.d("Added", name+"'s id "+id+" and email "+email);
-                        if (userData.first != null && userData.second != null) {
-                            userDataList.add(userData);
-                        }
+                      try {
+                          String id = snapshot.getId();
+                          String name = snapshot.getData().get(NAME).toString();
+                          Pair<String, String> userData = new Pair<>(name, id);
+                          Log.d("Added", name + "'s id " + id + " and email " + email);
+                          if (userData.first != null && userData.second != null) {
+                              userDataList.add(userData);
+                          }
+                      }catch (Exception e){
+                          Log.d("Exception", e.toString());
+                      }
                   }
                   queryEventsForID();
               } else {
@@ -327,24 +381,54 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 
     }
 
-    private void clearUserEvents(String userId){
+    /*private void clearUserEvents(String userId){
         for (int i = 0; i < hEvents.size(); i++){
             HabitEvent selectedEvent = hEvents.get(i);
             if ( selectedEvent.getUid().equals(userId) ){
                 hEvents.remove(selectedEvent);
             }
         }
-    }
+    }*/
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void sortFeed(){
-        Log.d("Sorting", "all events");
+        Log.d("Sorting", "their events");
         hEvents.sort(new Comparator<HabitEvent>() {
             @Override
             public int compare(HabitEvent habitEvent, HabitEvent t1) {
                 return habitEvent.getDate().compareTo(t1.getDate());
             }
-        });
+        }.reversed());
+    }
+
+
+    /**
+     * Inflate the menu for the options menu
+     * @param menu options menu
+     * @return true when menu displayed, false otherwise
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.view_feed, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    /**
+     * Listener for the edit button
+     * @param item selected item
+     * @return true if displayed, false otherwise
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        MenuItem iMine = findViewById(R.id.myEvents);
+        MenuItem iTheirs = findViewById(R.id.theirEvents);
+        mine = iMine.isChecked();
+        others = iTheirs.isChecked();
+        if (mine && !others){setTitle(myEventsTitle);}
+        else if (others && !mine){setTitle(theirEvents);}
+        else if (mine && others){setTitle("My Feed");}
+        else{ setTitle("Select what to show ->");}
+        return super.onOptionsItemSelected(item);
     }
 
 }
