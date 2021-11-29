@@ -232,7 +232,7 @@ public interface FollowFirebase extends Firebase{
                 for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(Task.getResult())){
 
                     String id = snapshot.getId();
-                    db.collection((USER_KEY))
+                    db.collection(USER_KEY)
                             .document(id)
                             .update(SENT, FieldValue.arrayRemove(undesiredUserEmail));
                 }
@@ -256,7 +256,7 @@ public interface FollowFirebase extends Firebase{
                 for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(Task.getResult())){
 
                     String id = snapshot.getId();
-                    db.collection((USER_KEY))
+                    db.collection(USER_KEY)
                             .document(id)
                             .update(SENT, FieldValue.arrayUnion(desiredUserEmail));
                 }
@@ -266,23 +266,24 @@ public interface FollowFirebase extends Firebase{
 
 
     /**
-     * Cancel follow request from active user to undesired user
+     * remove a follow request received from activeUser that is received from undesiredUser
      * @param db firebase cloud
      * @param undesiredUserEmail email id of undesired user
      * @param activeUserEmail email id of active user
      *
      */
     default void cancel_follow_request(FirebaseFirestore db, String undesiredUserEmail, String activeUserEmail ){
-        db.collection(USERNAME)
+        db.collection(USER_KEY)
                 .whereEqualTo(EMAIL,undesiredUserEmail)
                 .get().addOnCompleteListener( Task -> {
             if (Task.isSuccessful()){
                 for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(Task.getResult())){
 
                     String id = snapshot.getId();
-                    db.collection((USER_KEY))
+                    db.collection(USER_KEY)
                             .document(id)
                             .update(RECEIVED, FieldValue.arrayRemove(activeUserEmail));
+
                 }
 
 
@@ -307,7 +308,7 @@ public interface FollowFirebase extends Firebase{
                 for (QueryDocumentSnapshot snapshot : Objects.requireNonNull(Task.getResult())){
 
                     String id = snapshot.getId();
-                    db.collection((USER_KEY))
+                    db.collection(USER_KEY)
                             .document(id)
                             .update(RECEIVED, FieldValue.arrayUnion(activeUserEmail));
                 }
