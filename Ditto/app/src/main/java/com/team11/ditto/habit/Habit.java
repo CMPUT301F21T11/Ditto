@@ -29,6 +29,7 @@ import java.util.ArrayList;
  * isPublic
  * position
  * habitDoneToday
+ * streak
  * Design Rationale: set getters and setters for the data that Habit holds
  * @author Kelly Shih, Aidan Horemans
  */
@@ -45,11 +46,14 @@ public class Habit implements Serializable {
     private int position;
     private boolean habitDoneToday;
 
+
     /**
-     * Constructor for Habit object
+     * Constructor for a Habit object
+     * Constructor for a Habit object
      * @param title Habit title
      * @param reason Reason for habit
      * @param dates Days of the week for scheduling
+     * @param isPublic
      */
     public Habit(String title, String reason, ArrayList<String> dates, boolean isPublic) {
         this.title = title;
@@ -67,13 +71,14 @@ public class Habit implements Serializable {
      * @param reason Reason for habit
      * @param dates Days of the week for scheduling
      */
-    public Habit(String id, String title, String reason, ArrayList<String> dates, boolean isPublic, int streak) {
+    public Habit(String id, String title, String reason, ArrayList<String> dates, boolean isPublic, int streak, boolean habitDoneToday) {
         this.habitID = id;
         this.title = title;
         this.reason = reason;
         this.setDate(dates);
         this.isPublic = isPublic;
         this.streak = streak;
+        this.habitDoneToday = habitDoneToday;
     }
 
     /**
@@ -89,14 +94,13 @@ public class Habit implements Serializable {
         this.position = position;
     }
 
+    /**
+     * Returns the current streak value of the habit
+     * @return integer value of streak
+     */
     public int getStreak(){
         return this.streak;
     }
-
-    public void setStreak(int streak){
-      this.streak = streak;
-    }
-
 
     /**
      * Getter for Habit title
@@ -173,6 +177,10 @@ public class Habit implements Serializable {
      */
     public boolean isPublic(){ return this.isPublic; }
 
+    /**
+     * Returns the list position that the user has defined
+     * @return position as an integer
+     */
     public int getPosition() {
         return position;
     }
@@ -189,22 +197,6 @@ public class Habit implements Serializable {
         this.isPublic = !this.isPublic;
     }
 
-    public void completeHabit(boolean complete){
-        if (complete && this.streak > 0){
-            this.streak ++;
-        }
-        else if (complete && this.streak <= 0){
-            this.streak = 1;
-        }
-        else if (!complete && this.streak <= 0){
-            this.streak--;
-        }
-        else if (!complete && this.streak > 0){
-            this.streak = 0;
-        }
-
-    }
-
     /**
      * Getter for whether Habit is done today or not
      * @return
@@ -213,11 +205,5 @@ public class Habit implements Serializable {
         return habitDoneToday;
     }
 
-    /**
-     * Setter for whether Habit is done today or not
-     * @param habitDoneToday
-     */
-    public void setHabitDoneToday(boolean habitDoneToday) {
-        this.habitDoneToday = habitDoneToday;
-    }
+
 }

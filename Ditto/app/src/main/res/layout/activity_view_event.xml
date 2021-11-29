@@ -59,15 +59,31 @@
         app:layout_constraintTop_toBottomOf="@+id/comment"
         android:layout_marginHorizontal="10dp"/>
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/map_event"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/habit_comment" />
+        app:layout_constraintTop_toBottomOf="@+id/habit_comment">
+
+        <ImageView
+            android:id="@+id/event_image_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:adjustViewBounds="false"
+            android:scaleType="fitCenter" />
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/map_event"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_weight="1" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

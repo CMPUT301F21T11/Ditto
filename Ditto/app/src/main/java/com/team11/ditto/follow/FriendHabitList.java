@@ -80,21 +80,16 @@ public class FriendHabitList extends ArrayAdapter<Habit> {
 
         int lB = -3;
         int uB = 5;
+
+        //Displays different emojis depending on user streak score
         if (streaks < lB) {
             progress.setImageResource(R.drawable.sad);
-
-
         }
         else if (streaks >= lB && streaks < uB) {
             progress.setImageResource(R.drawable.neutral);
-
-
         }
         else if (streaks >= uB) {
             progress.setImageResource(R.drawable.happiness);
-
-
-
         }
 
 

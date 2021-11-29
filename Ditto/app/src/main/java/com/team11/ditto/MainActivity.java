@@ -13,9 +13,6 @@
  limitations under the License.
  */
 package com.team11.ditto;
-/*
-Role: Class for Habit Event Activity, be able to see you feed and add a habit event
-*/
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -149,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         addHabitEventButton.setOnClickListener(view -> new AddHabitEventFragment()
                 .show(getSupportFragmentManager(), "ADD_HABIT_EVENT"));
 
+        //Check if we need to reset due today
         adjustScore(db, currentUser);
 
         fadeInView();
@@ -189,16 +187,13 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     @Override
     public void onOkPressed(HabitEvent newHabitEvent) {
 
-        //if today is the same day as one of the dates they picked,
-        //AND in this selected day if there are no other habit events with the same habit
-        //THEN set habitDoneToday to true
         habitEventList.setVisibility(View.INVISIBLE);
-
+        adjustScore(db, currentUser); //Called here in case app is open during change of days
         //handle setting the habitDoneToday field for the Habit
         isHabitDoneToday(db, todayIs(), newHabitEvent);
 
         //Adds the item to the database and then immediately retrieves it from the list
-        pushHabitEventData(db, newHabitEvent);
+        pushHabitEventData(db, newHabitEvent, false);
         habitEventRecyclerAdapter.notifyDataSetChanged();
 
         fadeInView();
@@ -314,6 +309,9 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         return day;
     }
 
+    /**
+     * Handle transitions between activities
+     */
     @Override
     public void onPause(){
         overridePendingTransition(0,0);

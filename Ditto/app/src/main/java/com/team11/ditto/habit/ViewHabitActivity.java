@@ -33,9 +33,8 @@ import com.team11.ditto.interfaces.HabitFirebase;
 import java.util.ArrayList;
 
 /**
- * Role: An Activity to view the contents of a chosen Habit.
+ * Role: An Activity to view the contents of a chosen Habit, and then allow them to edit
  * Allow user to edit Habit and return updated data back to this activity
- * TODO: Get updated photos and locations updating in the database
  * @author Kelly Shih, Aidan Horemans
  */
 public class ViewHabitActivity extends AppCompatActivity
@@ -51,7 +50,6 @@ public class ViewHabitActivity extends AppCompatActivity
 
     /**
      * Create the dialog with the fields for reason, dates and go to OnOkPressed method when user clicks "Add"
-     * TODO: get fields for photos and location
      * @param savedInstanceState current app state
      */
     @Override
@@ -124,11 +122,7 @@ public class ViewHabitActivity extends AppCompatActivity
     @Override
     public void onOkPressed(Habit habit) {
 
-        //UPDATE THE OLD HABIT WITH THE NEW DATA
-
         //when the user clicks the add button, we want to add to the db and display the new entry
-        Log.d(TAG, "dates -> "+ dates);
-
         pushEditData(database, habit);
 
         //Updating old text with new habit stuff
@@ -138,6 +132,12 @@ public class ViewHabitActivity extends AppCompatActivity
         habitDays.setText(listDays(habit));
     }
 
+
+    /**
+     * Creates a string of comma separated days depending on what the habit has selected
+     * @param habit habit from which we want to display the days of
+     * @return returns a string of comma separated days
+     */
     private String listDays(Habit habit){
         String listDays = "";
         ArrayList<String> currentDates = habit.getDates();
@@ -155,6 +155,10 @@ public class ViewHabitActivity extends AppCompatActivity
         return listDays;
     }
 
+    /**
+     * Displays variations of motivating text, telling the user what their streak score is like
+     * @param habit the habit of the streak value we want to check
+     */
     private void displayStreakText(Habit habit){
         int streak = habit.getStreak();
         if(streak < -3){

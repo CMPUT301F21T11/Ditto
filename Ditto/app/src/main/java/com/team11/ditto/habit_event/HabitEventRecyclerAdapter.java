@@ -15,6 +15,7 @@
 package com.team11.ditto.habit_event;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -153,7 +154,7 @@ public class HabitEventRecyclerAdapter extends RecyclerView.Adapter<HabitEventRe
     }
 
     /**
-     * Listener interface
+     * Listener interface for on click
      */
     public interface EventClickListener{
         void onEventClick(int position);

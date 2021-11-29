@@ -168,10 +168,10 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
     /**
      * This method gets the list of all users followed by active user
      */
-    // Do not add to firebase, Firebase is delaying return of data by few hundred ms
-    // This is causing data to not show onCreation of activity
-    // So just calling the showData() once the data has been returned successfully
     public void getFollowerList(){
+        // Do not add to firebase, Firebase is delaying return of data by few hundred ms
+        // This is causing data to not show onCreation of activity
+        // So just calling the showData() once the data has been returned successfully
         db.collection("Following")
                 .whereEqualTo("followedBy",currentUser.getEmail())
                 .get().addOnCompleteListener(task -> {
@@ -190,6 +190,7 @@ public class FollowingActivity extends AppCompatActivity implements SwitchTabs, 
 
     @Override
     public void onPause(){
+        //Generic onPause function
         overridePendingTransition(0,0);
         super.onPause();
     }

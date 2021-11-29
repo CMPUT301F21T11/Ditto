@@ -39,7 +39,6 @@ import java.util.ArrayList;
 
 /**
  *  Custom RecyclerView item for the Habit Activity
- *  TODO: match the UI more accurately
  * @author Kelly Shih
  */
 public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdapter.RecyclerViewHolder> {
@@ -47,7 +46,6 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
     private final ArrayList<Habit> courseDataArrayList;
     private final Context context;
     private final HabitClickListener habitClickListener;
-    FirebaseFirestore database;
 
 
     /**
@@ -90,28 +88,25 @@ public class HabitRecyclerAdapter extends RecyclerView.Adapter<HabitRecyclerAdap
 
     }
 
+    /**
+     * set the streak icon for the habit
+     * @param streaks the streak value for the habit
+     * @param holder the recycler view holder
+     */
     private void setIcon(int streaks, RecyclerViewHolder holder) {
         int lB = -3;
         int uB = 5;
         if (streaks < lB) {
             holder.icon.setImageResource(R.drawable.sad);
 
-
-
-
         }
         else if (streaks >= lB && streaks < uB) {
             holder.icon.setImageResource(R.drawable.neutral);
-
-
         }
         else if (streaks >= uB) {
             holder.icon.setImageResource(R.drawable.happiness);
 
-
         }
-
-
     }
 
 

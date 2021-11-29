@@ -27,7 +27,9 @@ import javax.annotation.Nullable;
  * comment
  * photograph
  * location
- *
+ * eventID
+ * uid
+ * name
  * @author Kelly Shih, Aidan Horemans
  */
 
@@ -42,14 +44,15 @@ public class HabitEvent implements Serializable {
     private List<Double> location;
 
     /**
-     * Constructor
+     * Constructor for pre-existing event
      * @param habitId Id of the Habit whose HabitEvent this is
-     * @param comment optional comment (maybe empty string)
+     * @param comment optional comment (may be empty string)
      * @param photo optional photo (may be empty string)
-     * @param location optional location (may be empty string)
+     * @param location optional location given in a list of doubles
      * @param habitTitle Title of the Habit whose HabitEvent this is
+     * @param uid user id of the user this event is attached to
+     * @param name the name of the user this event is attached to
      */
-
     public HabitEvent(String eventID, String habitId, String comment, String photo, @Nullable List<Double> location, String habitTitle, String uid, String name) {
         this.eventID = eventID;
         this.habitId = habitId;
@@ -61,6 +64,14 @@ public class HabitEvent implements Serializable {
         this.name = name;
     }
 
+    /**
+     * Constructor for new event
+     * @param habitId Id of the Habit whose HabitEvent this is
+     * @param comment optional comment (may be empty string)
+     * @param photo optional photo (may be empty string)
+     * @param location optional location (may be empty string)
+     * @param habitTitle Title of the Habit whose HabitEvent this is
+     */
     public HabitEvent(String habitId, String comment, String photo, @Nullable List<Double> location, String habitTitle) {
         this.habitId = habitId;
         this.comment = comment;
@@ -69,14 +80,26 @@ public class HabitEvent implements Serializable {
         this.habitTitle = habitTitle;
     }
 
+    /**
+     * Getter for the habit's user's name
+     * @return a name as a string
+     */
     public String getName(){
         return name;
     }
 
+    /**
+     * Setter for the habit's user's name
+     * @param name a name as a string
+     */
     public void setName(String name){
         this.name = name;
     }
 
+    /**
+     * Getter for the habit's user's id
+     * @return user's id as a string
+     */
     public String getUid(){
         return uid;
     }

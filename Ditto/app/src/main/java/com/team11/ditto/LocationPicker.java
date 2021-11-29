@@ -28,6 +28,10 @@ import com.team11.ditto.interfaces.MapHandler;
 
 import java.util.List;
 
+/**
+ * Class for the Location picking fragment
+ * Matthew Asgari
+ */
 public class LocationPicker extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
@@ -45,6 +49,7 @@ public class LocationPicker extends FragmentActivity implements OnMapReadyCallba
     private boolean mLocationPermissionGranted;
 
     private Button saveButton;
+    private Button cancelButton;
     public static MapHandler callback = null;
 
     @Override
@@ -61,11 +66,16 @@ public class LocationPicker extends FragmentActivity implements OnMapReadyCallba
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         saveButton = findViewById(R.id.map_save_button);
+        cancelButton = findViewById(R.id.location_cancel_button);
 
         saveButton.setOnClickListener(view -> {
             if (callback != null) {
                 callback.handleLocationChange(mLocation);
             }
+            onBackPressed();
+        });
+
+        cancelButton.setOnClickListener(view -> {
             onBackPressed();
         });
     }
@@ -86,6 +96,12 @@ public class LocationPicker extends FragmentActivity implements OnMapReadyCallba
 
         // Prompt the user for permission.
         getLocationPermission();
+
+        mMap.setOnMapClickListener(latLng -> {
+            mMap.clear();
+            mMap.addMarker(new MarkerOptions().position(latLng));
+            mLocation = latLng;
+        });
     }
 
     /**
@@ -129,18 +145,18 @@ public class LocationPicker extends FragmentActivity implements OnMapReadyCallba
     }
 
 
+    /**
+     * Get the best and most recent location of the device, which may be null in rare
+     * cases when a location is not available.
+     */
     private void getDeviceLocation() {
-        /*
-         * Get the best and most recent location of the device, which may be null in rare
-         * cases when a location is not available.
-         */
         try {
             if (mLocationPermissionGranted) {
                 Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
                 locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful()) {
+                        if (task.isSuccessful() && task.getResult() != null) {
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
                             Log.d(TAG, "Latitude: " + mLastKnownLocation.getLatitude());
@@ -153,7 +169,6 @@ public class LocationPicker extends FragmentActivity implements OnMapReadyCallba
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
                             Log.e(TAG, "Exception: %s", task.getException());
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLocation, DEFAULT_ZOOM));
                         }
                     }
                 });
@@ -163,6 +178,9 @@ public class LocationPicker extends FragmentActivity implements OnMapReadyCallba
         }
     }
 
+    /**
+     * Handle user picking the current location
+     */
     private void pickCurrentPlace() {
         if (mMap == null) {
             return;

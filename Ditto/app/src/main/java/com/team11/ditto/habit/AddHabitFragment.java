@@ -14,12 +14,6 @@
  */
 package com.team11.ditto.habit;
 
-/*
-Role: Initialize a Dialog for the user to input a title, reason, dates for a new Habit.
-Send input back to MyHabitActivity and Firestore Database collection "Habit"
-TODO Needs work on the visual aspect (to be done in xml)
- */
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -45,9 +39,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * This is a class that initializes a Dialog for the user to input a title, reason, dates for a new Habit.
+ * This is a class that initializes a Dialog for the user to input a title, reason, dates, photo, location for a new Habit.
  * Sends input back to MyHabitActivity and Firestore Database collection "Habit"
- * TODO: Needs work on the visual aspect (to be done in xml)
  * @author Kelly Shih, Aidan Horemans
  */
 public class AddHabitFragment extends DialogFragment implements Days {
@@ -59,8 +52,11 @@ public class AddHabitFragment extends DialogFragment implements Days {
     private SwitchMaterial privacySwitch;
     private ArrayList<CheckBox> checkBoxes;
 
-    //Declare interface
+    /**
+     * Interaction listener that runs onOkPressed in MyHabitActivity
+     */
     public interface OnFragmentInteractionListener {
+        //onOkPressed is defined in MyHabitActivity
         void onOkPressed(Habit newHabit);
     }
 
@@ -90,8 +86,6 @@ public class AddHabitFragment extends DialogFragment implements Days {
         privacySwitch = view.findViewById(R.id.privacySwitch);
         privacySwitch.setChecked(true);
         checkBoxes = setCheckBoxLayouts(view);
-
-        //hDate = view.findViewById(R.id.date_editText);
 
         //Builds the dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
