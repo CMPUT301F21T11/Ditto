@@ -23,7 +23,6 @@ import java.util.Map;
  * Helper class for providing sample content for user interfaces created by
  * Android template wizards.
  * <p>
- * TODO: Replace all uses of this class before publishing your app.
  */
 public class PlaceholderContent {
 
@@ -46,15 +45,29 @@ public class PlaceholderContent {
         }
     }
 
+    /**
+     * handle adding placeholder
+     * @param item
+     */
     private static void addItem(PlaceholderItem item) {
         ITEMS.add(item);
         ITEM_MAP.put(item.id, item);
     }
 
+    /**
+     * create placeholder item
+     * @param position
+     * @return
+     */
     private static PlaceholderItem createPlaceholderItem(int position) {
         return new PlaceholderItem(String.valueOf(position), "Item " + position, makeDetails(position));
     }
 
+    /**
+     * details
+     * @param position
+     * @return
+     */
     private static String makeDetails(int position) {
         StringBuilder builder = new StringBuilder();
         builder.append("Details about Item: ").append(position);
@@ -72,6 +85,12 @@ public class PlaceholderContent {
         public final String content;
         public final String details;
 
+        /**
+         * placeholder constructor
+         * @param id
+         * @param content
+         * @param details
+         */
         public PlaceholderItem(String id, String content, String details) {
             this.id = id;
             this.content = content;
