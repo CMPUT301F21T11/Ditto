@@ -48,6 +48,7 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
     String title;
     String comment;
     Bundle eventBundle;
+    GoogleMap map;
     private FirebaseFirestore database;
 
 
@@ -151,6 +152,25 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
         //Updating old text with new habit stuff
         habitComment.setText(event.getComment());
 
+        //update image
+        if (!event.getPhoto().equals("")) {
+            setImage(event.getPhoto(), eventImage);
+        } else {
+            eventImage.setImageBitmap(null);
+        }
+
+        //update map
+        if (event.getLocation() == null || event.getLocation().size() != 2) {
+            findViewById(R.id.map_event).setVisibility(View.GONE);
+        } else {
+            findViewById(R.id.map_event).setVisibility(View.VISIBLE);
+            LatLng location = new LatLng(event.getLocation().get(0), event.getLocation().get(1));
+            map.clear();
+            map.addMarker(new MarkerOptions()
+                    .position(location)
+                    .title(habitEvent.getHabitTitle()));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
+        }
     }
 
     /**
@@ -159,6 +179,7 @@ public class ViewEventActivity extends AppCompatActivity implements EditEventFra
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
         if (habitEvent.getLocation() != null && habitEvent.getLocation().size() == 2) {
             LatLng location = new LatLng(habitEvent.getLocation().get(0), habitEvent.getLocation().get(1));
             googleMap.addMarker(new MarkerOptions()

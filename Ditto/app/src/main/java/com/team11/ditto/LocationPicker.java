@@ -140,7 +140,7 @@ public class LocationPicker extends FragmentActivity implements OnMapReadyCallba
                 locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful()) {
+                        if (task.isSuccessful() && task.getResult() != null) {
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
                             Log.d(TAG, "Latitude: " + mLastKnownLocation.getLatitude());
@@ -153,7 +153,6 @@ public class LocationPicker extends FragmentActivity implements OnMapReadyCallba
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
                             Log.e(TAG, "Exception: %s", task.getException());
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLocation, DEFAULT_ZOOM));
                         }
                     }
                 });

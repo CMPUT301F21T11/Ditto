@@ -204,12 +204,12 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
     public void handleLocationChange(@Nullable LatLng location) {
         if (location == null) {
             this.location = null;
-            this.locationButton.setText("Add location");
+            this.locationButton.setText(R.string.add_location);
         } else {
             this.location = new ArrayList<>();
             this.location.add(location.latitude);
             this.location.add(location.longitude);
-            this.locationButton.setText("Update location");
+            this.locationButton.setText(R.string.update_location);
         }
     }
 
@@ -307,7 +307,7 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
                 @Override
                 public void imageURIChanged(Uri uri) {
                     currentPhotoURL = uri.toString();
-                    acc_photo.setText("Update photo");
+                    acc_photo.setText(R.string.update_photo);
                 }
             });
         } else if (requestCode == MEDIA_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
@@ -317,7 +317,7 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
                 @Override
                 public void imageURIChanged(Uri uri) {
                     currentPhotoURL = uri.toString();
-                    acc_photo.setText("Update photo");
+                    acc_photo.setText(R.string.update_photo);
                 }
             });
         }

@@ -7,8 +7,10 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,6 +24,7 @@ import com.team11.ditto.habit.Habit;
 import com.team11.ditto.interfaces.Days;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Role: Handle events to edit a habit event comment, photo, location, dates
@@ -30,7 +33,14 @@ import java.util.ArrayList;
 public class EditEventFragment extends DialogFragment implements Days {
     private EditText Comment;
     private HabitEvent selectedEvent;
+    private Button updateLocationButton;
+    private Button updatePhotoButton;
+    private ImageButton deleteLocationButton;
+    private ImageButton deletePhotoButton;
     private EditEventFragment.OnFragmentInteractionListener listener;
+
+    private @Nullable List<Double> location = null;
+    private String currentPhotoURL = "";
 
     public interface OnFragmentInteractionListener {
         void onOkPressed(HabitEvent habit);
@@ -62,6 +72,10 @@ public class EditEventFragment extends DialogFragment implements Days {
         //Declarations
         TextView hTitle = view.findViewById(R.id.title_textView);
         Comment = view.findViewById(R.id.comment_editText);
+        updateLocationButton = view.findViewById(R.id.edit_loc_btn);
+        updatePhotoButton = view.findViewById(R.id.edit_photo_btn);
+        deleteLocationButton = view.findViewById(R.id.edit_event_delete_location_button);
+        deletePhotoButton = view.findViewById(R.id.edit_event_delete_photo_button);
 
         //Get and handle Habit from bundle if there is one
         Bundle bundle = getArguments();
@@ -69,8 +83,31 @@ public class EditEventFragment extends DialogFragment implements Days {
             selectedEvent = (HabitEvent) bundle.getSerializable("EVENT");
             hTitle.setText(selectedEvent.getHabitTitle());
             Comment.setText(selectedEvent.getComment());
-
+            location = selectedEvent.getLocation();
+            currentPhotoURL = selectedEvent.getPhoto();
         }
+
+        if (location != null && location.size() == 2) {
+            updateLocationButton.setText(R.string.update_location);
+        }
+
+        if (!currentPhotoURL.equals("")) {
+            updatePhotoButton.setText(R.string.update_photo);
+        }
+
+        // Listen for when the delete photo button is pressed
+        deletePhotoButton.setOnClickListener(view1 -> {
+            currentPhotoURL = "";
+            updatePhotoButton.setText(R.string.add_photo);
+        });
+
+        // Listen for when the delete location button is pressed
+        deleteLocationButton.setOnClickListener(view1 -> {
+            location = null;
+            updateLocationButton.setText(R.string.add_location);
+        });
+
+
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         return builder
@@ -88,6 +125,8 @@ public class EditEventFragment extends DialogFragment implements Days {
                         String updatedComment = Comment.getText().toString();
 
                         selectedEvent.setComment(updatedComment);
+                        selectedEvent.setPhoto(currentPhotoURL);
+                        selectedEvent.setLocation(location);
 
                         listener.onOkPressed(selectedEvent);
                     }
