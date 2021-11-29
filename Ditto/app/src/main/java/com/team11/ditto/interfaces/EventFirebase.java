@@ -109,7 +109,9 @@ public interface EventFirebase extends Firebase, Days{
         String photo = event.getPhoto();
         String habitTitle = event.getHabitTitle();
         List<Double> location = event.getLocation();
-        String date = DATE_FORMAT.format(event.getDate());
+
+
+        //String date = DATE_FORMAT.format(event.getDate());
 
         eventData.put(USER_ID, FirebaseAuth.getInstance().getUid());
         eventData.put(HABIT_ID, habitID);
@@ -117,7 +119,7 @@ public interface EventFirebase extends Firebase, Days{
         eventData.put(PHOTO, photo);
         eventData.put(LOCATION, location);
         eventData.put(HABIT_TITLE, habitTitle);
-        eventData.put(DATE, date);
+        //eventData.put(DATE, date);
         //this field is used to add the current timestamp of the item, to be used to order the items
     }
 
