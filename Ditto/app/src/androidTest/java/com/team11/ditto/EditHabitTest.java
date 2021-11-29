@@ -151,6 +151,8 @@ public class EditHabitTest {
         onView(withId(R.id.edit_habit)).perform(click());
         onView(withText("UPDATE")).check(matches(isDisplayed())); // Check update button
         onView(withText("CANCEL")).check(matches(isDisplayed())); // Check cancel button
+        pressBack();
+        pressBack();
         onView(withText("Habit to test")).perform(swipeLeft());
     }
 
