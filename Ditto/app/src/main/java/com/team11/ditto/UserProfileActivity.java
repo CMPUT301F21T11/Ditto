@@ -19,8 +19,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.ImageDecoder;
 import android.net.Uri;
 import android.os.Build;
@@ -31,23 +29,15 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.team11.ditto.follow.FollowRequestActivity;
 import com.team11.ditto.follow.FollowerActivity;
 import com.team11.ditto.follow.FollowingActivity;
@@ -58,7 +48,6 @@ import com.team11.ditto.interfaces.SwitchTabs;
 import com.team11.ditto.login.ActiveUser;
 import com.team11.ditto.profile_details.SearchUserActivity;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -105,7 +94,7 @@ public class UserProfileActivity extends AppCompatActivity implements SwitchTabs
         no_following = findViewById(R.id.no_following_1);
         no_followers = findViewById(R.id.no_followers);
         search = findViewById(R.id.search_users);
-        username = findViewById(R.id.username_editText);
+        username = findViewById(R.id.username_text);
         fr_pending = findViewById(R.id.pending_fr);
         logout = findViewById(R.id.logout_button);
         frSent = findViewById(R.id.follow_request_sent);

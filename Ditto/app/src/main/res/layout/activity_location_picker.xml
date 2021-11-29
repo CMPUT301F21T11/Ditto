@@ -58,7 +58,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
-        android:text="Tap anywhere on the map to update the pin"
+        android:text="@string/location_helper"
         android:textAlignment="center"
         map:layout_constraintBottom_toTopOf="@+id/linearLayout"
         map:layout_constraintEnd_toEndOf="parent"
