@@ -15,36 +15,19 @@ import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.Espresso.pressBack;
 import static androidx.test.espresso.action.ViewActions.clearText;
 import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.action.ViewActions.pressKey;
-import static androidx.test.espresso.action.ViewActions.scrollTo;
+
 import static androidx.test.espresso.action.ViewActions.swipeLeft;
 import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
-
-import android.view.KeyEvent;
-import android.widget.CheckBox;
-import static androidx.test.espresso.contrib.RecyclerViewActions.actionOnItem;
-import static androidx.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static androidx.test.espresso.matcher.ViewMatchers.isChecked;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isNotChecked;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
-
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.containsString;
-
 import android.os.SystemClock;
 
 import androidx.test.core.app.ActivityScenario;
-import androidx.test.espresso.Espresso;
-import androidx.test.espresso.ViewInteraction;
-import androidx.test.espresso.action.KeyEventAction;
 import androidx.test.espresso.action.ViewActions;
-import androidx.test.espresso.contrib.RecyclerViewActions;
-
-import com.team11.ditto.habit.EditHabitFragment;
-import com.team11.ditto.habit.ViewHabitActivity;
 
 import org.junit.After;
 import org.junit.Test;
@@ -151,6 +134,8 @@ public class EditHabitTest {
         onView(withId(R.id.edit_habit)).perform(click());
         onView(withText("UPDATE")).check(matches(isDisplayed())); // Check update button
         onView(withText("CANCEL")).check(matches(isDisplayed())); // Check cancel button
+        pressBack();
+        pressBack();
         onView(withText("Habit to test")).perform(swipeLeft());
     }
 
