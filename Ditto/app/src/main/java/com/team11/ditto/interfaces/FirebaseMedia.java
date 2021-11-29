@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageException;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -46,6 +47,7 @@ public interface FirebaseMedia {
                 setDefaultProfilePhoto(imageView);
             }
         });
+
     }
 
     default void setImage(String url, ImageView imageView) {
