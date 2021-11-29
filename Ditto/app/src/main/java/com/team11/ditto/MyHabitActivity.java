@@ -61,7 +61,7 @@ import java.util.Objects;
 
 public class MyHabitActivity extends AppCompatActivity implements
         AddHabitFragment.OnFragmentInteractionListener, SwitchTabs,
-        HabitRecyclerAdapter.HabitClickListener, HabitFirebase, EventFirebase, Days {
+        HabitRecyclerAdapter.HabitClickListener, HabitFirebase, EventFirebase {
 
     public static String SELECTED_HABIT = "HABIT";
     private TabLayout tabLayout;

@@ -43,7 +43,7 @@ import java.util.Objects;
  * Activity to display a list of the ActiveUser's Habits that are scheduled to be done today, and its status
  * @author Aidan Horemans, Kelly Shih, Vivek Malhotra, Matthew Asgari
  */
-public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, Firebase, Days, HabitFirebase {
+public class DueTodayActivity extends AppCompatActivity implements SwitchTabs, HabitFirebase {
     FirebaseFirestore db;
     private TabLayout tabLayout;
     private ListView list;

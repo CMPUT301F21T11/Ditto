@@ -77,14 +77,12 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
 //ACTIVITY WIDE VARIABLES
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final ActiveUser currentUser = new ActiveUser();
-    private final ArrayList<Pair<String,String>> userDataList = new ArrayList<>();
-    private final ArrayList<String> emailList = new ArrayList<>();
-    ArrayList<HabitEvent> hEvents = new ArrayList<>();
+    private ArrayList<Pair<String,String>> userDataList;
+    private ArrayList<String> emailList;
+    private ArrayList<HabitEvent> hEvents;
     private int shortAnimationDuration;
-    final String myEventsTitle = "My Events";
-    final String theirEvents = "Followed Users";
-    Boolean mine = true;
-    Boolean others = true;
+    private Boolean mine = true;
+    private Boolean others = true;
 
 //LAYOUTS & HELPERS
     private TabLayout tabLayout;
@@ -122,6 +120,9 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                 .show(getSupportFragmentManager(), "ADD_HABIT_EVENT"));
 
     //Initialize non-final variables
+        emailList = new ArrayList<>();
+        userDataList = new ArrayList<>();
+        hEvents = new ArrayList<>();
         shortAnimationDuration = getResources().getInteger(android.R.integer.config_mediumAnimTime);
         habitEventList = findViewById(R.id.list_habit_event);
         habitEventRecyclerAdapter = new HabitEventRecyclerAdapter(this, hEvents, this);
@@ -323,11 +324,13 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         if (item.getItemId() == R.id.myEvents){
             mine = true;
             others = false;
+            String myEventsTitle = "My Events";
             setTitle(myEventsTitle);
         }
         if (item.getItemId() == R.id.theirEvents){
             others = true;
             mine = false;
+            String theirEvents = "Followed Users";
             setTitle(theirEvents);
         }
         if (item.getItemId() == R.id.myEvents){
@@ -356,6 +359,7 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         isHabitDoneToday(db, todayIs(), newHabitEvent);
 
         //Adds the item to the database and then immediately retrieves it from the list
+        newHabitEvent.setName(currentUser.getName());
         hEvents.add(newHabitEvent);
         sortFeed();
         habitEventRecyclerAdapter.notifyDataSetChanged();

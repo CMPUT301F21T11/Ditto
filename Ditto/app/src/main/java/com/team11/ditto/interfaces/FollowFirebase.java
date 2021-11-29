@@ -171,6 +171,7 @@ public interface FollowFirebase extends Firebase{
                     }
                 }
             }
+            try{
             for (int i = 0; i < sentRequestEmails.size(); i++) {
                 String sentEmail = sentRequestEmails.get(i);
                 Log.d("Looping over", String.valueOf(sentRequestEmails.size()));
@@ -196,6 +197,9 @@ public interface FollowFirebase extends Firebase{
                                 }
                             }
                         });
+                }}
+                catch (Exception none){
+                    Log.d("Exception", none.toString());
                 }
 
 
