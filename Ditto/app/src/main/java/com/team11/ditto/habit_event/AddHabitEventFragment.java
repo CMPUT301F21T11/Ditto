@@ -34,6 +34,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
@@ -69,6 +70,8 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
     private EditText hComment;
     private Button acc_photo;
     private Button locationButton;
+    private ImageButton deletePhotoButton;
+    private ImageButton deleteLocationButton;
     private OnFragmentInteractionListener listener;
     private FirebaseFirestore db;
     final String TAG = "dbs";
@@ -81,7 +84,6 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
     //Declare interface
     public interface OnFragmentInteractionListener {
         void onOkPressed(HabitEvent newHabitEvent);
-
     }
 
     /**
@@ -107,6 +109,8 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
         hComment = view.findViewById(R.id.comment_editText);
         acc_photo = view.findViewById(R.id.add_photo);
         locationButton = view.findViewById(R.id.event_add_location_button);
+        deletePhotoButton = view.findViewById(R.id.add_event_delete_photo);
+        deleteLocationButton = view.findViewById(R.id.add_event_delete_location);
         db = FirebaseFirestore.getInstance();
         Spinner spinner = view.findViewById(R.id.event_spinner);
         final List<String> habits = new ArrayList<>();
@@ -153,6 +157,18 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
             LocationPicker.callback = this;  // Really bad implementation - should be fixed
             Intent intent = new Intent(getActivity(), LocationPicker.class);
             startActivity(intent);
+        });
+
+        // Listen for when the delete photo button is pressed
+        deletePhotoButton.setOnClickListener(view1 -> {
+            currentPhotoURL = "";
+            acc_photo.setText(R.string.add_photo);
+        });
+
+        // Listen for when the delete location button is pressed
+        deleteLocationButton.setOnClickListener(view1 -> {
+            location = null;
+            locationButton.setText(R.string.add_location);
         });
 
         //Builds the Dialog for the user to add a new habit event
@@ -291,6 +307,7 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
                 @Override
                 public void imageURIChanged(Uri uri) {
                     currentPhotoURL = uri.toString();
+                    acc_photo.setText("Update photo");
                 }
             });
         } else if (requestCode == MEDIA_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
@@ -300,6 +317,7 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
                 @Override
                 public void imageURIChanged(Uri uri) {
                     currentPhotoURL = uri.toString();
+                    acc_photo.setText("Update photo");
                 }
             });
         }
