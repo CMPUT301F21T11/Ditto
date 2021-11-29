@@ -29,6 +29,7 @@ import java.util.ArrayList;
  * isPublic
  * position
  * habitDoneToday
+ * streak
  * Design Rationale: set getters and setters for the data that Habit holds
  * @author Kelly Shih, Aidan Horemans
  */
@@ -45,11 +46,14 @@ public class Habit implements Serializable {
     private int position;
     private boolean habitDoneToday;
 
+
     /**
-     * Constructor for Habit object
+     * Constructor for a Habit object
+     * Constructor for a Habit object
      * @param title Habit title
      * @param reason Reason for habit
      * @param dates Days of the week for scheduling
+     * @param isPublic
      */
     public Habit(String title, String reason, ArrayList<String> dates, boolean isPublic) {
         this.title = title;
@@ -214,11 +218,5 @@ public class Habit implements Serializable {
         return habitDoneToday;
     }
 
-    /**
-     * Setter for whether Habit is done today or not
-     * @param habitDoneToday
-     */
-    public void setHabitDoneToday(boolean habitDoneToday) {
-        this.habitDoneToday = habitDoneToday;
-    }
+
 }

@@ -42,6 +42,10 @@ import java.util.Objects;
 
 import javax.annotation.Nullable;
 
+/**
+ * Role: implement default methods that deal with Habits in firebase
+ * @author Courtenay Laing-Kobe, Kelly Shih, Aidan Horemans
+ */
 public interface HabitFirebase extends EventFirebase, Days{
 
     ArrayList<Habit> habitsFirebase = new ArrayList<>();
@@ -53,10 +57,13 @@ public interface HabitFirebase extends EventFirebase, Days{
     String REASON = "reason";
     String IS_PUBLIC = "is_public";
 
+    /**
+     * Retrieve the habits from firestore, called when making activity changes
+     * @param queryDocumentSnapshots the event data
+     */
     default void logHabitData(@Nullable QuerySnapshot queryDocumentSnapshots){
         if (queryDocumentSnapshots != null) {
             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                Log.d(TAG, String.valueOf(doc.getData().get(TITLE)));
                 String hTitle = (String) doc.getData().get(TITLE);
                 String hReason = (String) doc.getData().get(REASON);
                 ArrayList<String> hDate = new ArrayList<>();
@@ -123,8 +130,8 @@ public interface HabitFirebase extends EventFirebase, Days{
      * delete the habit and ensure the associated habit events also get deleted
      * @param db firebase cloud
      * @param oldEntry Habit already on cloud to remove
-     * @param s
-     * @param dHabits
+     * @param s position of deletion
+     * @param dHabits habits after the one deleted (to have position decremented)
      */
     default void deleteDataMyHabit(FirebaseFirestore db, Habit oldEntry, int s, ArrayList<Habit> dHabits) {
         //ALSO REMOVE THE ASSOCIATED HABIT EVENTS
@@ -154,29 +161,7 @@ public interface HabitFirebase extends EventFirebase, Days{
         });
 
         //decrement all the habit positions after the one that was deleted
-        int c = s;
-        for (int i=0; i<dHabits.size();i++) {
-            DocumentReference docRef = db.collection(HABIT_KEY).document(dHabits.get(i).getHabitID());
-
-            //set position of from habit to toPos
-            docRef.update("position", c)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void unused) {
-                            Log.d(TAG, "DocumentSnapshot successfully updated!");
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.w(TAG, "Error updating document", e);
-                        }
-                    });
-            c--;
-
-        }
-
-
+        decPosition(db, s,dHabits);
 
     }
 
@@ -226,7 +211,6 @@ public interface HabitFirebase extends EventFirebase, Days{
                             habitData.put("Last_Adjusted", currentTime);
                             habitData.put("Last_Created", currentTime);
                             pushToDB(database,HABIT_KEY,habitID, habitData);
-                            Log.d(TAG, "SET POSITION " + habit.getPosition());
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
                         }
@@ -236,8 +220,11 @@ public interface HabitFirebase extends EventFirebase, Days{
     }
 
 
-
-
+    /**
+     * Handle adding a new habit to firebase
+     * @param database firestore cloud
+     * @param newHabit the new habit to be added to firestore
+     */
     default void pushHabitData(FirebaseFirestore database, Habit newHabit){
         habitData.clear();
         habitData.put(USER_ID, new ActiveUser().getUID());
@@ -302,45 +289,23 @@ public interface HabitFirebase extends EventFirebase, Days{
         DocumentReference movedRef = database.collection(HABIT_KEY).document(from.getHabitID());
 
         //set position of from habit to toPos
-        movedRef
-                .update("position", toPos)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        Log.d(TAG, "DocumentSnapshot successfully updated!");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error updating document", e);
-                    }
-                });
+        setNewPosition(movedRef, toPos);
 
         //decrement all habit positions after the "fromPos"
-        int c = fromPos;
-        for (int i=0; i<habitsDecrement.size();i++) {
-            DocumentReference docRef = database.collection(HABIT_KEY).document(habitsDecrement.get(i).getHabitID());
-
-            //set position of from habit to toPos
-            docRef.update("position", c)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void unused) {
-                            Log.d(TAG, "DocumentSnapshot successfully updated!");
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.w(TAG, "Error updating document", e);
-                        }
-                    });
-            c--;
-
-        }
+        decPosition(database, fromPos, habitsDecrement);
 
         //increment all habit positions after the "toPos"
+        incPosition(database, toPos, habitsUpdate);
+
+    }
+
+    /**
+     * increment all habit positions after the "toPos" in firebase
+     * @param database
+     * @param toPos
+     * @param habitsUpdate
+     */
+    default void incPosition(FirebaseFirestore database, int toPos, ArrayList<Habit> habitsUpdate) {
         int counter = toPos+1;
         for (int i=0; i<habitsUpdate.size();i++) {
             DocumentReference docRef = database.collection(HABIT_KEY).document(habitsUpdate.get(i).getHabitID());
@@ -364,7 +329,59 @@ public interface HabitFirebase extends EventFirebase, Days{
 
         }
 
+    }
 
+    /**
+     * decrement all habit positions after the "fromPos" in firebase
+     * @param database firestore cloud
+     * @param fromPos the initial position of habit that is moved
+     * @param habitsDecrement array of habits after the habit being moved
+     */
+    default void decPosition(FirebaseFirestore database, int fromPos, ArrayList<Habit> habitsDecrement) {
+        int c = fromPos;
+        for (int i=0; i<habitsDecrement.size();i++) {
+            DocumentReference docRef = database.collection(HABIT_KEY).document(habitsDecrement.get(i).getHabitID());
+
+            //set position of from habit to toPos
+            docRef.update("position", c)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            Log.d(TAG, "DocumentSnapshot successfully updated!");
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error updating document", e);
+                        }
+                    });
+            c--;
+
+        }
+    }
+
+
+    /**
+     * The the position of the habit moved to the new position in firebase
+     * @param movedRef Document reference to that habit moved
+     * @param toPos the position the habit ends up in
+     */
+    default void setNewPosition(DocumentReference movedRef, int toPos){
+        movedRef
+                .update("position", toPos)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        Log.d(TAG, "DocumentSnapshot successfully updated!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error updating document", e);
+                    }
+                });
     }
 
     /** Handle updating habitDoneToday field for a habit when an event is added

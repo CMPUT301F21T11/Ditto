@@ -23,6 +23,10 @@ import com.team11.ditto.interfaces.Days;
 
 import java.util.ArrayList;
 
+/**
+ * Role: Handle events to edit a habit event comment, photo, location, dates
+ * @author Kelly Shih, Aidan Horemans
+ */
 public class EditEventFragment extends DialogFragment implements Days {
     private EditText Comment;
     private HabitEvent selectedEvent;

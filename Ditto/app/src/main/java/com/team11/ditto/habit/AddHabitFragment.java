@@ -14,12 +14,6 @@
  */
 package com.team11.ditto.habit;
 
-/*
-Role: Initialize a Dialog for the user to input a title, reason, dates for a new Habit.
-Send input back to MyHabitActivity and Firestore Database collection "Habit"
-TODO Needs work on the visual aspect (to be done in xml)
- */
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -45,9 +39,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * This is a class that initializes a Dialog for the user to input a title, reason, dates for a new Habit.
+ * This is a class that initializes a Dialog for the user to input a title, reason, dates, photo, location for a new Habit.
  * Sends input back to MyHabitActivity and Firestore Database collection "Habit"
- * TODO: Needs work on the visual aspect (to be done in xml)
  * @author Kelly Shih, Aidan Horemans
  */
 public class AddHabitFragment extends DialogFragment implements Days {

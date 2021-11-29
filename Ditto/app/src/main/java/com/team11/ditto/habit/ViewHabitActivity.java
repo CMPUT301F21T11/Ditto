@@ -33,9 +33,8 @@ import com.team11.ditto.interfaces.HabitFirebase;
 import java.util.ArrayList;
 
 /**
- * Role: An Activity to view the contents of a chosen Habit.
+ * Role: An Activity to view the contents of a chosen Habit, and then allow them to edit
  * Allow user to edit Habit and return updated data back to this activity
- * TODO: Get updated photos and locations updating in the database
  * @author Kelly Shih, Aidan Horemans
  */
 public class ViewHabitActivity extends AppCompatActivity
@@ -51,7 +50,6 @@ public class ViewHabitActivity extends AppCompatActivity
 
     /**
      * Create the dialog with the fields for reason, dates and go to OnOkPressed method when user clicks "Add"
-     * TODO: get fields for photos and location
      * @param savedInstanceState current app state
      */
     @Override
@@ -127,8 +125,6 @@ public class ViewHabitActivity extends AppCompatActivity
         //UPDATE THE OLD HABIT WITH THE NEW DATA
 
         //when the user clicks the add button, we want to add to the db and display the new entry
-        Log.d(TAG, "dates -> "+ dates);
-
         pushEditData(database, habit);
 
         //Updating old text with new habit stuff

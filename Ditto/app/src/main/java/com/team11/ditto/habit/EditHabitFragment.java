@@ -41,7 +41,6 @@ import java.util.Collections;
  * Role: Initialize a Dialog for the user to edit an EXISTING Habit Event
  * editable -> reason, dates
  *  Send input back to ViewHabitActivity and Firestore Database collection "Habit"
- *  TODO: get the photo and location to be editable
  *  @author Kelly Shih, Aidan Horemans
  */
 public class EditHabitFragment extends DialogFragment implements Days {

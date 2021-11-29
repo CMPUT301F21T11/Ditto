@@ -13,9 +13,6 @@
  limitations under the License.
  */
 package com.team11.ditto;
-/*
-Role: Class for Habit Event Activity, be able to see you feed and add a habit event
-*/
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -312,6 +309,9 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         return day;
     }
 
+    /**
+     * Handle transitions between activities
+     */
     @Override
     public void onPause(){
         overridePendingTransition(0,0);

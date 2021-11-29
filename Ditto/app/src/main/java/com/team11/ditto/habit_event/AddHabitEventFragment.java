@@ -13,16 +13,6 @@
  limitations under the License.
  */
 package com.team11.ditto.habit_event;
-/*
-Role: Initialize a Dialog for the user to choose an EXISTING Habit from the database, comment, photo, location for a new Habit Event.
-Send input back to MainActivity and Firestore Database collection "HabitEvent", as well as update "Habit" collection
-Goals:
-    -To create restraints on user i.e. warn user to pick a Habit before pressing Add
-    -To not make the first choice "Go eat ramen" for the choices of habits
-    -Get Camera and photo library permission
-    -Get location option
-    -Make it better visually (xml)
- */
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -55,8 +45,7 @@ import java.util.List;
 
 /**Initialize a Dialog for the user to choose an EXISTING Habit from the database and add comment, dates for a new Habit Event.
  * Send input back to MainActivity and Firestore Database collection "HabitEvent", as well as update "Habit" collection
- * TODO: allow user to add photo and location
- * @author Kelly Shih, Aidan Horemans
+ * @author Kelly Shih, Aidan Horemans, Matt Asgari
  */
 public class AddHabitEventFragment extends DialogFragment implements HabitFirebase, MapHandler {
     //Declare necessary values
@@ -85,8 +74,7 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
     }
 
     /**
-     * Create the dialog with the fields for habit (spinner), reason, dates and go to OnOkPressed method when user clicks "Add"
-     * TODO: photo and location addition
+     * Create the dialog with the fields for habit (spinner), reason, dates, photos, location and go to OnOkPressed method when user clicks "Add"
      * @param savedInstanceState current state of the app
      * @return Dialog Fragment for user inputs
      */
@@ -134,7 +122,7 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
             }
         });
 
-        //TODO Get camera permission for photo
+        //Get camera permission for photo
         acc_photo.setOnClickListener(view1 -> {
         });
 
@@ -159,15 +147,6 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String comment = hComment.getText().toString();
-
-                        //TODO If user doesn't choose a Habit...
-                        /*
-                        if (hHabit.equals("Habit")) {
-                            hHabit = "";
-                        }
-                         */
-
-                        //set photo and location
                         String photo = "";
 
                         listener.onOkPressed(new HabitEvent(IDhabit[0], comment, photo, location, hHabit[0]));
@@ -179,6 +158,10 @@ public class AddHabitEventFragment extends DialogFragment implements HabitFireba
 
     }
 
+    /**
+     * Handle changing a location
+     * @param location
+     */
     @Override
     public void handleLocationChange(@Nullable LatLng location) {
         if (location == null) {

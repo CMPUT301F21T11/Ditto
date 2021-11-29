@@ -27,7 +27,9 @@ import javax.annotation.Nullable;
  * comment
  * photograph
  * location
- *
+ * eventID
+ * uid
+ * name
  * @author Kelly Shih, Aidan Horemans
  */
 
@@ -49,7 +51,6 @@ public class HabitEvent implements Serializable {
      * @param location optional location (may be empty string)
      * @param habitTitle Title of the Habit whose HabitEvent this is
      */
-
     public HabitEvent(String eventID, String habitId, String comment, String photo, @Nullable List<Double> location, String habitTitle, String uid, String name) {
         this.eventID = eventID;
         this.habitId = habitId;
