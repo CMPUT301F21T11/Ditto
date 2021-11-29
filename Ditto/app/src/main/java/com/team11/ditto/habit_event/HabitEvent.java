@@ -74,6 +74,7 @@ public class HabitEvent implements Serializable, Comparable {
         setDate();
     }
 
+
     public String getName(){
         return name;
     }
