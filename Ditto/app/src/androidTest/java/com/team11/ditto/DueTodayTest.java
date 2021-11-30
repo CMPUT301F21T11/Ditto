@@ -52,7 +52,6 @@ public class DueTodayTest {
         onView(withId(R.id.saturday_box)).perform(click());
         onView(withId(R.id.sunday_box)).perform(click());
         onView(withText("UPDATE")).perform(click());
-
         // Check if the habit was added to due today habits
         ActivityScenario<DueTodayActivity> activityScenario1 = ActivityScenario.launch(DueTodayActivity.class);
         onView(withText("Testing my app")).check(matches(isDisplayed()));

@@ -8,7 +8,7 @@
     <string name="createAccount">Create an Account</string>
     <string name="signIn">Sign In</string>
     <string name="ditto">Ditto</string>
-    <string name="userName">User Name</string>
+    <string name="userName">Name</string>
     <string name="password">Password</string>
     <string name="home">Home</string>
     <string name="habits">Habits</string>
@@ -60,4 +60,6 @@
     <string name="log_in">Log in</string>
     <string name="welcome_to">Welcome to</string>
     <string name="slogan">Keep track of your habits</string>
+    <string name="location_helper">Tap anywhere on the map to update the pin</string>
+    <string name="profile_helper">Tap on profile photo to update</string>
 </resources>
