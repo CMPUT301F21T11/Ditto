@@ -81,8 +81,8 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
     private ArrayList<String> emailList;
     private ArrayList<HabitEvent> hEvents;
     private int shortAnimationDuration;
-    private Boolean mine = true;
-    private Boolean others = true;
+    private Boolean mine;
+    private Boolean others;
 
 //LAYOUTS & HELPERS
     private TabLayout tabLayout;
@@ -120,6 +120,8 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
                 .show(getSupportFragmentManager(), "ADD_HABIT_EVENT"));
 
     //Initialize non-final variables
+        mine = true;
+        others = true;
         emailList = new ArrayList<>();
         userDataList = new ArrayList<>();
         hEvents = new ArrayList<>();
@@ -163,7 +165,9 @@ public class MainActivity extends AppCompatActivity implements SwitchTabs,
         //If we want to see our data, add it to the list
         Pair<String,String> currentUserData = new Pair<>(currentUser.getName(), currentUser.getUID());
         if (!userDataList.contains(currentUserData) && mine){
-            userDataList.add(currentUserData);}
+            userDataList.add(currentUserData);
+            emailList.add(currentUser.getEmail());
+        }
 
         //If we want to see others' data, continue to query their information
         if(others) {
